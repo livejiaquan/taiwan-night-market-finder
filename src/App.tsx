@@ -32,12 +32,12 @@ import {
   labelCity,
   labelConfidence,
   labelDay,
-  labelPhrase,
   labelTag,
   labelTransport,
+  localize,
   uiCopy,
 } from "./lib/i18n";
-import type { DataStatus, Locale, NightMarket, NightMarketFilters, OpeningDay, StyleId } from "./types";
+import type { DataStatus, Locale, NightMarket, NightMarketFilters, StyleId } from "./types";
 
 const styleRoutes: Record<StyleId, string> = {
   neon: "/style/neon",
@@ -45,11 +45,6 @@ const styleRoutes: Record<StyleId, string> = {
 };
 
 const styleIds: StyleId[] = ["neon", "travel"];
-
-const getToday = (): OpeningDay => {
-  const days: OpeningDay[] = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-  return days[new Date().getDay()];
-};
 
 const defaultFilters: NightMarketFilters = {
   query: "",
@@ -140,10 +135,7 @@ export default function App() {
   const data = useNightMarketData();
   const [locale, setLocale] = useLocaleState();
   const [detailPulse, setDetailPulse] = useState(0);
-  const [filters, setFilters] = useState<NightMarketFilters>(() => ({
-    ...defaultFilters,
-    openingDay: getToday(),
-  }));
+  const [filters, setFilters] = useState<NightMarketFilters>(defaultFilters);
 
   const filterOptions = useMemo(() => getFilterOptions(nightMarkets), []);
   const filteredMarkets = useMemo(
@@ -325,7 +317,7 @@ function ComparisonPanel({
         <h3 className="mt-1 text-xl font-semibold text-slate-950">{marketTitle.primary}</h3>
         <p className="mt-1 text-sm text-slate-500">{marketTitle.secondary}</p>
         <p className="mt-2 text-sm leading-6 text-slate-600">
-          {sample.highlights.slice(0, 2).map((item) => labelPhrase(item, locale)).join(" / ")}
+          {sample.highlights.slice(0, 2).map((item) => localize(item, locale)).join(" / ")}
         </p>
       </div>
       <button className="mt-5 inline-flex min-h-11 items-center gap-2 rounded-[8px] bg-slate-950 px-4 text-sm font-semibold text-white" onClick={onOpen}>
@@ -570,7 +562,7 @@ function TopNav({
         "flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between",
         isDark ? "text-white" : "text-slate-950",
       )}
-      aria-label="Style navigation"
+      aria-label={copy.styleNav}
     >
       <div className="flex min-w-0 flex-col gap-3 sm:flex-row sm:items-center">
         <a
@@ -934,7 +926,7 @@ function MarketCard({
         <TagRow tags={[...market.foodTypes.slice(0, 2), ...market.moods.slice(0, 1)]} tone={styleId} locale={locale} />
 
         <p className={clsx("mt-4 line-clamp-3 text-sm leading-6", isNeon ? "text-white/68" : "text-slate-600")}>
-          {market.highlights.map((item) => labelPhrase(item, locale)).join(" / ")}
+          {market.highlights.map((item) => localize(item, locale)).join(" / ")}
         </p>
 
         <button
@@ -1048,7 +1040,7 @@ function DetailPanel({
       <div className="mt-5 grid grid-cols-2 gap-3">
         <DetailFact icon={<CalendarDays size={17} aria-hidden="true" />} label={copy.open} value={market.openingDays.map((day) => labelDay(day, locale)).join(" ")} styleId={styleId} />
         <DetailFact icon={<Clock3 size={17} aria-hidden="true" />} label={copy.hours} value={market.hours} styleId={styleId} />
-        <DetailFact icon={<Train size={17} aria-hidden="true" />} label={copy.station} value={market.nearestStation} styleId={styleId} />
+        <DetailFact icon={<Train size={17} aria-hidden="true" />} label={copy.station} value={localize(market.nearestStation, locale)} styleId={styleId} />
         <DetailFact icon={<Navigation size={17} aria-hidden="true" />} label={copy.walk} value={`${market.walkingMinutes} ${copy.minWalk}`} styleId={styleId} />
       </div>
 
@@ -1078,9 +1070,9 @@ function DetailPanel({
         <h3 className="text-sm font-bold uppercase tracking-[0.12em] opacity-75">{copy.recommendedFoods}</h3>
         <div className="mt-3 grid gap-2">
           {market.recommendedFoods.map((food) => (
-            <div key={food} className={clsx("flex items-center gap-2 rounded-[8px] px-3 py-2 text-sm font-semibold", isNeon ? "bg-white/8 text-white/82" : "bg-slate-50 text-slate-700")}>
+            <div key={food.en} className={clsx("flex items-center gap-2 rounded-[8px] px-3 py-2 text-sm font-semibold", isNeon ? "bg-white/8 text-white/82" : "bg-slate-50 text-slate-700")}>
               <Utensils size={16} aria-hidden="true" />
-              {labelPhrase(food, locale)}
+              {localize(food, locale)}
             </div>
           ))}
         </div>
@@ -1090,9 +1082,9 @@ function DetailPanel({
         <h3 className="text-sm font-bold uppercase tracking-[0.12em] opacity-75">{copy.practicalInfo}</h3>
         <ul className="mt-3 space-y-2">
           {market.practicalInfo.map((item) => (
-            <li key={item} className={clsx("flex gap-2 text-sm leading-6", isNeon ? "text-white/72" : "text-slate-600")}>
+            <li key={item.en} className={clsx("flex gap-2 text-sm leading-6", isNeon ? "text-white/72" : "text-slate-600")}>
               <CheckCircle2 className={clsx("mt-1 shrink-0", isNeon ? "text-cyan-200" : "text-emerald-700")} size={16} aria-hidden="true" />
-              <span>{labelPhrase(item, locale)}</span>
+              <span>{localize(item, locale)}</span>
             </li>
           ))}
         </ul>
@@ -1102,7 +1094,7 @@ function DetailPanel({
         <div className="flex items-start gap-2">
           <BadgeInfo size={17} aria-hidden="true" className="mt-0.5 shrink-0" />
           <div>
-            <p className="font-semibold">{market.source.label}</p>
+            <p className="font-semibold">{localize(market.source.label, locale)}</p>
             <a
               href={market.source.url}
               target="_blank"
@@ -1194,7 +1186,7 @@ function TaiwanMap({
             ? "bg-[#f4f6f1]"
             : "bg-[#dfe8ef]",
       )}
-      aria-label="Schematic Taiwan map with night market markers"
+      aria-label={copy.mapAria}
     >
       <div
         className={clsx(

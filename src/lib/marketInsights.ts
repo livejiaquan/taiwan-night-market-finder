@@ -1,5 +1,5 @@
 import type { Locale, NightMarket } from "../types";
-import { labelDay, labelPhrase, labelTag } from "./i18n";
+import { labelDay, labelTag, localize } from "./i18n";
 
 export interface MarketInsight {
   planLabel: string;
@@ -28,19 +28,19 @@ const joinList = (items: string[], locale: Locale) => {
     : `${items.slice(0, -1).join(", ")}, and ${items[items.length - 1]}`;
 };
 
-const labelFood = (value: string, locale: Locale) => {
-  const phrase = labelPhrase(value, locale);
-  return phrase === value ? labelTag(value, locale) : phrase;
-};
-
 export function getMarketInsight(market: NightMarket, locale: Locale): MarketInsight {
-  const foods = market.recommendedFoods.slice(0, 3).map((food) => labelFood(food, locale));
+  const foods = market.recommendedFoods.slice(0, 3).map((food) => localize(food, locale));
   const tags = [...market.moods.slice(0, 2), ...market.foodTypes.slice(0, 1)].map((tag) =>
     labelTag(tag, locale),
   );
   const days = market.openingDays.map((day) => labelDay(day, locale));
-  const highlight = labelPhrase(market.highlights[0] ?? market.address, locale);
-  const practicalTip = labelPhrase(market.practicalInfo[0] ?? market.address, locale);
+  const station = localize(market.nearestStation, locale);
+  const highlight = market.highlights[0]
+    ? localize(market.highlights[0], locale)
+    : market.address;
+  const practicalTip = market.practicalInfo[0]
+    ? localize(market.practicalInfo[0], locale)
+    : market.address;
 
   if (locale === "zh") {
     return {
@@ -49,7 +49,7 @@ export function getMarketInsight(market: NightMarket, locale: Locale): MarketIns
       foodMissionTitle: "美食任務",
       foodMission: `${joinList(foods, locale)} 排成一條路線，比只看評分更容易逛出節奏。`,
       timingTitle: "抵達節奏",
-      timing: `營業日 ${joinList(days, locale)}；從 ${market.nearestStation} 步行 ${market.walkingMinutes} 分鐘，建議抓 90 分鐘慢慢逛。`,
+      timing: `營業日 ${joinList(days, locale)}；從 ${station} 步行 ${market.walkingMinutes} 分鐘，建議抓 90 分鐘慢慢逛。`,
       bestForTitle: "適合情境",
       bestFor: joinList(tags, locale),
       localTipTitle: "在地提醒",
@@ -63,7 +63,7 @@ export function getMarketInsight(market: NightMarket, locale: Locale): MarketIns
     foodMissionTitle: "Food mission",
     foodMission: `Try ${joinList(foods, locale)} before switching lanes so the visit feels like a route, not a random snack list.`,
     timingTitle: "Visit timing",
-    timing: `Open ${joinList(days, locale)}; ${market.walkingMinutes} min from ${market.nearestStation}. Plan about 90 minutes for a relaxed food crawl.`,
+    timing: `Open ${joinList(days, locale)}; ${market.walkingMinutes} min from ${station}. Plan about 90 minutes for a relaxed food crawl.`,
     bestForTitle: "Best for",
     bestFor: joinList(tags, locale),
     localTipTitle: "Local tip",

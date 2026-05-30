@@ -1,4 +1,4 @@
-import type { Locale, NightMarket, OpeningDay, StyleId } from "../types";
+import type { Locale, LocalizedText, NightMarket, OpeningDay, StyleId } from "../types";
 
 export const uiCopy = {
   en: {
@@ -57,6 +57,8 @@ export const uiCopy = {
     emptyBody:
       "Try a broader city, remove the opening-day filter, or search for a specific food like seafood, pepper buns, tea, or fried chicken.",
     languageLabel: "Language",
+    styleNav: "Style navigation",
+    mapAria: "Schematic Taiwan map with night market markers",
     english: "EN",
     chinese: "中文",
   },
@@ -114,6 +116,8 @@ export const uiCopy = {
     emptyTitle: "沒有符合條件的夜市。",
     emptyBody: "可以放寬縣市、取消營業日，或搜尋海鮮、胡椒餅、飲料、雞排等美食。",
     languageLabel: "語言",
+    styleNav: "版本導覽",
+    mapAria: "台灣夜市示意地圖",
     english: "EN",
     chinese: "中文",
   },
@@ -206,6 +210,7 @@ const tagZh: Record<string, string> = {
   "beef noodles": "牛肉麵",
   "braised snacks": "滷味",
   "bubble tea": "珍珠奶茶",
+  "central": "市中心",
   "classic": "經典",
   "coffin bread": "棺材板",
   "compact": "精簡好逛",
@@ -282,65 +287,6 @@ const dayZh: Record<OpeningDay, string> = {
   Sun: "日",
 };
 
-const phraseZh: Record<string, string> = {
-  "Large covered food court": "大型室內美食區",
-  "Arcade lanes": "遊戲與購物巷弄",
-  "Easy MRT access": "捷運方便",
-  "Ciyou Temple entrance": "慈祐宮入口",
-  "Linear one-street route": "直線型街道好走",
-  "Strong snack density": "小吃密度高",
-  "Compact food corridor": "精簡美食走廊",
-  "Old Taipei snacks": "老台北小吃",
-  "Easy food crawl": "適合一路吃過去",
-  "Local dinner crowd": "在地晚餐人潮",
-  "Clothes and snacks mix": "服飾與小吃混合",
-  "Near Taipei 101 area": "鄰近台北 101 商圈",
-  "Dense Yonghe snack scene": "永和在地小吃密集",
-  "Less touristy than central Taipei": "比台北市中心更在地",
-  "Good dessert stops": "甜點選擇多",
-  "Old-school Taoyuan route": "桃園老派夜市路線",
-  "Good stop before airport hotel nights": "適合機場住宿前順遊",
-  "Zhongli local staple": "中壢在地代表夜市",
-  "Large snack variety": "小吃種類多",
-  "Evening shopping streets nearby": "周邊晚間商圈方便",
-  "One of Taiwan's biggest night-market districts": "台灣大型夜市商圈之一",
-  "Student energy": "學生族群活力",
-  "Trend snacks": "流行小吃多",
-  "Early-opening student district": "較早開始熱鬧的學生商圈",
-  "Boutiques and snacks": "服飾小店與小吃",
-  "Good before dinner": "晚餐前也適合去",
-  "Large open-air layout": "大型露天場域",
-  "Carnival-style games": "遊戲攤氣氛強",
-  "Four-night weekly schedule": "一週四天營業",
-  "Large Tainan rotating market": "台南大型輪流夜市",
-  "Flag rows over stalls": "旗幟攤位視覺明顯",
-  "Very strong food mix": "美食組合豐富",
-  "Long-running local favorite": "長年在地人氣夜市",
-  "Wednesday/Saturday schedule": "週三、週六營業",
-  "Food and games mix": "小吃與遊戲攤並重",
-  "Useful Monday/Tuesday Tainan option": "台南週一週二實用選擇",
-  "Casual local atmosphere": "輕鬆在地氛圍",
-  "Wide snack rows": "小吃攤位多排展開",
-  "Central Kaohsiung access": "高雄市中心交通方便",
-  "Tourist-friendly seafood": "觀光友善海鮮",
-  "Iconic boulevard setup": "經典道路型夜市",
-  "Dense grid layout": "密集格狀動線",
-  "Games and snacks": "遊戲與小吃並重",
-  "Popular local alternative to Liuhe": "六合以外的在地熱門選擇",
-  "Yilan snack specialties": "宜蘭特色小吃",
-  "Rail-friendly": "台鐵可達",
-  "Good for weekend trips": "適合週末小旅行",
-  "Large open plaza": "大型開放廣場",
-  "Hualien regional stalls": "花蓮地方攤位",
-  "Game and performance areas": "遊戲與表演區",
-  "Temple-front food streets": "廟口前美食街",
-  "Seafood-heavy snacks": "海鮮小吃多",
-  "Works before or after Jiufen trips": "可搭配九份行程",
-  "Chiayi food essentials": "嘉義必吃小吃",
-  "Straightforward central route": "市中心動線直覺",
-  "Good after Alishan transfer days": "適合阿里山轉乘日後安排",
-};
-
 export function getStyleCopy(styleId: StyleId, locale: Locale) {
   return styleCopy[locale][styleId];
 }
@@ -369,8 +315,8 @@ export function labelDay(value: OpeningDay, locale: Locale) {
   return locale === "zh" ? dayZh[value] : value;
 }
 
-export function labelPhrase(value: string, locale: Locale) {
-  return locale === "zh" ? phraseZh[value] ?? value : value;
+export function localize(text: LocalizedText, locale: Locale) {
+  return locale === "zh" ? text.zh : text.en;
 }
 
 export function formatMarketTitle(market: NightMarket, locale: Locale) {

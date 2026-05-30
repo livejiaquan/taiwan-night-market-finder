@@ -15,13 +15,22 @@ const market = {
   moods: ["classic", "food-first"],
   foodTypes: ["pepper buns", "seafood"],
   transport: ["MRT", "rail"],
-  nearestStation: "Songshan Station",
+  nearestStation: { zh: "松山車站", en: "Songshan Station" },
   walkingMinutes: 2,
-  highlights: ["Ciyou Temple entrance", "Linear one-street route"],
-  recommendedFoods: ["pepper buns", "herbal soup", "oyster omelet"],
-  practicalInfo: ["Start from Songshan Station and walk toward Ciyou Temple."],
+  highlights: [
+    { zh: "慈祐宮入口", en: "Ciyou Temple entrance" },
+    { zh: "直線型街道好走", en: "Linear one-street route" },
+  ],
+  recommendedFoods: [
+    { zh: "胡椒餅", en: "pepper buns" },
+    { zh: "藥燉湯", en: "herbal soup" },
+    { zh: "蚵仔煎", en: "oyster omelet" },
+  ],
+  practicalInfo: [
+    { zh: "從松山車站往慈祐宮走", en: "Start from Songshan Station and walk toward Ciyou Temple." },
+  ],
   source: {
-    label: "Tourism reference",
+    label: { zh: "旅遊參考", en: "Tourism reference" },
     url: "https://example.com",
     confidence: "curated",
   },
@@ -37,6 +46,7 @@ describe("getMarketInsight", () => {
 
     expect(getMarketInsight(market, "zh").plan).toContain("胡椒餅");
     expect(getMarketInsight(market, "zh").timing).toContain("2 分鐘");
+    expect(getMarketInsight(market, "zh").timing).toContain("松山車站");
     expect(getMarketInsight(market, "en").foodMission).toContain("pepper buns");
   });
 });
