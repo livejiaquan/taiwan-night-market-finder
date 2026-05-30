@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Taiwan night market finder icon">
+  <rect width="64" height="64" rx="12" fill="#07111f"/>
+  <path d="M14 43h36" stroke="#22d3ee" stroke-width="4" stroke-linecap="round"/>
+  <path d="M18 25c4-7 9-10 14-10s10 3 14 10" fill="none" stroke="#f59e0b" stroke-width="4" stroke-linecap="round"/>
+  <circle cx="23" cy="34" r="5" fill="#f472b6"/>
+  <circle cx="41" cy="34" r="5" fill="#34d399"/>
+  <path d="M28 45c1.5 2 6.5 2 8 0" stroke="#fff7ed" stroke-width="4" stroke-linecap="round"/>
+</svg>

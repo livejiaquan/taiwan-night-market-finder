@@ -1,0 +1,16 @@
+node_modules/
+dist/
+.playwright-cli/
+
+.DS_Store
+.env
+.env.*
+
+*.tsbuildinfo
+coverage/
+
+vite.config.js
+vite.config.d.ts
+vitest.config.js
+vitest.config.d.ts
+output/playwright/test-results/
