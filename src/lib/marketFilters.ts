@@ -1,4 +1,5 @@
 import type { FilterOptions, NightMarket, NightMarketFilters, OpeningDay } from "../types";
+import { labelCity, labelDistrict, labelTag, labelTransport } from "./i18n";
 
 const openingDays: OpeningDay[] = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
@@ -16,6 +17,7 @@ const queryAliases: Record<string, string[]> = {
   捷運: ["mrt"],
   火車: ["rail", "station"],
   公車: ["bus"],
+  飲料: ["tea"],
 };
 
 const expandQuery = (query: string) => {
@@ -44,15 +46,21 @@ const marketText = (market: NightMarket) =>
     market.name,
     market.localName,
     market.city,
+    labelCity(market.city, "zh"),
     market.district,
+    labelDistrict(market.district, "zh"),
     market.address,
-    market.nearestStation,
+    market.nearestStation.zh,
+    market.nearestStation.en,
     ...market.moods,
+    ...market.moods.map((mood) => labelTag(mood, "zh")),
     ...market.foodTypes,
+    ...market.foodTypes.map((food) => labelTag(food, "zh")),
     ...market.transport,
-    ...market.highlights,
-    ...market.recommendedFoods,
-    ...market.practicalInfo,
+    ...market.transport.map((transport) => labelTransport(transport, "zh")),
+    ...market.highlights.flatMap((item) => [item.zh, item.en]),
+    ...market.recommendedFoods.flatMap((item) => [item.zh, item.en]),
+    ...market.practicalInfo.flatMap((item) => [item.zh, item.en]),
   ]
     .join(" ")
     .toLocaleLowerCase();

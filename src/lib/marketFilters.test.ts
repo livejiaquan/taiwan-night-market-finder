@@ -16,13 +16,19 @@ const markets: NightMarket[] = [
     moods: ["classic", "food-first"],
     foodTypes: ["pepper buns", "seafood"],
     transport: ["MRT", "rail"],
-    nearestStation: "Songshan Station",
+    nearestStation: { zh: "松山車站", en: "Songshan Station" },
     walkingMinutes: 2,
-    highlights: ["Temple gate", "Pepper buns"],
-    recommendedFoods: ["Pepper buns", "Herbal ribs"],
-    practicalInfo: ["Go before 19:00 for shorter lines"],
+    highlights: [
+      { zh: "廟口", en: "Temple gate" },
+      { zh: "胡椒餅", en: "Pepper buns" },
+    ],
+    recommendedFoods: [
+      { zh: "胡椒餅", en: "Pepper buns" },
+      { zh: "藥燉排骨", en: "Herbal ribs" },
+    ],
+    practicalInfo: [{ zh: "19:00 前去人比較少", en: "Go before 19:00 for shorter lines" }],
     source: {
-      label: "Fallback fixture",
+      label: { zh: "備援樣本", en: "Fallback fixture" },
       url: "https://data.gov.tw/",
       confidence: "fallback",
     },
@@ -40,13 +46,19 @@ const markets: NightMarket[] = [
     moods: ["student", "late-night"],
     foodTypes: ["fried chicken", "tea"],
     transport: ["bus"],
-    nearestStation: "Feng Chia University stop",
+    nearestStation: { zh: "逢甲大學站", en: "Feng Chia University stop" },
     walkingMinutes: 4,
-    highlights: ["Large student crowd", "Snack alleys"],
-    recommendedFoods: ["Fried chicken", "Bubble tea"],
-    practicalInfo: ["Use buses or taxi from high-speed rail"],
+    highlights: [
+      { zh: "學生人潮多", en: "Large student crowd" },
+      { zh: "小吃巷弄", en: "Snack alleys" },
+    ],
+    recommendedFoods: [
+      { zh: "雞排", en: "Fried chicken" },
+      { zh: "珍珠奶茶", en: "Bubble tea" },
+    ],
+    practicalInfo: [{ zh: "從高鐵搭公車或計程車", en: "Use buses or taxi from high-speed rail" }],
     source: {
-      label: "Fallback fixture",
+      label: { zh: "備援樣本", en: "Fallback fixture" },
       url: "https://data.gov.tw/",
       confidence: "fallback",
     },
@@ -58,6 +70,24 @@ describe("filterNightMarkets", () => {
     const result = filterNightMarkets(markets, { query: "胡椒" });
 
     expect(result.map((market) => market.id)).toEqual(["raohe"]);
+  });
+
+  it("matches English food queries against bilingual data", () => {
+    const result = filterNightMarkets(markets, { query: "pepper buns" });
+
+    expect(result.map((market) => market.id)).toEqual(["raohe"]);
+  });
+
+  it("matches Chinese enum labels for city, food, and transport", () => {
+    expect(filterNightMarkets(markets, { query: "台北" }).map((market) => market.id)).toEqual([
+      "raohe",
+    ]);
+    expect(filterNightMarkets(markets, { query: "手搖飲" }).map((market) => market.id)).toEqual([
+      "fengjia",
+    ]);
+    expect(filterNightMarkets(markets, { query: "捷運" }).map((market) => market.id)).toEqual([
+      "raohe",
+    ]);
   });
 
   it("combines city, day, mood, food, and transport filters", () => {

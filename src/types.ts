@@ -10,9 +10,14 @@ export type OpeningDay =
 export type DataConfidence = "official" | "curated" | "fallback";
 
 export interface MarketSource {
-  label: string;
+  label: LocalizedText;
   url: string;
   confidence: DataConfidence;
+}
+
+export interface LocalizedText {
+  zh: string;
+  en: string;
 }
 
 export interface Coordinates {
@@ -33,11 +38,11 @@ export interface NightMarket {
   moods: string[];
   foodTypes: string[];
   transport: string[];
-  nearestStation: string;
+  nearestStation: LocalizedText;
   walkingMinutes: number;
-  highlights: string[];
-  recommendedFoods: string[];
-  practicalInfo: string[];
+  highlights: LocalizedText[];
+  recommendedFoods: LocalizedText[];
+  practicalInfo: LocalizedText[];
   source: MarketSource;
 }
 
