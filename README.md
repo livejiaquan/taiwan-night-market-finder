@@ -14,7 +14,7 @@ The UI includes a Chinese / English language switcher. Chinese is the default fo
 
 - Search across English names, Chinese names, city/county, district, food, mood, transit, highlights, and practical notes.
 - Filter by city/county, opening day, mood, food type, and transportation.
-- Browse responsive night-market cards, detail panels, practical visiting info, recommended foods, source confidence, and schematic location context.
+- Browse responsive night-market cards, detail panels, practical visiting info, recommended foods, source confidence, and a schematic Taiwan map.
 - Support mobile, tablet, and desktop layouts as first-class surfaces.
 - Render loading, empty, recoverable error, and fallback-data states.
 - Compare the two retained frontend versions clearly before choosing one direction for refinement.
@@ -37,7 +37,7 @@ Public references used:
 - [Taiwan Tourism Administration](https://eng.taiwan.net.tw/)
 - [Government Data Open Platform](https://data.gov.tw/)
 
-The schematic map uses bundled latitude/longitude values for product comparison. It is not a turn-by-turn navigation map and intentionally avoids third-party tile dependencies for a stable static build.
+The map is a lightweight inline SVG outline of Taiwan that plots each market by its bundled latitude/longitude. It is a schematic locator, not a turn-by-turn navigation map, and it intentionally avoids third-party map-tile dependencies so the build stays fully static and works offline. The neon direction renders it dark with a scanline glow; the travel direction renders it light.
 
 ## Visual Directions
 

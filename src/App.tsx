@@ -1139,95 +1139,121 @@ function InsightTile({
   );
 }
 
+const TAIWAN_OUTLINE =
+  "M74.5,2.5 L83.6,10.9 L93.2,12.4 L95.5,18.4 L89.1,37.8 L78.2,68.1 L67.3,111.8 L56.8,127.7 L50.9,136.7 L43.2,170.5 L36.4,169 L36.4,156.6 L25.5,148.1 L25,143.2 L16.8,135.7 L9.1,116.8 L9.1,101.9 L13.6,79.5 L21.8,63.1 L28.2,52.2 L35,42.8 L46.4,24.9 L53.6,12.4 L62.7,8.5 Z";
+
+const MAP_LNG_MIN = 119.9;
+const MAP_LNG_MAX = 122.1;
+const MAP_LAT_MIN = 21.85;
+const MAP_LAT_MAX = 25.35;
+const MAP_WIDTH = 100;
+const MAP_HEIGHT = 174;
+
+const projectX = (lng: number) => ((lng - MAP_LNG_MIN) / (MAP_LNG_MAX - MAP_LNG_MIN)) * MAP_WIDTH;
+const projectY = (lat: number) => ((MAP_LAT_MAX - lat) / (MAP_LAT_MAX - MAP_LAT_MIN)) * MAP_HEIGHT;
+
+function mapTheme(tone: "neon" | "travel" | "utility") {
+  if (tone === "neon") {
+    return {
+      bg: "bg-[#070912]",
+      outlineFill: "rgba(103,232,249,0.10)",
+      outlineStroke: "rgba(103,232,249,0.45)",
+      activeFill: "#67e8f9",
+      inactiveFill: "#e879f9",
+    };
+  }
+  if (tone === "travel") {
+    return {
+      bg: "bg-[#eef3ef]",
+      outlineFill: "rgba(16,185,129,0.16)",
+      outlineStroke: "rgba(4,120,87,0.45)",
+      activeFill: "#047857",
+      inactiveFill: "#f59e0b",
+    };
+  }
+  return {
+    bg: "bg-[#dfe8ef]",
+    outlineFill: "rgba(59,130,246,0.14)",
+    outlineStroke: "rgba(29,78,216,0.45)",
+    activeFill: "#1d4ed8",
+    inactiveFill: "#059669",
+  };
+}
+
 function TaiwanMap({
   markets,
   selectedMarket,
   onSelect,
   tone,
   locale,
-  showLabels = false,
 }: {
   markets: NightMarket[];
   selectedMarket: NightMarket;
   onSelect: (market: NightMarket) => void;
   tone: "neon" | "travel" | "utility";
   locale: Locale;
-  showLabels?: boolean;
 }) {
   const copy = uiCopy[locale];
-  const latMin = 21.85;
-  const latMax = 25.45;
-  const lngMin = 119.85;
-  const lngMax = 122.05;
-  const markerClass = (active: boolean) =>
-    clsx(
-      "absolute flex -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border text-xs font-bold shadow-lg transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2",
-      active ? "h-9 w-9 z-20" : "h-6 w-6 z-10 hover:scale-110",
-      tone === "neon"
-        ? active
-          ? "border-cyan-100 bg-cyan-300 text-slate-950 focus-visible:outline-cyan-200"
-          : "border-fuchsia-100/70 bg-fuchsia-400 text-white focus-visible:outline-cyan-200"
-        : tone === "travel"
-          ? active
-            ? "border-white bg-emerald-700 text-white focus-visible:outline-emerald-500"
-            : "border-white bg-amber-500 text-slate-950 focus-visible:outline-emerald-500"
-          : active
-            ? "border-white bg-blue-700 text-white focus-visible:outline-blue-500"
-            : "border-white bg-emerald-600 text-white focus-visible:outline-blue-500",
-    );
+  const theme = mapTheme(tone);
+  const isNeon = tone === "neon";
 
   return (
     <div
-      className={clsx(
-        "relative h-full min-h-[18rem] w-full overflow-hidden",
-        tone === "neon"
-          ? "bg-[#070912]"
-          : tone === "travel"
-            ? "bg-[#f4f6f1]"
-            : "bg-[#dfe8ef]",
-      )}
+      className={clsx("relative h-full min-h-[18rem] w-full overflow-hidden", theme.bg)}
       aria-label={copy.mapAria}
     >
+      {isNeon ? <div className="absolute inset-0 bg-neon-scan opacity-40" /> : null}
+      <div className="absolute inset-0 bg-map-grid opacity-30" />
+      <svg
+        viewBox={`0 0 ${MAP_WIDTH} ${MAP_HEIGHT}`}
+        preserveAspectRatio="xMidYMid meet"
+        className="relative h-full w-full"
+        role="img"
+      >
+        <path
+          d={TAIWAN_OUTLINE}
+          fill={theme.outlineFill}
+          stroke={theme.outlineStroke}
+          strokeWidth={0.8}
+          strokeLinejoin="round"
+        />
+        {markets.map((market) => {
+          const cx = projectX(market.coordinates.lng);
+          const cy = projectY(market.coordinates.lat);
+          const active = market.id === selectedMarket.id;
+          return (
+            <g
+              key={market.id}
+              className="cursor-pointer"
+              role="button"
+              tabIndex={0}
+              aria-label={`${copy.viewDetails}: ${formatMarketTitle(market, locale).primary}`}
+              onClick={() => onSelect(market)}
+              onKeyDown={(event) => {
+                if (event.key === "Enter" || event.key === " ") {
+                  event.preventDefault();
+                  onSelect(market);
+                }
+              }}
+            >
+              <title>{formatMarketTitle(market, locale).primary}</title>
+              <circle cx={cx} cy={cy} r={6} fill="transparent" />
+              <circle
+                cx={cx}
+                cy={cy}
+                r={active ? 4 : 2.6}
+                fill={active ? theme.activeFill : theme.inactiveFill}
+                stroke={active ? "#ffffff" : "rgba(255,255,255,0.65)"}
+                strokeWidth={active ? 1.3 : 0.7}
+              />
+            </g>
+          );
+        })}
+      </svg>
       <div
         className={clsx(
-          "absolute inset-4 rounded-[42%_52%_48%_43%/55%_44%_60%_45%] border",
-          tone === "neon"
-            ? "border-cyan-300/30 bg-cyan-300/10 shadow-glow"
-            : tone === "travel"
-              ? "border-emerald-700/20 bg-emerald-100/60"
-              : "border-blue-700/20 bg-white/75",
-        )}
-      />
-      <div className="absolute inset-0 bg-map-grid opacity-45" />
-      {markets.map((market, index) => {
-        const x = ((market.coordinates.lng - lngMin) / (lngMax - lngMin)) * 100;
-        const y = 100 - ((market.coordinates.lat - latMin) / (latMax - latMin)) * 100;
-        const active = market.id === selectedMarket.id;
-        return (
-          <button
-            key={market.id}
-            type="button"
-            className={markerClass(active)}
-            style={{ left: `${x}%`, top: `${y}%` }}
-            onClick={() => onSelect(market)}
-            aria-label={`${copy.viewDetails}: ${formatMarketTitle(market, locale).primary}`}
-            title={formatMarketTitle(market, locale).primary}
-          >
-            {active ? <MapPin size={17} aria-hidden="true" /> : index + 1}
-            {showLabels && active ? (
-              <span className="absolute left-10 top-1/2 hidden min-w-40 -translate-y-1/2 rounded-[8px] border border-slate-300 bg-white px-3 py-2 text-left text-sm font-semibold text-slate-950 shadow-ambient sm:block">
-                {formatMarketTitle(market, locale).primary}
-              </span>
-            ) : null}
-          </button>
-        );
-      })}
-      <div
-        className={clsx(
-          "absolute bottom-3 left-3 rounded-[8px] border px-3 py-2 text-xs font-semibold",
-          tone === "neon"
-            ? "border-white/12 bg-black/55 text-white/70"
-            : "border-slate-200 bg-white/90 text-slate-600",
+          "pointer-events-none absolute bottom-3 left-3 rounded-[8px] border px-3 py-2 text-xs font-semibold",
+          isNeon ? "border-white/12 bg-black/55 text-white/70" : "border-slate-200 bg-white/90 text-slate-600",
         )}
       >
         {copy.schematicMap}
