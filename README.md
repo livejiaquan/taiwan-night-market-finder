@@ -1,101 +1,107 @@
-# Taiwan Night Market Finder
+# 今晚哪裡有市
 
-A polished frontend/product-design prototype for discovering Taiwan night markets by city, market name, mood, food type, transportation, and opening day.
+一個 trust-first 的臺南夜市決策工具：依臺南市政府許可名冊，查所選日期**正常週期**有營業的候選，並逐欄位顯示來源、核對時間、過期與來源衝突。
 
-The app currently keeps two polished visual directions that share one data model and one filter/search core:
+它不宣稱即時開門，也不以沒有來源的精確鐘點、美食排行或路線填補官方資料缺口。目前是 `pre-alpha / 臺南資料可追溯試行版`，不是全臺完整名冊。
 
-- `/` - side-by-side comparison screen
-- `/style/neon` - Version 1 / Neon Night Market / 版本 1：霓虹夜市版
-- `/style/travel` - Version 2 / Modern Travel Guide / 版本 2：現代旅遊指南版
+## Public product 與保留原型
 
-The UI includes a Chinese / English language switcher. Chinese is the default for the Taiwan-focused product, and English remains available from every style route.
+- `/`：所選日期的臺南正常週期候選；預設為 `Asia/Taipei` 今天。
+- `/market/:id`：夜市詳情、逐欄位 evidence、Maps 搜尋導航與可分享日期連結。
+- `/lab`：原本的雙視覺比較 prototype。
+- `/style/neon`、`/style/travel`：原本的視覺方向；其 19 筆手工策展資料不進 public product。
 
-## Product Scope
+產品方向、release gate 與資料邊界見：
 
-- Search across English names, Chinese names, city/county, district, food, mood, transit, highlights, and practical notes.
-- Filter by city/county, opening day, mood, food type, and transportation.
-- Browse responsive night-market cards, detail panels, practical visiting info, recommended foods, source confidence, and a schematic Taiwan map.
-- Support mobile, tablet, and desktop layouts as first-class surfaces.
-- Render loading, empty, recoverable error, and fallback-data states.
-- Compare the two retained frontend versions clearly before choosing one direction for refinement.
+- [產品使命](docs/PRODUCT_MISSION.md)
+- [資料信任契約](docs/DATA_TRUST_CONTRACT.md)
+- [outcome-gated roadmap](docs/ROADMAP.md)
+- [第一輪 UX contract](docs/ITERATION_1_UX_BRIEF.md)
 
-## Data Source Strategy
+## Current source of truth
 
-Official night-market data in Taiwan is fragmented. Some public datasets include operating cycles but not coordinates, food tags, transit, or visitor-friendly detail. This prototype therefore uses a curated static fallback dataset in `src/data/nightMarkets.ts`.
+第一階段只使用[臺南市已取得設置許可夜市名冊](https://data.gov.tw/dataset/53634)作為主要來源。`2026-08-09` 的 live snapshot 有 32 筆，提供：
 
-Each record includes a `source.confidence` field:
+- record `Seq`；
+- 夜市名稱；
+- 許可路段或區域；
+- 正常營業日；
+- 地址行政區域代碼。
 
-- `official` - official/public dataset directly covers the market or operating-cycle context.
-- `curated` - public-data and tourism references were used, but app-specific fields such as food tags or transit notes were curated.
-- `fallback` - local fallback fixture or incomplete public coverage.
+它**沒有**提供即時開門狀態、例外停業、可信精確鐘點或官方經緯度。Maps CTA 是由官方名稱與許可區域衍生的搜尋字串，不是官方座標。
 
-Public references used:
+已知衝突會保留兩個值，不採 latest-wins。例如花園夜市的許可名冊為四／六／日，[臺南旅遊網](https://www.twtainan.net/zh-tw/attractions/detail/5572/)為四／五／六／日；因此週五顯示「需再確認」，其餘兩來源一致的日期仍可獨立判斷。
 
-- [Tainan City licensed night-market open data](https://data.gov.tw/en/datasets/53634)
-- [Taoyuan City's tourist night market open data](https://data.gov.tw/en/datasets/25965)
-- [Taoyuan City open-data page for tourist night markets](https://opendata.tycg.gov.tw/datalist/0bd2cf36-7540-416b-911c-1ee3216fd79a)
-- [Taiwan Tourism Administration](https://eng.taiwan.net.tw/)
-- [Government Data Open Platform](https://data.gov.tw/)
+政府資料依[政府資料開放授權條款第 1 版](https://data.gov.tw/license)使用並顯示提供機關與原始連結。
 
-The map is a lightweight inline SVG outline of Taiwan that plots each market by its bundled latitude/longitude. It is a schematic locator, not a turn-by-turn navigation map, and it intentionally avoids third-party map-tile dependencies so the build stays fully static and works offline. The neon direction renders it dark with a scanline glow; the travel direction renders it light.
+## Reproducible data path
 
-## Visual Directions
+```text
+official endpoint
+  -> immutable raw snapshot + SHA-256 + retrievedAt
+  -> strict schema / row / key / schedule validation
+  -> manual official-source conflict file
+  -> generated production artifact with field-level evidence
+  -> runtime validation and day-specific claim policy
+```
 
-### Neon Night Market
-
-Dark mode, generated night-market atmosphere imagery, cyan/fuchsia/amber accents, glowing cards, and a lively food-street hierarchy. Best for a highly branded consumer discovery product.
-
-### Modern Travel Guide
-
-Clean editorial spacing, premium cards, calmer color, strong visual rhythm, and trip-planning detail. Best for a travel-guide product that should feel trustworthy and polished.
-
-## Screenshots
-
-Generate or refresh screenshots after running the local app:
-
-| View | Screenshot |
-| --- | --- |
-| Comparison | `output/playwright/screenshots/comparison-desktop.png` |
-| Neon desktop | `output/playwright/screenshots/neon-desktop.png` |
-| Neon mobile detail flow | `output/playwright/screenshots/neon-mobile-detail.png` |
-| Travel tablet | `output/playwright/screenshots/travel-tablet.png` |
-
-## Setup
+離線驗證目前已提交的 snapshot、curation 與 generated artifact：
 
 ```bash
-npm install
+npm run data:check
+```
+
+抓取 live endpoint、fail-closed 驗證後建立新 immutable snapshot：
+
+```bash
+npm run data:sync
+```
+
+遇到零筆、欄位改名、非 32 筆、重複 ID／名稱、未知營業日格式、checksum 不符或 curation 與主來源不再一致時，pipeline 會失敗且不發布 candidate。新 snapshot 不會覆寫舊 snapshot。
+
+## Local development
+
+建議 Node 22（見 `.nvmrc`）；production 支援範圍固定為 Node `>=20.19 <25`。
+
+```bash
+nvm use
+npm ci
 npm run dev
 ```
 
-Then open the local URL printed by Vite. The default dev host is `127.0.0.1`.
+Vite 預設綁定 `127.0.0.1`。
 
-## Quality Checks
+## Quality checks
 
 ```bash
+npm run data:check
 npm test
 npm run typecheck
 npm run lint
 npm run build
 ```
 
+完整本機 gate：
+
+```bash
+npm run verify
+```
+
+`npm run build` 會先重建並核對 committed data lineage，再輸出靜態 `dist/`。
+
 ## Deployment
 
-This is a static Vite app. Build output is written to `dist/`.
+這是無 runtime credential 的靜態 Vite app。`public/_redirects` 提供 Netlify／Cloudflare Pages 類型 host 的 SPA deep-link fallback；其他 host 需將所有未知路徑 rewrite 到 `index.html`。
+
+先 build，再用實際 HTTPS 網域產生 absolute canonical、robots sitemap、每筆市場 URL 的 crawler-readable metadata shell 與明確 SPA rewrite；命令拒絕自行發明 production domain：
 
 ```bash
 npm run build
+npm run deploy:metadata -- --site-url https://your-real-domain.example
 ```
 
-Deploy the `dist/` directory to a static host such as Netlify, Vercel static output, Cloudflare Pages, or GitHub Pages.
+完整 DNS、TLS、cache 與回滾檢查見 [deployment runbook](docs/DEPLOYMENT.md)。沒有網域／host credential 時仍可驗證 build，但不可聲稱已正式上線。
 
-For hosts that do not automatically route all paths to `index.html`, configure a single-page-app fallback so `/style/neon`, `/style/travel`, and detail routes load correctly.
+## Repository boundary
 
-## Generated Asset
-
-The night-market hero image was generated for this project and copied into:
-
-```text
-public/assets/night-market-hero.png
-```
-
-Prompt intent: editorial Taiwan night-market atmosphere at blue-hour night, lively stalls, neon, steam, and no readable text or logos.
+原有的 generated hero、SVG map、19 筆 prototype data 與視覺 screenshots 都被保留；它們僅支援 `/lab`，不得當成 production truth。此 repository 不含 API key、Google Places 抓取、帳號或 AI branding。

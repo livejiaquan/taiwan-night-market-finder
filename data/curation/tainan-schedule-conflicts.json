@@ -1,0 +1,46 @@
+{
+  "schemaVersion": 1,
+  "datasetId": "tainan-licensed-night-markets",
+  "conflicts": [
+    {
+      "id": "tainan-garden-friday-2026-08-09",
+      "recordId": "22",
+      "marketName": "花園夜市",
+      "field": "scheduleDays",
+      "status": "unresolved",
+      "days": ["Fri"],
+      "summaryZh": "週五是否屬於正常營業日，兩個臺南市政府來源說法不同。",
+      "summaryEn": "Two Tainan City Government sources disagree on whether Friday is a regular opening day.",
+      "sources": [
+        {
+          "sourceId": "tainan-licensed-night-markets",
+          "sourceLabel": "臺南市已取得設置許可夜市名冊",
+          "publisher": "臺南市政府經濟發展局",
+          "sourceUrl": "https://soa.tainan.gov.tw/Api/Service/Get/611e74b4-d09a-4712-b421-aa062fd02854",
+          "method": "official_dataset",
+          "recordId": "22",
+          "rawValue": "每周四六日",
+          "value": ["Thu", "Sat", "Sun"],
+          "retrievedAt": null,
+          "sourceUpdatedAt": null,
+          "verifiedAt": null,
+          "note": "擷取與核對時間由本次 immutable dataset snapshot 注入。"
+        },
+        {
+          "sourceId": "tainan-tourism-garden-night-market",
+          "sourceLabel": "臺南旅遊網：花園夜市",
+          "publisher": "臺南市政府觀光旅遊局",
+          "sourceUrl": "https://www.twtainan.net/zh-tw/attractions/detail/5572/",
+          "method": "official_page",
+          "recordId": null,
+          "rawValue": "每週四、五、六、日",
+          "value": ["Thu", "Fri", "Sat", "Sun"],
+          "retrievedAt": "2026-08-09",
+          "sourceUpdatedAt": "2026-07-23",
+          "verifiedAt": "2026-08-09",
+          "note": "頁面列出的營業日包含週五；本資料只記錄來源衝突，不自行宣布勝方。"
+        }
+      ]
+    }
+  ]
+}
