@@ -10,6 +10,8 @@
 
 它不回答「現在現場是否已開門」，也不推論天候、臨時停業、搬遷、節慶加開或個別攤商營業情況。
 
+行政區控制只回答「此列冊夜市的官方行政區代碼是否等於使用者選取的官方行政區代碼」。它不回答附近、距離、交通時間、最佳選擇或使用者目前所在位置，也不能改變正常週期的判斷。
+
 可顯示為「依正常週期今日有營業」的必要條件：
 
 1. `scheduleDays` 明確包含所選星期；
@@ -28,7 +30,7 @@ type EvidenceStatus = 'verified' | 'conflict' | 'stale' | 'unknown';
 type EvidenceMethod = 'official_dataset' | 'official_page' | 'derived';
 
 interface FieldEvidence {
-  field: 'name' | 'scheduleDays' | 'permittedArea' | 'navigationQuery';
+  field: 'adminCode' | 'districtName' | 'name' | 'scheduleDays' | 'permittedArea' | 'navigationQuery';
   value: unknown;
   status: EvidenceStatus;
   method: EvidenceMethod;
@@ -49,6 +51,8 @@ interface FieldEvidence {
 - `derived` 必須列出 derivation；例如 Maps 查詢字串可由名稱與許可區域組成，但不能被描述成官方座標。
 - source 支持哪些欄位，就只替那些欄位背書；市場本身不設 `official: true`。
 - 來源缺值必須保留 `null`／`unknown`，不能用策展文字補成看似精確的值。
+- `adminCode` 必須直接由夜市名冊的同一筆 record 提供；`districtName` 必須由臺南市官方區碼表的同一 code 提供。兩段 lineage 都存在，才可顯示或篩選行政區。
+- UI 的 short district name 只可從官方全名移除固定前綴「臺南市」，保留「區」；英文模式仍顯示官方中文名稱，不能自行翻譯。
 
 ## 3. Freshness policy
 
@@ -61,6 +65,8 @@ interface FieldEvidence {
 - 上游沒有 `sourceUpdatedAt` 時明示「來源未提供更新時間」，不得以 current 標籤掩蓋。
 
 門檻是第一階段可測試的維護假設；四週 maintenance proof 後依變更率調整，不能只因維護不便而放寬。
+
+行政區 code reference 有獨立 policy：官方區碼表在擷取後 `0–365` 天可用，超過 `365` 天必須 fail closed，不能繼續以過期 mapping 縮小候選或猜測區名。它不是 schedule 的 90-day freshness 訊號，不能把 stale schedule 升級或降級；兩者各自揭露與驗證。
 
 ## 4. Conflict policy
 
@@ -83,9 +89,17 @@ official endpoint
   -> field-level evidence + conflict detection
   -> generated public artifact
   -> UI claim policy
+
+official district-code endpoint
+  -> immutable raw snapshot + checksum + retrievedAt
+  -> exact 37-row schema / sequence validation
+  -> generated district reference
+  -> market.adminCode exact join
+  -> optional district filter / label
 ```
 
 - build 不直接依賴政府 endpoint 是否在線；部署使用已驗證且已提交的 snapshot。
+- browser runtime 對 district artifact 驗證 exact source identity、schema、timestamp、format 與 market-to-district join；market artifact 則驗證欄位 lineage／schema／timestamp。兩條路徑的 raw checksum 重算、market source identity 與 artifact reproducibility 都是 build-time `data:check` 責任，browser 不假裝能存取 raw snapshot。
 - 同步失敗、零筆、欄位改名、重複 record ID 或無法解析營業日時，pipeline 必須 fail closed，不覆寫有效 artifact。
 - last-known-good 可作 fallback，但 UI 仍依 age 降級；超過 hard-stale 後不再給正向今日結論。
 - sample/mock fixture 只存在 test path，不能進 production artifact。
@@ -94,6 +108,7 @@ official endpoint
 
 - 第一階段的導航使用名稱＋官方許可區域組成 Maps search query；這是 derived query，不是經官方驗證的經緯度。
 - 未有支持 exact clock hours 的來源時，只顯示營業星期；不得沿用 repository 內手工填寫的精確開收攤時間。
+- 沒有官方座標、定位 permission 或可稽核距離資料時，行政區 select 必須清楚標示為 exact administrative-area filter；不得寫成「附近」「最近」或排序推薦。
 - UI 必須提醒 Maps 或現場資訊可能比名冊更新，並讓使用者在出發前再確認。
 
 ## 7. Attribution 與授權
@@ -108,6 +123,7 @@ official endpoint
 
 - 100% critical fields 有完整 evidence；
 - 解析後筆數不為零，record ID 唯一，所有星期值合法；
+- 37 筆 official district codes／names 唯一，所有 pilot market `adminCode` 都能 exact join，且不存在未來源支持的區名；
 - selected date 與顯示集合一致；
 - stale／unknown，或會改變所選日期判斷的 conflict，不會取得 confirmed 視覺；
 - raw checksum、parser version、artifact generation time 可追溯；

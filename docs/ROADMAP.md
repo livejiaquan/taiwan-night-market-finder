@@ -34,6 +34,7 @@ Gate：Mission/Outcome Guardian 只允許進入臺南窄切片，不允許把現
 - 預設選取臺北時區的今天，標題使用「依正常週期」；
 - 首屏顯示日期、資料邊界、今日候選與需再確認數量；
 - 卡片顯示正常營業日、許可區域、欄位來源狀態與核對日期；
+- 以官方 district-code reference 顯示行政區，並提供 optional exact-code filter；這只能縮小集合，不能當附近／距離／推薦或改寫 schedule decision；
 - 詳情提供一鍵 Maps 搜尋導航與可重現 share URL；
 - 保留中／英文、search、day filter、deep link；
 - 原本比較頁與 alternate visual 留在明確標記的非公共 lab route。
@@ -45,6 +46,7 @@ Gate：Mission/Outcome Guardian 只允許進入臺南窄切片，不允許把現
 - title、description、canonical、Open Graph、Twitter、robots、sitemap 與 custom-domain 設定可重現；
 - production build 不需要 credential，SPA route 有部署 fallback；
 - 真實瀏覽器走完今日選擇、日期切換、搜尋、詳情、來源與 Maps CTA，console 無阻斷錯誤。
+- market `adminCode` 與 37-row official district reference 必須 100% exact join；district reference 超過 365 天 fail closed，與 schedule freshness 分開。
 
 Release gate：
 
@@ -62,6 +64,7 @@ Release gate：
 - 記錄同步失敗、上游 schema drift、衝突與人工處理時間；
 - 建立不需帳號即可提出更正的管道，72 小時內分流、7 日內關閉或標記未決；
 - 做至少兩輪、每輪 5 位目標使用者的 mobile task test；
+- 第一輪採 paired baseline／行政區 control 測試；若不達 4/5 於 30 秒內完成、0 誤解 nearby/live、且時間改善至少 25%，移除行政區 control而不以其他策展排序補洞；
 - 測量 30 秒任務成功率、信任狀態理解率、導航／分享轉換；
 - pilot coverage 固定為目前官方名冊 32 筆，不在此階段加入第二資料源；若列冊項目不符合一般認知，保留資料但不強迫全部進主結果。
 

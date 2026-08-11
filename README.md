@@ -6,7 +6,7 @@
 
 ## Public product 與保留原型
 
-- `/`：所選日期的臺南正常週期候選；預設為 `Asia/Taipei` 今天。
+- `/`：所選日期的臺南正常週期候選；預設為 `Asia/Taipei` 今天，可選填官方行政區縮小候選。
 - `/market/:id`：夜市詳情、逐欄位 evidence、Maps 搜尋導航與可分享日期連結。
 - `/lab`：原本的雙視覺比較 prototype。
 - `/style/neon`、`/style/travel`：原本的視覺方向；其 19 筆手工策展資料不進 public product。
@@ -17,6 +17,7 @@
 - [資料信任契約](docs/DATA_TRUST_CONTRACT.md)
 - [outcome-gated roadmap](docs/ROADMAP.md)
 - [第一輪 UX contract](docs/ITERATION_1_UX_BRIEF.md)
+- [行政區可逆實驗](docs/ITERATION_2_DISTRICT_HYPOTHESIS.md)
 
 ## Current source of truth
 
@@ -27,6 +28,8 @@
 - 許可路段或區域；
 - 正常營業日；
 - 地址行政區域代碼。
+
+行政區名稱則由臺南市政府研究發展考核委員會的[臺南市各區代碼](https://data.tainan.gov.tw/DataSet/Detail/70d961d2-9f38-4112-847d-907b436820ab)對照。`2026-08-11` snapshot 有 37 筆；只有夜市名冊的 `adminCode` 與此官方 code table exact join 時，才顯示或接受行政區 filter。這個 filter 不是附近、距離或推薦排序，也不會改變正常營業日、過期或衝突判斷。
 
 它**沒有**提供即時開門狀態、例外停業、可信精確鐘點或官方經緯度。Maps CTA 是由官方名稱與許可區域衍生的搜尋字串，不是官方座標。
 
@@ -43,6 +46,12 @@ official endpoint
   -> manual official-source conflict file
   -> generated production artifact with field-level evidence
   -> runtime validation and day-specific claim policy
+
+official district-code endpoint
+  -> immutable raw snapshot + SHA-256 + retrievedAt
+  -> strict 37-row code/name/sequence validation
+  -> generated district reference + exact market adminCode join
+  -> optional administrative-area filter / label
 ```
 
 離線驗證目前已提交的 snapshot、curation 與 generated artifact：
@@ -57,7 +66,13 @@ npm run data:check
 npm run data:sync
 ```
 
-遇到零筆、欄位改名、非 32 筆、重複 ID／名稱、未知營業日格式、checksum 不符或 curation 與主來源不再一致時，pipeline 會失敗且不發布 candidate。新 snapshot 不會覆寫舊 snapshot。
+更新官方行政區 code reference（獨立於夜市 normal-schedule source）：
+
+```bash
+npm run data:sync:districts
+```
+
+遇到零筆、欄位改名、非 32 筆市場／37 筆行政區、重複 ID／code／名稱、未知營業日格式、checksum 不符、無法 exact join 或 curation 與主來源不再一致時，pipeline 會失敗且不發布 candidate。新 snapshot 不會覆寫舊 snapshot。行政區 reference 超過 365 天未重新核對時，runtime 會 fail closed；它不使用 normal schedule 的 90-day freshness 門檻。
 
 ## Local development
 

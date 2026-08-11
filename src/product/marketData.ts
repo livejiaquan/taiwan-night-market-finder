@@ -14,6 +14,8 @@ export type OpeningDay = (typeof OPENING_DAYS)[number];
 export type EvidenceStatus = "verified" | "conflict" | "stale" | "unknown";
 export type EvidenceMethod = "official_dataset" | "official_page" | "derived";
 export type EvidenceField =
+  | "adminCode"
+  | "districtName"
   | "name"
   | "scheduleDays"
   | "permittedArea"
@@ -58,6 +60,7 @@ export interface TrustedMarket {
   navigationQuery: string;
   verifiedAt: string;
   evidence: {
+    adminCode: FieldEvidence<string>;
     name: FieldEvidence<string>;
     permittedArea: FieldEvidence<string>;
     scheduleDays: FieldEvidence<OpeningDay[]>[];
@@ -141,6 +144,8 @@ const EVIDENCE_METHODS = new Set<EvidenceMethod>([
   "derived",
 ]);
 const EVIDENCE_FIELDS = new Set<EvidenceField>([
+  "adminCode",
+  "districtName",
   "name",
   "scheduleDays",
   "permittedArea",
@@ -374,6 +379,12 @@ function validateMarket(
   assertDateLike(market.verifiedAt, `${context}.verifiedAt`);
 
   const rawEvidence = asRecord(market.evidence, `${context}.evidence`);
+  const adminCodeEvidence = validateEvidence(
+    rawEvidence.adminCode,
+    "adminCode",
+    stringValue,
+    `${context}.evidence.adminCode`,
+  );
   const nameEvidence = validateEvidence(
     rawEvidence.name,
     "name",
@@ -407,6 +418,9 @@ function validateMarket(
   if (!sameValue(nameEvidence.value, name)) {
     fail(`${context}.evidence.name does not match market.name`);
   }
+  if (!sameValue(adminCodeEvidence.value, market.adminCode)) {
+    fail(`${context}.evidence.adminCode does not match market.adminCode`);
+  }
   if (!sameValue(areaEvidence.value, permittedArea)) {
     fail(`${context}.evidence.permittedArea does not match market.permittedArea`);
   }
@@ -417,12 +431,17 @@ function validateMarket(
     fail(`${context}.navigationQuery must be marked derived with a derivation`);
   }
   if (
+    adminCodeEvidence.sourceId !== source.sourceId ||
     nameEvidence.sourceId !== source.sourceId ||
     areaEvidence.sourceId !== source.sourceId
   ) {
     fail(`${context} official fields must reference dataset sourceId`);
   }
-  if (nameEvidence.recordId !== recordId || areaEvidence.recordId !== recordId) {
+  if (
+    adminCodeEvidence.recordId !== recordId ||
+    nameEvidence.recordId !== recordId ||
+    areaEvidence.recordId !== recordId
+  ) {
     fail(`${context} official field evidence must reference its recordId`);
   }
   const primaryScheduleEvidence = scheduleEvidence.find(
@@ -467,6 +486,7 @@ function validateMarket(
     scheduleDays,
     navigationQuery,
     evidence: {
+      adminCode: adminCodeEvidence,
       name: nameEvidence,
       permittedArea: areaEvidence,
       scheduleDays: scheduleEvidence,

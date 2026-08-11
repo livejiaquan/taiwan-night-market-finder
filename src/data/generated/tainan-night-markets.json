@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "datasetId": "tainan-licensed-night-markets",
-  "parserVersion": "tainan-license-v1",
+  "parserVersion": "tainan-license-v2",
   "generatedAt": "2026-08-09T15:34:35.999Z",
   "source": {
     "sourceId": "tainan-licensed-night-markets",
@@ -43,6 +43,20 @@
       "navigationQuery": "太子廟夜市 長興四街和太子路交叉口至太子南路和太子路交叉口(北側)、太子南路和太子路交叉口至太子路517號(南側)。 臺南市",
       "verifiedAt": "2026-08-09T15:34:35.999Z",
       "evidence": {
+        "adminCode": {
+          "field": "adminCode",
+          "value": "67000270",
+          "status": "verified",
+          "method": "official_dataset",
+          "sourceId": "tainan-licensed-night-markets",
+          "sourceLabel": "臺南市已取得設置許可夜市名冊",
+          "publisher": "臺南市政府經濟發展局",
+          "sourceUrl": "https://soa.tainan.gov.tw/Api/Service/Get/611e74b4-d09a-4712-b421-aa062fd02854",
+          "recordId": "1",
+          "retrievedAt": "2026-08-09T15:34:35.999Z",
+          "sourceUpdatedAt": null,
+          "verifiedAt": "2026-08-09T15:34:35.999Z"
+        },
         "name": {
           "field": "name",
           "value": "太子廟夜市",
@@ -121,6 +135,20 @@
       "navigationQuery": "鍾厝夜市 中清路(中山路至仁義路口)、仁義一街及仁義三街部分路段。 臺南市",
       "verifiedAt": "2026-08-09T15:34:35.999Z",
       "evidence": {
+        "adminCode": {
+          "field": "adminCode",
+          "value": "67000270",
+          "status": "verified",
+          "method": "official_dataset",
+          "sourceId": "tainan-licensed-night-markets",
+          "sourceLabel": "臺南市已取得設置許可夜市名冊",
+          "publisher": "臺南市政府經濟發展局",
+          "sourceUrl": "https://soa.tainan.gov.tw/Api/Service/Get/611e74b4-d09a-4712-b421-aa062fd02854",
+          "recordId": "2",
+          "retrievedAt": "2026-08-09T15:34:35.999Z",
+          "sourceUpdatedAt": null,
+          "verifiedAt": "2026-08-09T15:34:35.999Z"
+        },
         "name": {
           "field": "name",
           "value": "鍾厝夜市",
@@ -199,6 +227,20 @@
       "navigationQuery": "仁和夜市 仁和路93號之7至文化二街和仁和路交叉口。文化二街和仁和路交叉口至仁和路107巷和仁和路交叉口。仁和路107巷和仁和路交叉口至仁和路105號之10。崇善十街和仁和路交叉口至仁和路110之3-1號。崇善九街和仁和路交叉口至崇善十街和仁和路交叉口。崇善九街104之8號。 臺南市",
       "verifiedAt": "2026-08-09T15:34:35.999Z",
       "evidence": {
+        "adminCode": {
+          "field": "adminCode",
+          "value": "67000320",
+          "status": "verified",
+          "method": "official_dataset",
+          "sourceId": "tainan-licensed-night-markets",
+          "sourceLabel": "臺南市已取得設置許可夜市名冊",
+          "publisher": "臺南市政府經濟發展局",
+          "sourceUrl": "https://soa.tainan.gov.tw/Api/Service/Get/611e74b4-d09a-4712-b421-aa062fd02854",
+          "recordId": "3",
+          "retrievedAt": "2026-08-09T15:34:35.999Z",
+          "sourceUpdatedAt": null,
+          "verifiedAt": "2026-08-09T15:34:35.999Z"
+        },
         "name": {
           "field": "name",
           "value": "仁和夜市",
@@ -277,6 +319,20 @@
       "navigationQuery": "新市傳統夜市 仁愛街口至中正路口、中正路口至信義街口、勝利街口至民權路口。 臺南市",
       "verifiedAt": "2026-08-09T15:34:35.999Z",
       "evidence": {
+        "adminCode": {
+          "field": "adminCode",
+          "value": "67000200",
+          "status": "verified",
+          "method": "official_dataset",
+          "sourceId": "tainan-licensed-night-markets",
+          "sourceLabel": "臺南市已取得設置許可夜市名冊",
+          "publisher": "臺南市政府經濟發展局",
+          "sourceUrl": "https://soa.tainan.gov.tw/Api/Service/Get/611e74b4-d09a-4712-b421-aa062fd02854",
+          "recordId": "4",
+          "retrievedAt": "2026-08-09T15:34:35.999Z",
+          "sourceUpdatedAt": null,
+          "verifiedAt": "2026-08-09T15:34:35.999Z"
+        },
         "name": {
           "field": "name",
           "value": "新市傳統夜市",
@@ -357,6 +413,20 @@
       "navigationQuery": "武聖夜市 武聖路69巷42號 臺南市",
       "verifiedAt": "2026-08-09T15:34:35.999Z",
       "evidence": {
+        "adminCode": {
+          "field": "adminCode",
+          "value": "67000370",
+          "status": "verified",
+          "method": "official_dataset",
+          "sourceId": "tainan-licensed-night-markets",
+          "sourceLabel": "臺南市已取得設置許可夜市名冊",
+          "publisher": "臺南市政府經濟發展局",
+          "sourceUrl": "https://soa.tainan.gov.tw/Api/Service/Get/611e74b4-d09a-4712-b421-aa062fd02854",
+          "recordId": "5",
+          "retrievedAt": "2026-08-09T15:34:35.999Z",
+          "sourceUpdatedAt": null,
+          "verifiedAt": "2026-08-09T15:34:35.999Z"
+        },
         "name": {
           "field": "name",
           "value": "武聖夜市",
@@ -438,6 +508,20 @@
       "navigationQuery": "安中夜市 安中路一段702巷 臺南市",
       "verifiedAt": "2026-08-09T15:34:35.999Z",
       "evidence": {
+        "adminCode": {
+          "field": "adminCode",
+          "value": "67000350",
+          "status": "verified",
+          "method": "official_dataset",
+          "sourceId": "tainan-licensed-night-markets",
+          "sourceLabel": "臺南市已取得設置許可夜市名冊",
+          "publisher": "臺南市政府經濟發展局",
+          "sourceUrl": "https://soa.tainan.gov.tw/Api/Service/Get/611e74b4-d09a-4712-b421-aa062fd02854",
+          "recordId": "6",
+          "retrievedAt": "2026-08-09T15:34:35.999Z",
+          "sourceUpdatedAt": null,
+          "verifiedAt": "2026-08-09T15:34:35.999Z"
+        },
         "name": {
           "field": "name",
           "value": "安中夜市",
@@ -518,6 +602,20 @@
       "navigationQuery": "學甲夜市 天水路(中正路以西至三民路口)、三民路(中山路以北至新生路口)、信義路(中山路以北至天水路口)、新生路(三連路以西至三民路口) 臺南市",
       "verifiedAt": "2026-08-09T15:34:35.999Z",
       "evidence": {
+        "adminCode": {
+          "field": "adminCode",
+          "value": "67000130",
+          "status": "verified",
+          "method": "official_dataset",
+          "sourceId": "tainan-licensed-night-markets",
+          "sourceLabel": "臺南市已取得設置許可夜市名冊",
+          "publisher": "臺南市政府經濟發展局",
+          "sourceUrl": "https://soa.tainan.gov.tw/Api/Service/Get/611e74b4-d09a-4712-b421-aa062fd02854",
+          "recordId": "7",
+          "retrievedAt": "2026-08-09T15:34:35.999Z",
+          "sourceUpdatedAt": null,
+          "verifiedAt": "2026-08-09T15:34:35.999Z"
+        },
         "name": {
           "field": "name",
           "value": "學甲夜市",
@@ -598,6 +696,20 @@
       "navigationQuery": "後壁厝夜市 德南路1號至24號 臺南市",
       "verifiedAt": "2026-08-09T15:34:35.999Z",
       "evidence": {
+        "adminCode": {
+          "field": "adminCode",
+          "value": "67000270",
+          "status": "verified",
+          "method": "official_dataset",
+          "sourceId": "tainan-licensed-night-markets",
+          "sourceLabel": "臺南市已取得設置許可夜市名冊",
+          "publisher": "臺南市政府經濟發展局",
+          "sourceUrl": "https://soa.tainan.gov.tw/Api/Service/Get/611e74b4-d09a-4712-b421-aa062fd02854",
+          "recordId": "8",
+          "retrievedAt": "2026-08-09T15:34:35.999Z",
+          "sourceUpdatedAt": null,
+          "verifiedAt": "2026-08-09T15:34:35.999Z"
+        },
         "name": {
           "field": "name",
           "value": "後壁厝夜市",
@@ -677,6 +789,20 @@
       "navigationQuery": "中興夜市 中山東路五王國小正門至中山東路和中華二路交叉口、中山東路和中華二路交叉口至中山東路和中山東路262巷交叉口 臺南市",
       "verifiedAt": "2026-08-09T15:34:35.999Z",
       "evidence": {
+        "adminCode": {
+          "field": "adminCode",
+          "value": "67000310",
+          "status": "verified",
+          "method": "official_dataset",
+          "sourceId": "tainan-licensed-night-markets",
+          "sourceLabel": "臺南市已取得設置許可夜市名冊",
+          "publisher": "臺南市政府經濟發展局",
+          "sourceUrl": "https://soa.tainan.gov.tw/Api/Service/Get/611e74b4-d09a-4712-b421-aa062fd02854",
+          "recordId": "9",
+          "retrievedAt": "2026-08-09T15:34:35.999Z",
+          "sourceUpdatedAt": null,
+          "verifiedAt": "2026-08-09T15:34:35.999Z"
+        },
         "name": {
           "field": "name",
           "value": "中興夜市",
@@ -755,6 +881,20 @@
       "navigationQuery": "長安路夜市 光華路139號至長安路路口。裕農路167巷路口至中山路。 臺南市",
       "verifiedAt": "2026-08-09T15:34:35.999Z",
       "evidence": {
+        "adminCode": {
+          "field": "adminCode",
+          "value": "67000030",
+          "status": "verified",
+          "method": "official_dataset",
+          "sourceId": "tainan-licensed-night-markets",
+          "sourceLabel": "臺南市已取得設置許可夜市名冊",
+          "publisher": "臺南市政府經濟發展局",
+          "sourceUrl": "https://soa.tainan.gov.tw/Api/Service/Get/611e74b4-d09a-4712-b421-aa062fd02854",
+          "recordId": "10",
+          "retrievedAt": "2026-08-09T15:34:35.999Z",
+          "sourceUpdatedAt": null,
+          "verifiedAt": "2026-08-09T15:34:35.999Z"
+        },
         "name": {
           "field": "name",
           "value": "長安路夜市",
@@ -834,6 +974,20 @@
       "navigationQuery": "玉井夜市 玉田里民生路323號至中正路口及民族路65至179號路段 臺南市",
       "verifiedAt": "2026-08-09T15:34:35.999Z",
       "evidence": {
+        "adminCode": {
+          "field": "adminCode",
+          "value": "67000230",
+          "status": "verified",
+          "method": "official_dataset",
+          "sourceId": "tainan-licensed-night-markets",
+          "sourceLabel": "臺南市已取得設置許可夜市名冊",
+          "publisher": "臺南市政府經濟發展局",
+          "sourceUrl": "https://soa.tainan.gov.tw/Api/Service/Get/611e74b4-d09a-4712-b421-aa062fd02854",
+          "recordId": "11",
+          "retrievedAt": "2026-08-09T15:34:35.999Z",
+          "sourceUpdatedAt": null,
+          "verifiedAt": "2026-08-09T15:34:35.999Z"
+        },
         "name": {
           "field": "name",
           "value": "玉井夜市",
@@ -913,6 +1067,20 @@
       "navigationQuery": "佳里傳統夜市 平等街：(1)道路雙邊：平等街16-3號至信義一街口，扣除佳池宮左前方5公尺範圍。(2)道路單邊：博愛街29巷口對面至平等街77號，及平等街62號往西5公尺範圍。信義一街145號至282號(道路雙邊)。忠仁街48號至博愛街口，及博愛街口至博愛街45號旁(道路單邊)。 臺南市",
       "verifiedAt": "2026-08-09T15:34:35.999Z",
       "evidence": {
+        "adminCode": {
+          "field": "adminCode",
+          "value": "67000120",
+          "status": "verified",
+          "method": "official_dataset",
+          "sourceId": "tainan-licensed-night-markets",
+          "sourceLabel": "臺南市已取得設置許可夜市名冊",
+          "publisher": "臺南市政府經濟發展局",
+          "sourceUrl": "https://soa.tainan.gov.tw/Api/Service/Get/611e74b4-d09a-4712-b421-aa062fd02854",
+          "recordId": "12",
+          "retrievedAt": "2026-08-09T15:34:35.999Z",
+          "sourceUpdatedAt": null,
+          "verifiedAt": "2026-08-09T15:34:35.999Z"
+        },
         "name": {
           "field": "name",
           "value": "佳里傳統夜市",
@@ -991,6 +1159,20 @@
       "navigationQuery": "樺谷夜市 郡安路五段184巷94弄、安寧街、安富街之間廣場 臺南市",
       "verifiedAt": "2026-08-09T15:34:35.999Z",
       "evidence": {
+        "adminCode": {
+          "field": "adminCode",
+          "value": "67000350",
+          "status": "verified",
+          "method": "official_dataset",
+          "sourceId": "tainan-licensed-night-markets",
+          "sourceLabel": "臺南市已取得設置許可夜市名冊",
+          "publisher": "臺南市政府經濟發展局",
+          "sourceUrl": "https://soa.tainan.gov.tw/Api/Service/Get/611e74b4-d09a-4712-b421-aa062fd02854",
+          "recordId": "13",
+          "retrievedAt": "2026-08-09T15:34:35.999Z",
+          "sourceUpdatedAt": null,
+          "verifiedAt": "2026-08-09T15:34:35.999Z"
+        },
         "name": {
           "field": "name",
           "value": "樺谷夜市",
@@ -1069,6 +1251,20 @@
       "navigationQuery": "埔園夜市 臺南市永康區聖龍街與中山路交界路口至聖龍街與永大路三段交界路口、臺南市永康區聖龍街與永埔街交界路口 臺南市",
       "verifiedAt": "2026-08-09T15:34:35.999Z",
       "evidence": {
+        "adminCode": {
+          "field": "adminCode",
+          "value": "67000310",
+          "status": "verified",
+          "method": "official_dataset",
+          "sourceId": "tainan-licensed-night-markets",
+          "sourceLabel": "臺南市已取得設置許可夜市名冊",
+          "publisher": "臺南市政府經濟發展局",
+          "sourceUrl": "https://soa.tainan.gov.tw/Api/Service/Get/611e74b4-d09a-4712-b421-aa062fd02854",
+          "recordId": "14",
+          "retrievedAt": "2026-08-09T15:34:35.999Z",
+          "sourceUpdatedAt": null,
+          "verifiedAt": "2026-08-09T15:34:35.999Z"
+        },
         "name": {
           "field": "name",
           "value": "埔園夜市",
@@ -1147,6 +1343,20 @@
       "navigationQuery": "新下營夜市 臺南市下營區中山路二段(上帝廟前至上帝廟停車場路段)、上帝廟停車場。 臺南市",
       "verifiedAt": "2026-08-09T15:34:35.999Z",
       "evidence": {
+        "adminCode": {
+          "field": "adminCode",
+          "value": "67000080",
+          "status": "verified",
+          "method": "official_dataset",
+          "sourceId": "tainan-licensed-night-markets",
+          "sourceLabel": "臺南市已取得設置許可夜市名冊",
+          "publisher": "臺南市政府經濟發展局",
+          "sourceUrl": "https://soa.tainan.gov.tw/Api/Service/Get/611e74b4-d09a-4712-b421-aa062fd02854",
+          "recordId": "15",
+          "retrievedAt": "2026-08-09T15:34:35.999Z",
+          "sourceUpdatedAt": null,
+          "verifiedAt": "2026-08-09T15:34:35.999Z"
+        },
         "name": {
           "field": "name",
           "value": "新下營夜市",
@@ -1225,6 +1435,20 @@
       "navigationQuery": "禹帝宮鹽行夜市 鹽行路東側三村段667地號往北延伸至鹽行路83號、鹽行路西側7號往北延伸至鹽行路71號、鹽行路往西延伸鹽洲一街、鹽行路往西延伸鹽洲二街、鹽行路往東延伸鹽洲二街 臺南市",
       "verifiedAt": "2026-08-09T15:34:35.999Z",
       "evidence": {
+        "adminCode": {
+          "field": "adminCode",
+          "value": "67000310",
+          "status": "verified",
+          "method": "official_dataset",
+          "sourceId": "tainan-licensed-night-markets",
+          "sourceLabel": "臺南市已取得設置許可夜市名冊",
+          "publisher": "臺南市政府經濟發展局",
+          "sourceUrl": "https://soa.tainan.gov.tw/Api/Service/Get/611e74b4-d09a-4712-b421-aa062fd02854",
+          "recordId": "16",
+          "retrievedAt": "2026-08-09T15:34:35.999Z",
+          "sourceUpdatedAt": null,
+          "verifiedAt": "2026-08-09T15:34:35.999Z"
+        },
         "name": {
           "field": "name",
           "value": "禹帝宮鹽行夜市",
@@ -1303,6 +1527,20 @@
       "navigationQuery": "國泰路夜市 臺南市白河區國泰路221號至國泰路307-1號。國泰路258號至國泰路212號。 臺南市",
       "verifiedAt": "2026-08-09T15:34:35.999Z",
       "evidence": {
+        "adminCode": {
+          "field": "adminCode",
+          "value": "67000030",
+          "status": "verified",
+          "method": "official_dataset",
+          "sourceId": "tainan-licensed-night-markets",
+          "sourceLabel": "臺南市已取得設置許可夜市名冊",
+          "publisher": "臺南市政府經濟發展局",
+          "sourceUrl": "https://soa.tainan.gov.tw/Api/Service/Get/611e74b4-d09a-4712-b421-aa062fd02854",
+          "recordId": "17",
+          "retrievedAt": "2026-08-09T15:34:35.999Z",
+          "sourceUpdatedAt": null,
+          "verifiedAt": "2026-08-09T15:34:35.999Z"
+        },
         "name": {
           "field": "name",
           "value": "國泰路夜市",
@@ -1381,6 +1619,20 @@
       "navigationQuery": "復興路夜市 臺南市歸仁區復興路(中正南路一段至信義南路)、和平南街(中山路一段至中正三街)、部分路段與巷道相交處 臺南市",
       "verifiedAt": "2026-08-09T15:34:35.999Z",
       "evidence": {
+        "adminCode": {
+          "field": "adminCode",
+          "value": "67000280",
+          "status": "verified",
+          "method": "official_dataset",
+          "sourceId": "tainan-licensed-night-markets",
+          "sourceLabel": "臺南市已取得設置許可夜市名冊",
+          "publisher": "臺南市政府經濟發展局",
+          "sourceUrl": "https://soa.tainan.gov.tw/Api/Service/Get/611e74b4-d09a-4712-b421-aa062fd02854",
+          "recordId": "18",
+          "retrievedAt": "2026-08-09T15:34:35.999Z",
+          "sourceUpdatedAt": null,
+          "verifiedAt": "2026-08-09T15:34:35.999Z"
+        },
         "name": {
           "field": "name",
           "value": "復興路夜市",
@@ -1459,6 +1711,20 @@
       "navigationQuery": "後市夜市 臺南市歸仁區民族北街(仁壽宮旁中山路段)、文化街二段(文化三街至歸仁國中旁)、部分路段與巷道相交處、仁壽宮廣場 臺南市",
       "verifiedAt": "2026-08-09T15:34:35.999Z",
       "evidence": {
+        "adminCode": {
+          "field": "adminCode",
+          "value": "67000280",
+          "status": "verified",
+          "method": "official_dataset",
+          "sourceId": "tainan-licensed-night-markets",
+          "sourceLabel": "臺南市已取得設置許可夜市名冊",
+          "publisher": "臺南市政府經濟發展局",
+          "sourceUrl": "https://soa.tainan.gov.tw/Api/Service/Get/611e74b4-d09a-4712-b421-aa062fd02854",
+          "recordId": "19",
+          "retrievedAt": "2026-08-09T15:34:35.999Z",
+          "sourceUpdatedAt": null,
+          "verifiedAt": "2026-08-09T15:34:35.999Z"
+        },
         "name": {
           "field": "name",
           "value": "後市夜市",
@@ -1537,6 +1803,20 @@
       "navigationQuery": "六甲夜市 臺南市六甲區建國街2號至138號。復興街69號至43-4號。(中正路522號) 臺南市",
       "verifiedAt": "2026-08-09T15:34:35.999Z",
       "evidence": {
+        "adminCode": {
+          "field": "adminCode",
+          "value": "67000090",
+          "status": "verified",
+          "method": "official_dataset",
+          "sourceId": "tainan-licensed-night-markets",
+          "sourceLabel": "臺南市已取得設置許可夜市名冊",
+          "publisher": "臺南市政府經濟發展局",
+          "sourceUrl": "https://soa.tainan.gov.tw/Api/Service/Get/611e74b4-d09a-4712-b421-aa062fd02854",
+          "recordId": "20",
+          "retrievedAt": "2026-08-09T15:34:35.999Z",
+          "sourceUpdatedAt": null,
+          "verifiedAt": "2026-08-09T15:34:35.999Z"
+        },
         "name": {
           "field": "name",
           "value": "六甲夜市",
@@ -1616,6 +1896,20 @@
       "navigationQuery": "鹽水夜市 臺南市鹽水區月津武廟前廣場。金和路、武廟路和北門路交界處。清泉路、北門路與清泉路北門路口停車場交界處。北門路至蔦松路口交界處 臺南市",
       "verifiedAt": "2026-08-09T15:34:35.999Z",
       "evidence": {
+        "adminCode": {
+          "field": "adminCode",
+          "value": "67000020",
+          "status": "verified",
+          "method": "official_dataset",
+          "sourceId": "tainan-licensed-night-markets",
+          "sourceLabel": "臺南市已取得設置許可夜市名冊",
+          "publisher": "臺南市政府經濟發展局",
+          "sourceUrl": "https://soa.tainan.gov.tw/Api/Service/Get/611e74b4-d09a-4712-b421-aa062fd02854",
+          "recordId": "21",
+          "retrievedAt": "2026-08-09T15:34:35.999Z",
+          "sourceUpdatedAt": null,
+          "verifiedAt": "2026-08-09T15:34:35.999Z"
+        },
         "name": {
           "field": "name",
           "value": "鹽水夜市",
@@ -1697,6 +1991,20 @@
       "navigationQuery": "花園夜市 臺南市北區和緯路三段、海安路三段、立賢路二段及立賢路二段66巷之間廣場 臺南市",
       "verifiedAt": "2026-08-09T15:34:35.999Z",
       "evidence": {
+        "adminCode": {
+          "field": "adminCode",
+          "value": "67000340",
+          "status": "verified",
+          "method": "official_dataset",
+          "sourceId": "tainan-licensed-night-markets",
+          "sourceLabel": "臺南市已取得設置許可夜市名冊",
+          "publisher": "臺南市政府經濟發展局",
+          "sourceUrl": "https://soa.tainan.gov.tw/Api/Service/Get/611e74b4-d09a-4712-b421-aa062fd02854",
+          "recordId": "22",
+          "retrievedAt": "2026-08-09T15:34:35.999Z",
+          "sourceUpdatedAt": null,
+          "verifiedAt": "2026-08-09T15:34:35.999Z"
+        },
         "name": {
           "field": "name",
           "value": "花園夜市",
@@ -1851,6 +2159,20 @@
       "navigationQuery": "復華夜市 臺南市永康區復國一路與復華三街交叉口旁廣場 臺南市",
       "verifiedAt": "2026-08-09T15:34:35.999Z",
       "evidence": {
+        "adminCode": {
+          "field": "adminCode",
+          "value": "67000310",
+          "status": "verified",
+          "method": "official_dataset",
+          "sourceId": "tainan-licensed-night-markets",
+          "sourceLabel": "臺南市已取得設置許可夜市名冊",
+          "publisher": "臺南市政府經濟發展局",
+          "sourceUrl": "https://soa.tainan.gov.tw/Api/Service/Get/611e74b4-d09a-4712-b421-aa062fd02854",
+          "recordId": "23",
+          "retrievedAt": "2026-08-09T15:34:35.999Z",
+          "sourceUpdatedAt": null,
+          "verifiedAt": "2026-08-09T15:34:35.999Z"
+        },
         "name": {
           "field": "name",
           "value": "復華夜市",
@@ -1930,6 +2252,20 @@
       "navigationQuery": "隆田夜市 臺南市官田區中山路一段與三民路路口交界處東西向10公尺處(官田區公所對面路口處)。三民路(隆田國小前道路至官田國民中學門口旁止)。 臺南市",
       "verifiedAt": "2026-08-09T15:34:35.999Z",
       "evidence": {
+        "adminCode": {
+          "field": "adminCode",
+          "value": "67000100",
+          "status": "verified",
+          "method": "official_dataset",
+          "sourceId": "tainan-licensed-night-markets",
+          "sourceLabel": "臺南市已取得設置許可夜市名冊",
+          "publisher": "臺南市政府經濟發展局",
+          "sourceUrl": "https://soa.tainan.gov.tw/Api/Service/Get/611e74b4-d09a-4712-b421-aa062fd02854",
+          "recordId": "24",
+          "retrievedAt": "2026-08-09T15:34:35.999Z",
+          "sourceUpdatedAt": null,
+          "verifiedAt": "2026-08-09T15:34:35.999Z"
+        },
         "name": {
           "field": "name",
           "value": "隆田夜市",
@@ -2010,6 +2346,20 @@
       "navigationQuery": "大益夜市 臺南市東區平實路2號 臺南市",
       "verifiedAt": "2026-08-09T15:34:35.999Z",
       "evidence": {
+        "adminCode": {
+          "field": "adminCode",
+          "value": "67000320",
+          "status": "verified",
+          "method": "official_dataset",
+          "sourceId": "tainan-licensed-night-markets",
+          "sourceLabel": "臺南市已取得設置許可夜市名冊",
+          "publisher": "臺南市政府經濟發展局",
+          "sourceUrl": "https://soa.tainan.gov.tw/Api/Service/Get/611e74b4-d09a-4712-b421-aa062fd02854",
+          "recordId": "25",
+          "retrievedAt": "2026-08-09T15:34:35.999Z",
+          "sourceUpdatedAt": null,
+          "verifiedAt": "2026-08-09T15:34:35.999Z"
+        },
         "name": {
           "field": "name",
           "value": "大益夜市",
@@ -2092,6 +2442,20 @@
       "navigationQuery": "大東夜市 臺南市東區林森路一段276號 臺南市",
       "verifiedAt": "2026-08-09T15:34:35.999Z",
       "evidence": {
+        "adminCode": {
+          "field": "adminCode",
+          "value": "67000320",
+          "status": "verified",
+          "method": "official_dataset",
+          "sourceId": "tainan-licensed-night-markets",
+          "sourceLabel": "臺南市已取得設置許可夜市名冊",
+          "publisher": "臺南市政府經濟發展局",
+          "sourceUrl": "https://soa.tainan.gov.tw/Api/Service/Get/611e74b4-d09a-4712-b421-aa062fd02854",
+          "recordId": "26",
+          "retrievedAt": "2026-08-09T15:34:35.999Z",
+          "sourceUpdatedAt": null,
+          "verifiedAt": "2026-08-09T15:34:35.999Z"
+        },
         "name": {
           "field": "name",
           "value": "大東夜市",
@@ -2174,6 +2538,20 @@
       "navigationQuery": "大東東夜市 臺南市東區竹篙厝段1682地號(部分) 臺南市",
       "verifiedAt": "2026-08-09T15:34:35.999Z",
       "evidence": {
+        "adminCode": {
+          "field": "adminCode",
+          "value": "67000320",
+          "status": "verified",
+          "method": "official_dataset",
+          "sourceId": "tainan-licensed-night-markets",
+          "sourceLabel": "臺南市已取得設置許可夜市名冊",
+          "publisher": "臺南市政府經濟發展局",
+          "sourceUrl": "https://soa.tainan.gov.tw/Api/Service/Get/611e74b4-d09a-4712-b421-aa062fd02854",
+          "recordId": "27",
+          "retrievedAt": "2026-08-09T15:34:35.999Z",
+          "sourceUpdatedAt": null,
+          "verifiedAt": "2026-08-09T15:34:35.999Z"
+        },
         "name": {
           "field": "name",
           "value": "大東東夜市",
@@ -2254,6 +2632,20 @@
       "navigationQuery": "什二佃夜市 臺南市安南區公學路4段160號前(廟前廣場及道路用地) 臺南市",
       "verifiedAt": "2026-08-09T15:34:35.999Z",
       "evidence": {
+        "adminCode": {
+          "field": "adminCode",
+          "value": "67000350",
+          "status": "verified",
+          "method": "official_dataset",
+          "sourceId": "tainan-licensed-night-markets",
+          "sourceLabel": "臺南市已取得設置許可夜市名冊",
+          "publisher": "臺南市政府經濟發展局",
+          "sourceUrl": "https://soa.tainan.gov.tw/Api/Service/Get/611e74b4-d09a-4712-b421-aa062fd02854",
+          "recordId": "28",
+          "retrievedAt": "2026-08-09T15:34:35.999Z",
+          "sourceUpdatedAt": null,
+          "verifiedAt": "2026-08-09T15:34:35.999Z"
+        },
         "name": {
           "field": "name",
           "value": "什二佃夜市",
@@ -2332,6 +2724,20 @@
       "navigationQuery": "漚汪夜市 臺南市將軍區南21鄉道(方圓美術館周邊) 臺南市",
       "verifiedAt": "2026-08-09T15:34:35.999Z",
       "evidence": {
+        "adminCode": {
+          "field": "adminCode",
+          "value": "67000160",
+          "status": "verified",
+          "method": "official_dataset",
+          "sourceId": "tainan-licensed-night-markets",
+          "sourceLabel": "臺南市已取得設置許可夜市名冊",
+          "publisher": "臺南市政府經濟發展局",
+          "sourceUrl": "https://soa.tainan.gov.tw/Api/Service/Get/611e74b4-d09a-4712-b421-aa062fd02854",
+          "recordId": "29",
+          "retrievedAt": "2026-08-09T15:34:35.999Z",
+          "sourceUpdatedAt": null,
+          "verifiedAt": "2026-08-09T15:34:35.999Z"
+        },
         "name": {
           "field": "name",
           "value": "漚汪夜市",
@@ -2411,6 +2817,20 @@
       "navigationQuery": "關廟夜市 臺南市關廟區仁愛路38號至仁愛路2號、中央路129號至中央路223號、中山路1段620巷7號至中央路、中山路1段620巷7號旁(巡府路)至中央路165巷口、中央路165巷至中山路1段566巷 臺南市",
       "verifiedAt": "2026-08-09T15:34:35.999Z",
       "evidence": {
+        "adminCode": {
+          "field": "adminCode",
+          "value": "67000290",
+          "status": "verified",
+          "method": "official_dataset",
+          "sourceId": "tainan-licensed-night-markets",
+          "sourceLabel": "臺南市已取得設置許可夜市名冊",
+          "publisher": "臺南市政府經濟發展局",
+          "sourceUrl": "https://soa.tainan.gov.tw/Api/Service/Get/611e74b4-d09a-4712-b421-aa062fd02854",
+          "recordId": "30",
+          "retrievedAt": "2026-08-09T15:34:35.999Z",
+          "sourceUpdatedAt": null,
+          "verifiedAt": "2026-08-09T15:34:35.999Z"
+        },
         "name": {
           "field": "name",
           "value": "關廟夜市",
@@ -2490,6 +2910,20 @@
       "navigationQuery": "柳營夜市 臺南市柳營區柳營代天院四週道路。成功街(成功街與中山西路1段352巷至福中街口)。代天院廣場。 臺南市",
       "verifiedAt": "2026-08-09T15:34:35.999Z",
       "evidence": {
+        "adminCode": {
+          "field": "adminCode",
+          "value": "67000040",
+          "status": "verified",
+          "method": "official_dataset",
+          "sourceId": "tainan-licensed-night-markets",
+          "sourceLabel": "臺南市已取得設置許可夜市名冊",
+          "publisher": "臺南市政府經濟發展局",
+          "sourceUrl": "https://soa.tainan.gov.tw/Api/Service/Get/611e74b4-d09a-4712-b421-aa062fd02854",
+          "recordId": "31",
+          "retrievedAt": "2026-08-09T15:34:35.999Z",
+          "sourceUpdatedAt": null,
+          "verifiedAt": "2026-08-09T15:34:35.999Z"
+        },
         "name": {
           "field": "name",
           "value": "柳營夜市",
@@ -2569,6 +3003,20 @@
       "navigationQuery": "中洲寮夜市 臺南市安南區安昌街174巷、安昌街174巷79弄、長和路二段12巷261弄及府城客運停車場所圍之區域 臺南市",
       "verifiedAt": "2026-08-09T15:34:35.999Z",
       "evidence": {
+        "adminCode": {
+          "field": "adminCode",
+          "value": "67000350",
+          "status": "verified",
+          "method": "official_dataset",
+          "sourceId": "tainan-licensed-night-markets",
+          "sourceLabel": "臺南市已取得設置許可夜市名冊",
+          "publisher": "臺南市政府經濟發展局",
+          "sourceUrl": "https://soa.tainan.gov.tw/Api/Service/Get/611e74b4-d09a-4712-b421-aa062fd02854",
+          "recordId": "32",
+          "retrievedAt": "2026-08-09T15:34:35.999Z",
+          "sourceUpdatedAt": null,
+          "verifiedAt": "2026-08-09T15:34:35.999Z"
+        },
         "name": {
           "field": "name",
           "value": "中洲寮夜市",

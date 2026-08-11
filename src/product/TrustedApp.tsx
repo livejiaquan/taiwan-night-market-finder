@@ -27,6 +27,7 @@ import {
   type OpeningDay,
   type TrustedMarket,
 } from "./marketData";
+import { districtDataset, getDistrict, pilotDistricts, type TrustedDistrict } from "./districtData";
 import {
   formatCompactDate,
   formatDecisionDate,
@@ -72,8 +73,13 @@ const copy = {
     chooseDate: "選擇日期",
     today: "今天",
     searchLabel: "搜尋夜市或許可區域",
-    searchPlaceholder: "搜尋武聖、安南區…",
+    searchPlaceholder: "搜尋武聖、東區…",
     clearSearch: "清除搜尋",
+    chooseDistrict: "行政區（選填）",
+    allPilotDistricts: "全部本名冊行政區",
+    districtHelp: "只依官方行政區代碼縮小候選；不是附近、距離或推薦排序。",
+    invalidDistrict: "連結中的行政區條件無效，已改為顯示全部本名冊行政區。",
+    clearFilters: "清除條件",
     confirmed: "依週期有營業",
     needsCheck: "需再確認",
     sourceChecked: "資料比對",
@@ -83,9 +89,10 @@ const copy = {
       `${confirmed} 個正常週期候選，${needsCheck} 個資料需再確認`,
     noResults: "這個條件下沒有可安全顯示的當日候選",
     noResultsHint: "可能是搜尋到的夜市在所選日期沒有排班；請清除搜尋或改選日期。",
-    clearFilters: "清除搜尋",
     schedule: "正常營業日",
     permitArea: "許可路段或區域",
+    district: "行政區",
+    districtCode: "行政區代碼",
     details: "查看依據與導航",
     checkedAt: "資料比對",
     normalSchedule: "依正常週期有營業",
@@ -133,6 +140,7 @@ const copy = {
     sourceScope: (count: number) =>
       `目前收錄臺南市政府許可名冊 ${count} 筆。名冊提供名稱、許可區域與正常營業日，不提供即時開門狀態。`,
     sourcePage: "查看臺南市政府資料集",
+    districtSourcePage: "查看臺南市行政區代碼來源",
     attribution: "資料來源：臺南市政府經濟發展局，政府資料開放授權條款第 1 版。",
     lab: "視覺原型保留於 lab，不是公共首頁。",
     notFoundTitle: "找不到這個夜市資料",
@@ -150,8 +158,13 @@ const copy = {
     chooseDate: "Choose a date",
     today: "Today",
     searchLabel: "Search a market or permitted area",
-    searchPlaceholder: "Try 武聖 or 安南區…",
+    searchPlaceholder: "Try 武聖 or 東區…",
     clearSearch: "Clear search",
+    chooseDistrict: "District (optional)",
+    allPilotDistricts: "All pilot districts",
+    districtHelp: "Narrows candidates by the official district code only; not nearby, distance, or a recommendation.",
+    invalidDistrict: "The district in this link is invalid, so all pilot districts are shown.",
+    clearFilters: "Clear filters",
     confirmed: "Scheduled",
     needsCheck: "Needs checking",
     sourceChecked: "Data checked",
@@ -161,9 +174,10 @@ const copy = {
       `${confirmed} scheduled candidates, ${needsCheck} needing confirmation`,
     noResults: "No same-day candidate can be shown safely for this search",
     noResultsHint: "The matching market may not be scheduled that day. Clear search or choose another date.",
-    clearFilters: "Clear search",
     schedule: "Regular days",
     permitArea: "Permitted area",
+    district: "District",
+    districtCode: "District code",
     details: "Evidence and directions",
     checkedAt: "Verified",
     normalSchedule: "Scheduled on its regular cycle",
@@ -211,6 +225,7 @@ const copy = {
     sourceScope: (count: number) =>
       `The pilot contains ${count} records from Tainan City's licensed-market register. It provides names, permitted areas, and regular days—not live opening status.`,
     sourcePage: "Open the Tainan City dataset",
+    districtSourcePage: "Open the Tainan district-code source",
     attribution: "Source: Economic Development Bureau, Tainan City Government. Open Government Data License 1.0.",
     lab: "The visual prototype remains in the lab and is not the public homepage.",
     notFoundTitle: "This market record was not found",
@@ -225,6 +240,8 @@ interface LocationState {
   isUnknownPath: boolean;
   date: string;
   query: string;
+  districtCode: string;
+  invalidDistrictCode: string | null;
 }
 
 function readLocation(): LocationState {
@@ -232,6 +249,7 @@ function readLocation(): LocationState {
   const segments = pathname.split("/").filter(Boolean);
   const params = new URLSearchParams(window.location.search);
   const requestedDate = params.get("date");
+  const requestedDistrictCode = params.get("district")?.trim() ?? "";
   const isMarketRoute = segments.length === 2 && segments[0] === "market";
   let selectedMarketId: string | null = null;
   if (isMarketRoute) {
@@ -248,17 +266,27 @@ function readLocation(): LocationState {
     isUnknownPath: segments.length > 0 && (!isMarketRoute || selectedMarketId === null),
     date: isIsoDate(requestedDate) ? requestedDate : getTaipeiToday(),
     query: params.get("q")?.trim() ?? "",
+    districtCode: pilotDistricts.some((district) => district.code === requestedDistrictCode)
+      ? requestedDistrictCode
+      : "",
+    invalidDistrictCode:
+      requestedDistrictCode && !pilotDistricts.some((district) => district.code === requestedDistrictCode)
+        ? requestedDistrictCode
+        : null,
   };
 }
 
 function writeLocation(
-  next: { pathname?: string; date: string; query: string },
+  next: { pathname?: string; date: string; query: string; districtCode: string },
   options: { replace?: boolean; scroll?: boolean } = {},
 ) {
   const params = new URLSearchParams();
   params.set("date", next.date);
   if (next.query) {
     params.set("q", next.query);
+  }
+  if (next.districtCode) {
+    params.set("district", next.districtCode);
   }
   const url = `${next.pathname ?? window.location.pathname}?${params.toString()}`;
 
@@ -403,7 +431,7 @@ function AppHeader({ locale, setLocale }: { locale: Locale; setLocale: (locale: 
           href={`/?date=${getTaipeiToday()}`}
           onClick={(event) => {
             event.preventDefault();
-            writeLocation({ pathname: "/", date: getTaipeiToday(), query: "" });
+            writeLocation({ pathname: "/", date: getTaipeiToday(), query: "", districtCode: "" });
           }}
         >
           <span className="block text-lg font-extrabold tracking-tight text-slate-950">{c.brand}</span>
@@ -419,10 +447,12 @@ function DatePicker({
   locale,
   selectedDate,
   query,
+  districtCode,
 }: {
   locale: Locale;
   selectedDate: string;
   query: string;
+  districtCode: string;
 }) {
   const today = getTaipeiToday();
   const currentWindow = getDateChoices(today);
@@ -467,7 +497,7 @@ function DatePicker({
                   : "border-slate-300 bg-white text-slate-700 hover:border-slate-500",
               )}
               key={date}
-              onClick={() => writeLocation({ pathname: "/", date, query })}
+              onClick={() => writeLocation({ pathname: "/", date, query, districtCode })}
               ref={selected ? selectedDateRef : undefined}
               type="button"
             >
@@ -503,19 +533,23 @@ function DecisionBadge({ decision, locale }: { decision: MarketDecision; locale:
 
 function MarketCard({
   market,
+  district,
   decision,
   date,
   query,
+  districtCode,
   locale,
 }: {
   market: TrustedMarket;
+  district: TrustedDistrict;
   decision: MarketDecision;
   date: string;
   query: string;
+  districtCode: string;
   locale: Locale;
 }) {
   const c = copy[locale];
-  const url = `/market/${encodeURIComponent(market.id)}?date=${date}${query ? `&q=${encodeURIComponent(query)}` : ""}`;
+  const url = `/market/${encodeURIComponent(market.id)}?date=${date}${query ? `&q=${encodeURIComponent(query)}` : ""}${districtCode ? `&district=${encodeURIComponent(districtCode)}` : ""}`;
 
   return (
     <article className="group flex min-h-full flex-col rounded-2xl border border-slate-200 bg-white p-5 shadow-[0_16px_45px_-36px_rgba(15,23,42,0.65)] transition hover:border-slate-400">
@@ -524,7 +558,9 @@ function MarketCard({
       <div className="mt-4 flex items-start gap-2 text-sm leading-6 text-slate-700">
         <MapPin aria-hidden="true" className="mt-1 shrink-0 text-orange-700" size={16} />
         <div>
-          <span className="block text-xs font-bold uppercase tracking-wide text-slate-500">{c.permitArea}</span>
+          <span className="block text-xs font-bold uppercase tracking-wide text-slate-500">
+            {district.shortName} · {c.permitArea}
+          </span>
           <p className="line-clamp-3 mt-0.5">{market.permittedArea}</p>
         </div>
       </div>
@@ -544,7 +580,7 @@ function MarketCard({
           href={url}
           onClick={(event) => {
             event.preventDefault();
-            writeLocation({ pathname: `/market/${market.id}`, date, query });
+            writeLocation({ pathname: `/market/${market.id}`, date, query, districtCode });
           }}
         >
           {c.details}
@@ -555,7 +591,17 @@ function MarketCard({
   );
 }
 
-function SearchControl({ locale, date, query }: { locale: Locale; date: string; query: string }) {
+function SearchControl({
+  locale,
+  date,
+  query,
+  districtCode,
+}: {
+  locale: Locale;
+  date: string;
+  query: string;
+  districtCode: string;
+}) {
   const c = copy[locale];
   return (
     <div>
@@ -571,7 +617,7 @@ function SearchControl({ locale, date, query }: { locale: Locale; date: string; 
           autoComplete="off"
           onChange={(event) =>
             writeLocation(
-              { pathname: "/", date, query: event.target.value },
+              { pathname: "/", date, query: event.target.value, districtCode },
               { replace: true, scroll: false },
             )
           }
@@ -583,13 +629,59 @@ function SearchControl({ locale, date, query }: { locale: Locale; date: string; 
           <button
             aria-label={c.clearSearch}
             className="absolute right-1.5 top-1/2 inline-flex min-h-9 min-w-9 -translate-y-1/2 items-center justify-center rounded-lg text-slate-600 hover:bg-slate-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-orange-600"
-            onClick={() => writeLocation({ pathname: "/", date, query: "" }, { replace: true, scroll: false })}
+            onClick={() =>
+              writeLocation(
+                { pathname: "/", date, query: "", districtCode },
+                { replace: true, scroll: false },
+              )
+            }
             type="button"
           >
             <X aria-hidden="true" size={18} />
           </button>
         ) : null}
       </div>
+    </div>
+  );
+}
+
+function DistrictControl({
+  locale,
+  date,
+  query,
+  districtCode,
+}: {
+  locale: Locale;
+  date: string;
+  query: string;
+  districtCode: string;
+}) {
+  const c = copy[locale];
+  return (
+    <div>
+      <label className="mb-2 block text-sm font-bold text-slate-800" htmlFor="district-filter">
+        {c.chooseDistrict}
+      </label>
+      <select
+        className="min-h-12 w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-base font-semibold text-slate-950 outline-none focus:border-orange-600 focus:ring-2 focus:ring-orange-200"
+        id="district-filter"
+        name="district-filter"
+        onChange={(event) =>
+          writeLocation(
+            { pathname: "/", date, query, districtCode: event.target.value },
+            { replace: true, scroll: false },
+          )
+        }
+        value={districtCode}
+      >
+        <option value="">{c.allPilotDistricts}</option>
+        {pilotDistricts.map((district) => (
+          <option key={district.code} value={district.code}>
+            {district.shortName}
+          </option>
+        ))}
+      </select>
+      <p className="mt-1.5 text-xs font-semibold leading-5 text-slate-600">{c.districtHelp}</p>
     </div>
   );
 }
@@ -628,6 +720,15 @@ function SourceSummary({ headingId, locale }: { headingId: string; locale: Local
             {c.sourcePage}
             <ExternalLink aria-hidden="true" size={14} />
           </a>
+          <a
+            className="mt-3 inline-flex items-center gap-1.5 rounded text-sm font-bold text-orange-800 underline decoration-orange-300 underline-offset-4 transition-colors hover:text-orange-950 hover:decoration-orange-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange-600"
+            href={districtDataset.source.datasetUrl}
+            rel="noreferrer"
+            target="_blank"
+          >
+            {c.districtSourcePage}
+            <ExternalLink aria-hidden="true" size={14} />
+          </a>
         </div>
       </div>
     </aside>
@@ -641,13 +742,23 @@ function HomeView({ locale, location }: { locale: Locale; location: LocationStat
   const decisions = useMemo(
     () =>
       marketDataset.markets
-        .filter((market) =>
-          normalizedQuery
-            ? `${market.name} ${market.permittedArea}`.toLocaleLowerCase().includes(normalizedQuery)
-            : true,
-        )
-        .map((market) => ({ market, decision: getMarketDecision(market, selectedDay) })),
-    [normalizedQuery, selectedDay],
+        .map((market) => ({ market, district: getDistrict(market.adminCode) }))
+        .filter(({ market, district }) => {
+          if (location.districtCode && market.adminCode !== location.districtCode) {
+            return false;
+          }
+          return normalizedQuery
+            ? `${market.name} ${market.permittedArea} ${district.fullName} ${district.shortName}`
+                .toLocaleLowerCase(locale === "zh" ? "zh-TW" : "en-US")
+                .includes(normalizedQuery)
+            : true;
+        })
+        .map(({ market, district }) => ({
+          market,
+          district,
+          decision: getMarketDecision(market, selectedDay),
+        })),
+    [locale, location.districtCode, normalizedQuery, selectedDay],
   );
   const confirmed = decisions.filter(({ decision }) => decision.status === "confirmed");
   const needsCheck = decisions.filter(
@@ -667,6 +778,18 @@ function HomeView({ locale, location }: { locale: Locale; location: LocationStat
       "/",
     );
   }, [c.brand, c.intro, locale, location.date]);
+
+  useEffect(() => {
+    if (!location.invalidDistrictCode) {
+      return;
+    }
+    const params = new URLSearchParams();
+    params.set("date", location.date);
+    if (location.query) {
+      params.set("q", location.query);
+    }
+    window.history.replaceState({}, "", `/?${params.toString()}`);
+  }, [location.date, location.invalidDistrictCode, location.query]);
 
   return (
     <>
@@ -692,9 +815,25 @@ function HomeView({ locale, location }: { locale: Locale; location: LocationStat
       </section>
 
       <section className="border-b border-slate-200 bg-white" aria-label={c.chooseDate}>
-        <div className="mx-auto grid w-full max-w-6xl gap-5 px-4 py-5 sm:px-6 lg:grid-cols-[1.35fr_0.65fr] lg:px-8">
-          <DatePicker locale={locale} query={location.query} selectedDate={location.date} />
-          <SearchControl date={location.date} locale={locale} query={location.query} />
+        <div className="mx-auto grid w-full max-w-6xl gap-5 px-4 py-5 sm:px-6 lg:grid-cols-[1.25fr_0.6fr_0.85fr] lg:px-8">
+          <DatePicker
+            districtCode={location.districtCode}
+            locale={locale}
+            query={location.query}
+            selectedDate={location.date}
+          />
+          <DistrictControl
+            date={location.date}
+            districtCode={location.districtCode}
+            locale={locale}
+            query={location.query}
+          />
+          <SearchControl
+            date={location.date}
+            districtCode={location.districtCode}
+            locale={locale}
+            query={location.query}
+          />
         </div>
       </section>
 
@@ -718,12 +857,21 @@ function HomeView({ locale, location }: { locale: Locale; location: LocationStat
           </div>
         ) : null}
 
+        {location.invalidDistrictCode ? (
+          <div className="mt-5 flex gap-3 rounded-xl border border-slate-300 bg-slate-100 p-4 text-slate-800" role="status">
+            <Info aria-hidden="true" className="mt-0.5 shrink-0 text-slate-600" size={20} />
+            <p className="text-sm font-semibold leading-6">{c.invalidDistrict}</p>
+          </div>
+        ) : null}
+
         {visible.length ? (
           <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {visible.map(({ market, decision }) => (
+            {visible.map(({ market, district, decision }) => (
               <MarketCard
                 date={location.date}
                 decision={decision}
+                district={district}
+                districtCode={location.districtCode}
                 key={market.id}
                 locale={locale}
                 market={market}
@@ -736,10 +884,12 @@ function HomeView({ locale, location }: { locale: Locale; location: LocationStat
             <CircleAlert aria-hidden="true" className="mx-auto text-slate-500" size={30} />
             <h3 className="mt-3 text-xl font-extrabold text-slate-950">{c.noResults}</h3>
             <p className="mx-auto mt-2 max-w-xl leading-7 text-slate-600">{c.noResultsHint}</p>
-            {location.query ? (
+            {location.query || location.districtCode ? (
               <button
                 className="mt-5 min-h-11 rounded-lg bg-slate-950 px-4 font-bold text-white transition-colors hover:bg-slate-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange-600"
-                onClick={() => writeLocation({ pathname: "/", date: location.date, query: "" })}
+                onClick={() =>
+                  writeLocation({ pathname: "/", date: location.date, query: "", districtCode: "" })
+                }
                 type="button"
               >
                 {c.clearFilters}
@@ -918,6 +1068,7 @@ function DetailView({
   const c = copy[locale];
   const selectedDay = getScheduleDay(location.date) as OpeningDay;
   const decision = getMarketDecision(market, selectedDay);
+  const district = getDistrict(market.adminCode);
   const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(market.navigationQuery)}`;
   const mainRef = useRef<HTMLElement>(null);
 
@@ -935,10 +1086,15 @@ function DetailView({
       <div className="mx-auto w-full max-w-5xl px-4 py-6 sm:px-6 sm:py-10 lg:px-8">
         <a
           className="inline-flex min-h-11 items-center gap-2 rounded-lg font-bold text-slate-700 transition-colors hover:text-slate-950 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange-600"
-          href={`/?date=${location.date}${location.query ? `&q=${encodeURIComponent(location.query)}` : ""}`}
+          href={`/?date=${location.date}${location.query ? `&q=${encodeURIComponent(location.query)}` : ""}${location.districtCode ? `&district=${encodeURIComponent(location.districtCode)}` : ""}`}
           onClick={(event) => {
             event.preventDefault();
-            writeLocation({ pathname: "/", date: location.date, query: location.query });
+            writeLocation({
+              pathname: "/",
+              date: location.date,
+              query: location.query,
+              districtCode: location.districtCode,
+            });
           }}
         >
           <ArrowLeft aria-hidden="true" size={18} />
@@ -967,6 +1123,13 @@ function DetailView({
             ) : null}
 
             <dl className="mt-7 space-y-5">
+              <div>
+                <dt className="flex items-center gap-2 text-sm font-extrabold text-slate-600">
+                  <MapPin aria-hidden="true" size={18} />
+                  {c.district}
+                </dt>
+                <dd className="mt-1 text-xl font-extrabold text-slate-950">{district.shortName}</dd>
+              </div>
               <div>
                 <dt className="flex items-center gap-2 text-sm font-extrabold text-slate-600">
                   <CalendarDays aria-hidden="true" size={18} />
@@ -1036,6 +1199,19 @@ function DetailView({
             </h3>
             <div className="mt-3 space-y-3">
               <EvidenceItem
+                evidence={market.evidence.adminCode}
+                fieldLabel={c.districtCode}
+                isDecisionStale={decision.status === "stale"}
+                locale={locale}
+                valueText={market.evidence.adminCode.value}
+              />
+              <EvidenceItem
+                evidence={district.evidence}
+                fieldLabel={c.district}
+                locale={locale}
+                valueText={district.fullName}
+              />
+              <EvidenceItem
                 evidence={market.evidence.name}
                 fieldLabel={c.fieldName}
                 isDecisionStale={decision.status === "stale"}
@@ -1084,7 +1260,12 @@ function NotFoundView({ locale, location }: { locale: Locale; location: Location
           href={`/?date=${location.date}`}
           onClick={(event) => {
             event.preventDefault();
-            writeLocation({ pathname: "/", date: location.date, query: "" });
+            writeLocation({
+              pathname: "/",
+              date: location.date,
+              query: "",
+              districtCode: location.districtCode,
+            });
           }}
         >
           {c.home}

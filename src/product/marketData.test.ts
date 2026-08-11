@@ -25,6 +25,12 @@ describe("trusted Tainan market dataset", () => {
     expect(new Set(marketDataset.markets.map((market) => market.recordId)).size).toBe(32);
 
     for (const market of marketDataset.markets) {
+      expect(market.evidence.adminCode).toMatchObject({
+        value: market.adminCode,
+        field: "adminCode",
+        sourceId: marketDataset.source.sourceId,
+        recordId: market.recordId,
+      });
       expect(market.evidence.name.value).toBe(market.name);
       expect(market.evidence.permittedArea.value).toBe(market.permittedArea);
       expect(market.evidence.scheduleDays.length).toBeGreaterThan(0);
