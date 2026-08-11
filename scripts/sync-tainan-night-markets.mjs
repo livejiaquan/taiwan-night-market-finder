@@ -8,7 +8,7 @@ import { dirname, relative, resolve } from "node:path";
 import { fileURLToPath, pathToFileURL, URL } from "node:url";
 
 export const DATASET_ID = "tainan-licensed-night-markets";
-export const PARSER_VERSION = "tainan-license-v1";
+export const PARSER_VERSION = "tainan-license-v2";
 export const APPROVED_ROW_COUNT = 32;
 export const MAX_FUTURE_CLOCK_SKEW_MS = 5 * 60 * 1000;
 
@@ -498,6 +498,7 @@ export function buildArtifact({ rawBody, retrievedAt, snapshotPath, curation }) 
       navigationQuery,
       verifiedAt: retrievedAt,
       evidence: {
+        adminCode: makeOfficialEvidence("adminCode", row.adminCode, row, retrievedAt),
         name: makeOfficialEvidence("name", row.name, row, retrievedAt),
         permittedArea: makeOfficialEvidence(
           "permittedArea",
@@ -594,6 +595,13 @@ export function validateArtifact(artifact) {
     canonicalDays(market.scheduleDays);
     assertNotFutureTimestamp(market.verifiedAt, `${market.id}.verifiedAt`);
     assert(isPlainObject(market.evidence), `${market.id}.evidence must be an object`);
+    assert(
+      isPlainObject(market.evidence.adminCode) &&
+        market.evidence.adminCode.field === "adminCode" &&
+        market.evidence.adminCode.value === market.adminCode &&
+        market.evidence.adminCode.recordId === market.recordId,
+      `${market.id} must preserve official adminCode evidence`,
+    );
     assert(
       Array.isArray(market.evidence.scheduleDays) &&
         market.evidence.scheduleDays.length > 0,

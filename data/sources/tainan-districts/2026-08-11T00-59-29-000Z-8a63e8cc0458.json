@@ -1,0 +1,16 @@
+{
+  "snapshotSchemaVersion": 1,
+  "source": {
+    "sourceId": "tainan-district-codes",
+    "publisher": "臺南市政府研究發展考核委員會",
+    "datasetName": "臺南市各區代碼",
+    "datasetUrl": "https://data.tainan.gov.tw/DataSet/Detail/70d961d2-9f38-4112-847d-907b436820ab",
+    "endpointUrl": "https://soa.tainan.gov.tw/Api/Service/Get/5b389f60-dee6-425a-8a40-f5cb2f949cf1",
+    "licenseName": "政府資料開放授權條款－第1版",
+    "licenseUrl": "https://data.gov.tw/license"
+  },
+  "retrievedAt": "2026-08-11T00:59:29.000Z",
+  "sourceUpdatedAt": null,
+  "rawSha256": "8a63e8cc0458a02dbbd8fca63374be5ecd5693b167cde0132c8d85b156695f7d",
+  "rawBody": "{\"contentType\":null,\"isImage\":false,\"size\":0,\"data\":[{\"Seq\":1,\"AreaName\":\"臺南市新營區\",\"AreaCode\":\"67000010\"},{\"Seq\":2,\"AreaName\":\"臺南市鹽水區\",\"AreaCode\":\"67000020\"},{\"Seq\":3,\"AreaName\":\"臺南市白河區\",\"AreaCode\":\"67000030\"},{\"Seq\":4,\"AreaName\":\"臺南市柳營區\",\"AreaCode\":\"67000040\"},{\"Seq\":5,\"AreaName\":\"臺南市後壁區\",\"AreaCode\":\"67000050\"},{\"Seq\":6,\"AreaName\":\"臺南市東山區\",\"AreaCode\":\"67000060\"},{\"Seq\":7,\"AreaName\":\"臺南市麻豆區\",\"AreaCode\":\"67000070\"},{\"Seq\":8,\"AreaName\":\"臺南市下營區\",\"AreaCode\":\"67000080\"},{\"Seq\":9,\"AreaName\":\"臺南市六甲區\",\"AreaCode\":\"67000090\"},{\"Seq\":10,\"AreaName\":\"臺南市官田區\",\"AreaCode\":\"67000100\"},{\"Seq\":11,\"AreaName\":\"臺南市大內區\",\"AreaCode\":\"67000110\"},{\"Seq\":12,\"AreaName\":\"臺南市佳里區\",\"AreaCode\":\"67000120\"},{\"Seq\":13,\"AreaName\":\"臺南市學甲區\",\"AreaCode\":\"67000130\"},{\"Seq\":14,\"AreaName\":\"臺南市西港區\",\"AreaCode\":\"67000140\"},{\"Seq\":15,\"AreaName\":\"臺南市七股區\",\"AreaCode\":\"67000150\"},{\"Seq\":16,\"AreaName\":\"臺南市將軍區\",\"AreaCode\":\"67000160\"},{\"Seq\":17,\"AreaName\":\"臺南市北門區\",\"AreaCode\":\"67000170\"},{\"Seq\":18,\"AreaName\":\"臺南市新化區\",\"AreaCode\":\"67000180\"},{\"Seq\":19,\"AreaName\":\"臺南市善化區\",\"AreaCode\":\"67000190\"},{\"Seq\":20,\"AreaName\":\"臺南市新市區\",\"AreaCode\":\"67000200\"},{\"Seq\":21,\"AreaName\":\"臺南市安定區\",\"AreaCode\":\"67000210\"},{\"Seq\":22,\"AreaName\":\"臺南市山上區\",\"AreaCode\":\"67000220\"},{\"Seq\":23,\"AreaName\":\"臺南市玉井區\",\"AreaCode\":\"67000230\"},{\"Seq\":24,\"AreaName\":\"臺南市楠西區\",\"AreaCode\":\"67000240\"},{\"Seq\":25,\"AreaName\":\"臺南市南化區\",\"AreaCode\":\"67000250\"},{\"Seq\":26,\"AreaName\":\"臺南市左鎮區\",\"AreaCode\":\"67000260\"},{\"Seq\":27,\"AreaName\":\"臺南市仁德區\",\"AreaCode\":\"67000270\"},{\"Seq\":28,\"AreaName\":\"臺南市歸仁區\",\"AreaCode\":\"67000280\"},{\"Seq\":29,\"AreaName\":\"臺南市關廟區\",\"AreaCode\":\"67000290\"},{\"Seq\":30,\"AreaName\":\"臺南市龍崎區\",\"AreaCode\":\"67000300\"},{\"Seq\":31,\"AreaName\":\"臺南市永康區\",\"AreaCode\":\"67000310\"},{\"Seq\":32,\"AreaName\":\"臺南市東區\",\"AreaCode\":\"67000320\"},{\"Seq\":33,\"AreaName\":\"臺南市南區\",\"AreaCode\":\"67000330\"},{\"Seq\":34,\"AreaName\":\"臺南市北區\",\"AreaCode\":\"67000340\"},{\"Seq\":35,\"AreaName\":\"臺南市安南區\",\"AreaCode\":\"67000350\"},{\"Seq\":36,\"AreaName\":\"臺南市安平區\",\"AreaCode\":\"67000360\"},{\"Seq\":37,\"AreaName\":\"臺南市中西區\",\"AreaCode\":\"67000370\"}],\"errorCode\":0,\"id\":\"e23cc595-2814-4f93-b7c3-125bf8e98bb1\",\"message\":null,\"success\":true}"
+}
