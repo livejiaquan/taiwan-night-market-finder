@@ -1,6 +1,7 @@
 import { Component, lazy, Suspense, useEffect, useState } from "react";
 import type { ErrorInfo, ReactNode } from "react";
 import { getAppLocation } from "./lib/basePath";
+import { appUrl } from "./lib/basePath";
 
 const TrustedApp = lazy(() => import("./product/TrustedApp"));
 const LegacyPrototype = lazy(() => import("./App"));
@@ -120,7 +121,7 @@ export default function ProductRouter() {
       document.title = "視覺原型 Lab · 今晚哪裡有市";
       document
         .querySelector<HTMLLinkElement>('link[rel="canonical"]')
-        ?.setAttribute("href", new URL("/lab", window.location.origin).toString());
+        ?.setAttribute("href", new URL(appUrl("/lab"), window.location.origin).toString());
     }
   }, [isLegacyRoute]);
 

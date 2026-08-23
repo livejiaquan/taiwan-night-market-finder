@@ -11,12 +11,23 @@ function fail(message) {
   throw new Error(message);
 }
 
+function parseBasePath(value) {
+  if (!value || value === "/") return "";
+  if (!/^\/[a-zA-Z0-9._-]+(?:\/[a-zA-Z0-9._-]+)*$/u.test(value)) {
+    fail("--base-path must be a safe absolute path without a trailing slash");
+  }
+  return value;
+}
+
 function parseArgs(argv) {
-  const options = { siteUrl: null, outDir: resolve(repoRoot, "dist") };
+  const options = { siteUrl: null, basePath: "", outDir: resolve(repoRoot, "dist") };
   for (let index = 0; index < argv.length; index += 1) {
     const argument = argv[index];
     if (argument === "--site-url") {
       options.siteUrl = argv[index + 1] ?? fail("--site-url requires an HTTPS URL");
+      index += 1;
+    } else if (argument === "--base-path") {
+      options.basePath = parseBasePath(argv[index + 1] ?? fail("--base-path requires an absolute path"));
       index += 1;
     } else if (argument === "--out-dir") {
       options.outDir = resolve(process.cwd(), argv[index + 1] ?? fail("--out-dir requires a path"));
@@ -43,7 +54,7 @@ function parseArgs(argv) {
   if (parsed.pathname !== "/" || parsed.search || parsed.hash) {
     fail("--site-url must be an origin without a path, query, or fragment");
   }
-  return { siteUrl: parsed.origin, outDir: options.outDir };
+  return { siteUrl: parsed.origin, basePath: options.basePath, outDir: options.outDir };
 }
 
 function escapeXml(value) {
@@ -68,17 +79,18 @@ function replaceExactlyOnce(value, pattern, replacement, label) {
   return value.replace(pattern, replacement);
 }
 
-function applyAbsoluteSiteMetadata(index, siteUrl) {
+function applyAbsoluteSiteMetadata(index, siteUrl, basePath) {
+  const rootPath = `${basePath}/`;
   const replacements = [
     {
       label: "canonical placeholder",
-      search: 'rel="canonical" href="/"',
-      replacement: `rel="canonical" href="${siteUrl}/"`,
+      search: 'rel="canonical" href="https://night-market.invalid/"',
+      replacement: `rel="canonical" href="${siteUrl}${rootPath}"`,
     },
     {
       label: "Open Graph URL placeholder",
       search: 'property="og:url" content="/"',
-      replacement: `property="og:url" content="${siteUrl}/"`,
+      replacement: `property="og:url" content="${siteUrl}${rootPath}"`,
     },
   ];
 
@@ -96,7 +108,7 @@ function applyAbsoluteSiteMetadata(index, siteUrl) {
   return output;
 }
 
-function buildMarketIndex(rootIndex, siteUrl, market) {
+function buildMarketIndex(rootIndex, siteUrl, basePath, market) {
   const marketPath = `/market/${encodeURIComponent(market.id)}`;
   const title = `${market.name}｜臺南夜市正常營業日與資料來源`;
   const description = `查${market.name}的正常營業日、許可區域、資料比對時間與原始來源；不是即時開門保證。`;
@@ -128,7 +140,7 @@ function buildMarketIndex(rootIndex, siteUrl, market) {
   output = replaceExactlyOnce(
     output,
     /<meta\b(?=[^>]*\bproperty="og:url")[^>]*>/u,
-    `<meta property="og:url" content="${escapeXml(`${siteUrl}${marketPath}`)}" />`,
+    `<meta property="og:url" content="${escapeXml(`${siteUrl}${basePath}${marketPath}`)}" />`,
     "Open Graph URL tag",
   );
   output = replaceExactlyOnce(
@@ -146,13 +158,13 @@ function buildMarketIndex(rootIndex, siteUrl, market) {
   output = replaceExactlyOnce(
     output,
     /<link\b(?=[^>]*\brel="canonical")[^>]*>/u,
-    `<link rel="canonical" href="${escapeXml(`${siteUrl}${marketPath}`)}" />`,
+    `<link rel="canonical" href="${escapeXml(`${siteUrl}${basePath}${marketPath}`)}" />`,
     "canonical tag",
   );
   return { contents: output, marketPath };
 }
 
-function buildNoindexIndex(rootIndex, siteUrl, routePath) {
+function buildNoindexIndex(rootIndex, siteUrl, basePath, routePath) {
   const title = "視覺原型 Lab｜今晚哪裡有市";
   const description = "保留的內部視覺原型，不是公共夜市資料產品。";
   let output = rootIndex;
@@ -189,7 +201,7 @@ function buildNoindexIndex(rootIndex, siteUrl, routePath) {
   output = replaceExactlyOnce(
     output,
     /<meta\b(?=[^>]*\bproperty="og:url")[^>]*>/u,
-    `<meta property="og:url" content="${siteUrl}${routePath}" />`,
+    `<meta property="og:url" content="${siteUrl}${basePath}${routePath}" />`,
     "Open Graph URL tag",
   );
   output = replaceExactlyOnce(
@@ -207,7 +219,7 @@ function buildNoindexIndex(rootIndex, siteUrl, routePath) {
   output = replaceExactlyOnce(
     output,
     /<link\b(?=[^>]*\brel="canonical")[^>]*>/u,
-    `<link rel="canonical" href="${siteUrl}${routePath}" />`,
+    `<link rel="canonical" href="${siteUrl}${basePath}${routePath}" />`,
     "canonical tag",
   );
   return { contents: output, routePath };
@@ -241,23 +253,23 @@ async function run() {
     '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">',
     ...paths.map(
       (path) =>
-        `  <url><loc>${escapeXml(`${options.siteUrl}${path}`)}</loc><lastmod>${lastModified}</lastmod></url>`,
+        `  <url><loc>${escapeXml(`${options.siteUrl}${options.basePath}${path}`)}</loc><lastmod>${lastModified}</lastmod></url>`,
     ),
     "</urlset>",
     "",
   ].join("\n");
-  const robots = `User-agent: *\nAllow: /\n\nSitemap: ${options.siteUrl}/sitemap.xml\n`;
+  const robots = `User-agent: *\nAllow: /\n\nSitemap: ${options.siteUrl}${options.basePath}/sitemap.xml\n`;
 
   const indexPath = resolve(options.outDir, "index.html");
   const sourceIndex = await readFile(indexPath, "utf8");
-  const index = applyAbsoluteSiteMetadata(sourceIndex, options.siteUrl);
+  const index = applyAbsoluteSiteMetadata(sourceIndex, options.siteUrl, options.basePath);
   const marketPages = dataset.markets.map((market) => ({
     id: encodeURIComponent(market.id),
-    ...buildMarketIndex(index, options.siteUrl, market),
+    ...buildMarketIndex(index, options.siteUrl, options.basePath, market),
   }));
   const prototypePages = ["/lab", "/style/neon", "/style/travel"].map((routePath) => ({
     directoryParts: routePath.split("/").filter(Boolean),
-    ...buildNoindexIndex(index, options.siteUrl, routePath),
+    ...buildNoindexIndex(index, options.siteUrl, options.basePath, routePath),
   }));
   const redirects = [
     ...marketPages.map(

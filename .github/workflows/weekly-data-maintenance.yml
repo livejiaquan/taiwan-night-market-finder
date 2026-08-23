@@ -1,0 +1,88 @@
+name: Weekly Tainan data maintenance
+
+on:
+  schedule:
+    - cron: "17 2 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: weekly-tainan-data
+  cancel-in-progress: false
+
+env:
+  MAINTENANCE_BRANCH: maintenance/tainan-data-review
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - id: semantic
+        run: |
+          node scripts/check-live-datasets.mjs --output "$RUNNER_TEMP/semantic-diff.json"
+          changed="$(node -e "console.log(JSON.parse(require('fs').readFileSync(process.argv[1], 'utf8')).hasMeaningfulChange)" "$RUNNER_TEMP/semantic-diff.json")"
+          echo "changed=$changed" >> "$GITHUB_OUTPUT"
+      - if: steps.semantic.outputs.changed == 'true'
+        name: Safely prepare the stable review branch from current main
+        run: |
+          git fetch origin main
+          if git ls-remote --exit-code --heads origin "$MAINTENANCE_BRANCH"; then
+            git fetch origin "$MAINTENANCE_BRANCH"
+            git switch --track "origin/$MAINTENANCE_BRANCH"
+            git merge --no-edit origin/main
+          else
+            git switch -c "$MAINTENANCE_BRANCH" origin/main
+          fi
+      - if: steps.semantic.outputs.changed == 'true'
+        run: |
+          npm run data:sync
+          npm run data:sync:districts
+          npm run verify
+          git diff --check
+      - if: steps.semantic.outputs.changed == 'true'
+        id: commit
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/sources data/curation src/data/generated
+          if git diff --cached --quiet; then
+            echo "updated=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          git commit -m "data: review weekly Tainan source changes"
+          git push origin "$MAINTENANCE_BRANCH"
+          echo "updated=true" >> "$GITHUB_OUTPUT"
+      - if: steps.commit.outputs.updated == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { data: openPulls } = await github.rest.pulls.list({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              base: 'main',
+              head: `${context.repo.owner}:${process.env.MAINTENANCE_BRANCH}`,
+            });
+            if (openPulls.length > 0) {
+              core.notice(`Updated review PR: ${openPulls[0].html_url}`);
+              return;
+            }
+            const result = await github.rest.pulls.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: 'data: review weekly Tainan source changes',
+              head: process.env.MAINTENANCE_BRANCH,
+              base: 'main',
+              body: 'Automated bounded source check detected a normalized semantic change. Validation passed before this review PR was opened. No production data was changed or auto-merged.',
+            });
+            core.notice(`Review PR: ${result.data.html_url}`);

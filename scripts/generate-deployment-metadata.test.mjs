@@ -1,4 +1,3 @@
-import { spawnSync } from "node:child_process";
 import {
   access,
   copyFile,
@@ -25,13 +24,7 @@ async function deploymentDirectory() {
 function runMetadata(outDir, siteUrl = "https://markets.example.test") {
   return spawnSync(
     process.execPath,
-    [
-      SCRIPT_PATH,
-      "--site-url",
-      siteUrl,
-      "--out-dir",
-      outDir,
-    ],
+    [SCRIPT_PATH, "--site-url", siteUrl, "--out-dir", outDir],
     { cwd: REPO_ROOT, encoding: "utf8" },
   );
 }
@@ -94,7 +87,7 @@ describe("deployment metadata generation", () => {
     ["missing", "<html><head></head><body></body></html>"],
     [
       "duplicated",
-      '<link rel="canonical" href="/" /><link rel="canonical" href="/" />' +
+      '<link rel="canonical" href="https://night-market.invalid/" /><link rel="canonical" href="https://night-market.invalid/" />' +
         '<meta property="og:url" content="/" />',
     ],
   ])("fails closed when required placeholders are %s", async (_caseName, index) => {
@@ -126,3 +119,4 @@ describe("deployment metadata generation", () => {
     await expect(access(join(directory, "robots.txt"))).rejects.toThrow();
   });
 });
+import { spawnSync } from "node:child_process";

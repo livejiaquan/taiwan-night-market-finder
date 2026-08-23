@@ -12,7 +12,11 @@
 ```bash
 npm ci
 npm run verify
-npm run deploy:metadata -- --site-url https://your-real-domain.example
+npm run deploy:metadata -- --site-url https://your-real-domain.example --base-path /taiwan-night-market-finder
+git diff --check
+npm audit --audit-level=high
+npm run test:e2e:chromium
+npm run test:e2e
 ```
 
 `deploy:metadata` 必須在 `build` 後執行，會：
@@ -49,6 +53,8 @@ npm run deploy:metadata -- --site-url https://your-real-domain.example
 Vite 的本機 `preview` 不會模擬 host 的 `_redirects` 規則：它可驗證 SPA 與 `/market/:id/` 目錄內的 crawler shell，但不能證明 production 的無尾斜線 rewrite。正式上線後必須直接請求實際網域的 `/market/:id`，確認回傳 HTML 在 JavaScript 執行前已包含該市場的 title、canonical 與 `og:url`。
 
 ## Pre-release browser checks
+
+The executable Chromium smoke is `npm run test:e2e`: it builds production output, writes Pages-base metadata, launches a strict-port Vite preview, and checks the root/detail/recovery journey, responsive overflow, console/same-origin request failures, health marker, and serious/critical axe findings. The following remain required human/post-deployment checks where the browser smoke cannot prove host behavior:
 
 至少在 production output／preview 驗證：
 

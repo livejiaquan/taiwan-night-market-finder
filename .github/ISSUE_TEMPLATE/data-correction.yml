@@ -1,0 +1,33 @@
+name: Data correction or product issue
+description: Report a possible source, schedule, evidence, accessibility, or product problem.
+title: "[Correction]: "
+labels: ["data-correction"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        This form requires a GitHub account. Do not provide personal, location, payment, or sensitive information. For authoritative source corrections, also contact the linked government data publisher.
+  - type: dropdown
+    id: category
+    attributes:
+      label: Issue type
+      options:
+        - Market schedule or source evidence
+        - District code or label
+        - Accessibility or keyboard issue
+        - Broken link or Maps query
+        - Other product issue
+    validations:
+      required: true
+  - type: input
+    id: market
+    attributes:
+      label: Relevant market or URL
+      description: Include a public product URL or market name if applicable.
+  - type: textarea
+    id: evidence
+    attributes:
+      label: What should be checked?
+      description: Describe the issue and link the original public source when available.
+    validations:
+      required: true

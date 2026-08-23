@@ -94,6 +94,9 @@ npm test
 npm run typecheck
 npm run lint
 npm run build
+npm audit --audit-level=high
+npm run test:e2e:chromium
+npm run test:e2e
 ```
 
 完整本機 gate：

@@ -144,6 +144,8 @@ const copy = {
     districtSourcePage: "查看臺南市行政區代碼來源",
     attribution: "資料來源：臺南市政府經濟發展局，政府資料開放授權條款第 1 版。",
     lab: "視覺原型保留於 lab，不是公共首頁。",
+    correction: "回報資料或產品問題（需要 GitHub 登入）",
+    privacy: "隱私、可近用性與已知限制",
     notFoundTitle: "找不到這個夜市資料",
     notFoundBody: "連結可能已過期或輸入有誤；我們不會靜默改成另一個夜市。",
     home: "回到候選清單",
@@ -229,6 +231,8 @@ const copy = {
     districtSourcePage: "Open the Tainan district-code source",
     attribution: "Source: Economic Development Bureau, Tainan City Government. Open Government Data License 1.0.",
     lab: "The visual prototype remains in the lab and is not the public homepage.",
+    correction: "Report a data or product issue (GitHub sign-in required)",
+    privacy: "Privacy, accessibility, and known limitations",
     notFoundTitle: "This market record was not found",
     notFoundBody: "The link may be old or mistyped. We will not silently substitute another market.",
     home: "Back to candidates",
@@ -349,7 +353,7 @@ function setPageMetadata(title: string, description: string, canonicalPath: stri
   document.title = title;
   const canonical = document.querySelector<HTMLLinkElement>('link[rel="canonical"]');
   if (canonical) {
-    canonical.href = new URL(canonicalPath, window.location.origin).toString();
+    canonical.href = new URL(appUrl(canonicalPath), window.location.origin).toString();
   }
 
   const values = [
@@ -364,7 +368,7 @@ function setPageMetadata(title: string, description: string, canonicalPath: stri
   });
 
   const ogUrl = document.querySelector<HTMLMetaElement>('meta[property="og:url"]');
-  ogUrl?.setAttribute("content", new URL(canonicalPath, window.location.origin).toString());
+  ogUrl?.setAttribute("content", new URL(appUrl(canonicalPath), window.location.origin).toString());
 }
 
 function scheduleText(days: OpeningDay[], locale: Locale) {
@@ -563,7 +567,14 @@ function MarketCard({
   locale: Locale;
 }) {
   const c = copy[locale];
-  const url = `/market/${encodeURIComponent(market.id)}?date=${date}${query ? `&q=${encodeURIComponent(query)}` : ""}${districtCode ? `&district=${encodeURIComponent(districtCode)}` : ""}`;
+  const url = appUrl(
+    `/market/${encodeURIComponent(market.id)}`,
+    new URLSearchParams({
+      date,
+      ...(query ? { q: query } : {}),
+      ...(districtCode ? { district: districtCode } : {}),
+    }),
+  );
 
   return (
     <article className="group flex min-h-full flex-col rounded-2xl border border-[#c8d5cf] bg-white/90 p-5 shadow-[0_16px_45px_-36px_rgba(16,33,28,0.55)] transition hover:border-moss-500">
@@ -1304,6 +1315,24 @@ function AppFooter({ locale }: { locale: Locale }) {
             target="_blank"
           >
             Open Government Data License 1.0
+            <ExternalLink aria-hidden="true" size={13} />
+          </a>
+          <a
+            className="inline-flex items-center gap-1 rounded underline underline-offset-4 transition-colors hover:text-slate-950 focus-visible:outline focus-visible:outline-2 focus-visible:outline-coral-600"
+            href="https://github.com/livejiaquan/taiwan-night-market-finder/issues/new?template=data-correction.yml"
+            rel="noreferrer"
+            target="_blank"
+          >
+            {c.correction}
+            <ExternalLink aria-hidden="true" size={13} />
+          </a>
+          <a
+            className="inline-flex items-center gap-1 rounded underline underline-offset-4 transition-colors hover:text-slate-950 focus-visible:outline focus-visible:outline-2 focus-visible:outline-coral-600"
+            href="https://github.com/livejiaquan/taiwan-night-market-finder/blob/main/docs/PUBLIC_OPERABILITY.md"
+            rel="noreferrer"
+            target="_blank"
+          >
+            {c.privacy}
             <ExternalLink aria-hidden="true" size={13} />
           </a>
         </div>

@@ -13,10 +13,13 @@
     "data:check": "node scripts/sync-tainan-night-markets.mjs --check && node scripts/sync-tainan-districts.mjs --check",
     "data:sync": "node scripts/sync-tainan-night-markets.mjs",
     "data:sync:districts": "node scripts/sync-tainan-districts.mjs",
+    "data:check:live": "node scripts/check-live-datasets.mjs",
     "deploy:metadata": "node scripts/generate-deployment-metadata.mjs",
     "lint": "eslint . --max-warnings=0",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
+    "test:e2e": "npm run build && npm run deploy:metadata -- --site-url https://livejiaquan.github.io --base-path /taiwan-night-market-finder && playwright test",
+    "test:e2e:chromium": "playwright install --with-deps chromium",
     "verify": "npm run data:check && npm test && npm run typecheck && npm run lint && npm run build"
   },
   "dependencies": {
@@ -26,22 +29,32 @@
     "react-dom": "^18.3.1"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.13.0",
     "@eslint/js": "^9.17.0",
+    "@playwright/test": "^1.62.1",
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.1.0",
     "@types/react": "^18.3.18",
     "@types/react-dom": "^18.3.5",
-    "@vitejs/plugin-react": "^4.3.4",
+    "@vitejs/plugin-react": "^6.1.0",
     "autoprefixer": "^10.4.20",
     "eslint": "^9.17.0",
     "eslint-plugin-react-hooks": "^5.1.0",
     "eslint-plugin-react-refresh": "^0.4.16",
     "jsdom": "^25.0.1",
-    "postcss": "^8.4.49",
+    "postcss": "^8.5.26",
     "tailwindcss": "^3.4.17",
     "typescript": "^5.7.2",
     "typescript-eslint": "^8.18.2",
-    "vite": "^6.0.5",
-    "vitest": "^2.1.8"
+    "vite": "^8.2.2",
+    "vitest": "^4.1.11"
+  },
+  "overrides": {
+    "brace-expansion": "5.0.9",
+    "minimatch@3.1.5": {
+      "brace-expansion": "1.1.18"
+    },
+    "form-data": "4.0.6",
+    "js-yaml": "4.3.1"
   }
 }

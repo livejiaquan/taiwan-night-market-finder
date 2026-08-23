@@ -11,6 +11,7 @@ export const DISTRICT_DATASET_ID = "tainan-district-codes";
 export const DISTRICT_PARSER_VERSION = "tainan-district-codes-v1";
 export const APPROVED_DISTRICT_COUNT = 37;
 export const MAX_FUTURE_CLOCK_SKEW_MS = 5 * 60 * 1000;
+export const LIVE_FETCH_TIMEOUT_MS = 15_000;
 
 export const DISTRICT_OFFICIAL_SOURCE = Object.freeze({
   sourceId: DISTRICT_DATASET_ID,
@@ -219,6 +220,41 @@ export function parseDistrictPayload(rawBody) {
       uniqueCodes: codes.size === districts.length,
       uniqueNames: fullNames.size === districts.length,
     },
+  };
+}
+
+function semanticDistricts(rawBody) {
+  return parseDistrictPayload(rawBody).districts
+    .map(({ sequence, code, fullName, shortName }) => ({ sequence, code, fullName, shortName }))
+    .sort((left, right) => left.sequence - right.sequence);
+}
+
+export function districtSemanticHash(rawBody) {
+  return districtSha256(JSON.stringify(semanticDistricts(rawBody)));
+}
+
+export function districtSemanticDiff(previousRawBody, nextRawBody) {
+  const previous = semanticDistricts(previousRawBody);
+  const next = semanticDistricts(nextRawBody);
+  const previousByCode = new Map(previous.map((row) => [row.code, row]));
+  const nextByCode = new Map(next.map((row) => [row.code, row]));
+  const added = next.filter((row) => !previousByCode.has(row.code)).map((row) => row.code);
+  const removed = previous.filter((row) => !nextByCode.has(row.code)).map((row) => row.code);
+  const changed = next.flatMap((row) => {
+    const prior = previousByCode.get(row.code);
+    if (!prior) return [];
+    const fields = Object.keys(row).filter(
+      (field) => field !== "code" && JSON.stringify(row[field]) !== JSON.stringify(prior[field]),
+    );
+    return fields.length ? [{ code: row.code, fields }] : [];
+  });
+  return {
+    previousSemanticHash: districtSha256(JSON.stringify(previous)),
+    nextSemanticHash: districtSha256(JSON.stringify(next)),
+    changed,
+    added,
+    removed,
+    hasMeaningfulChange: added.length > 0 || removed.length > 0 || changed.length > 0,
   };
 }
 
@@ -477,6 +513,7 @@ async function loadRawInput(inputPath, retrievedAtOption) {
 async function fetchLive(retrievedAtOption) {
   const response = await globalThis.fetch(DISTRICT_OFFICIAL_SOURCE.endpointUrl, {
     headers: { accept: "application/json" },
+    signal: AbortSignal.timeout(LIVE_FETCH_TIMEOUT_MS),
   });
   assert(
     response.ok,

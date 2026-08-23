@@ -11,6 +11,8 @@ import {
   parseArgs,
   parseOfficialPayload,
   parseSchedule,
+  semanticDiff,
+  semanticHash,
 } from "./sync-tainan-night-markets.mjs";
 
 const SNAPSHOT_PATH = resolve(
@@ -57,6 +59,24 @@ describe("Tainan official source parser", () => {
       "Fri",
       "Sat",
     ]);
+  });
+
+  it("ignores random official envelope IDs but reports normalized record changes", async () => {
+    const baseline = await officialPayload();
+    const envelopeOnly = JSON.parse(JSON.stringify(baseline));
+    envelopeOnly.id = "random-envelope-id";
+    expect(semanticHash(JSON.stringify(envelopeOnly))).toBe(semanticHash(JSON.stringify(baseline)));
+    expect(semanticDiff(JSON.stringify(baseline), JSON.stringify(envelopeOnly))).toMatchObject({
+      hasMeaningfulChange: false,
+      changed: [],
+    });
+
+    const changed = JSON.parse(JSON.stringify(baseline));
+    changed.data[0]["營業時間"] = "每週一二";
+    expect(semanticDiff(JSON.stringify(baseline), JSON.stringify(changed))).toMatchObject({
+      hasMeaningfulChange: true,
+      changed: [{ recordId: "1", fields: ["scheduleDays"] }],
+    });
   });
 
   it("rejects zero rows and reviewed volume drift", async () => {
