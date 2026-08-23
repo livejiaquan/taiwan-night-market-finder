@@ -62,6 +62,7 @@ describe("deployment metadata generation", () => {
     const redirects = await readFile(join(directory, "_redirects"), "utf8");
     expect(index).toContain('rel="canonical" href="https://markets.example.test/"');
     expect(index).toContain('property="og:url" content="https://markets.example.test/"');
+    expect(index).toContain('href="%BASE_URL%favicon.svg"');
     expect(marketIndex).toContain("<title>武聖夜市｜臺南夜市正常營業日與資料來源</title>");
     expect(marketIndex).toContain(
       'rel="canonical" href="https://markets.example.test/market/tainan-licensed-5"',
