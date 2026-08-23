@@ -1,0 +1,17 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="robots" content="noindex" />
+    <title>正在開啟夜市資料…</title>
+    <script>
+      (function () {
+        var base = "/taiwan-night-market-finder/";
+        var path = window.location.pathname;
+        var restored = path.indexOf(base) === 0 ? path.slice(base.length - 1) : path;
+        window.location.replace(base + "?p=" + encodeURIComponent(restored + window.location.search + window.location.hash));
+      })();
+    </script>
+  </head>
+  <body>正在開啟夜市資料…</body>
+</html>

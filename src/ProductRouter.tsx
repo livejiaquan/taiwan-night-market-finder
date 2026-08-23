@@ -1,14 +1,15 @@
 import { Component, lazy, Suspense, useEffect, useState } from "react";
 import type { ErrorInfo, ReactNode } from "react";
+import { getAppLocation } from "./lib/basePath";
 
 const TrustedApp = lazy(() => import("./product/TrustedApp"));
 const LegacyPrototype = lazy(() => import("./App"));
 
 function usePathname() {
-  const [pathname, setPathname] = useState(() => window.location.pathname);
+  const [pathname, setPathname] = useState(() => getAppLocation().pathname);
 
   useEffect(() => {
-    const updatePathname = () => setPathname(window.location.pathname);
+    const updatePathname = () => setPathname(getAppLocation().pathname);
     window.addEventListener("popstate", updatePathname);
     return () => window.removeEventListener("popstate", updatePathname);
   }, []);
@@ -21,12 +22,12 @@ function LoadingShell() {
     <main
       aria-busy="true"
       aria-label="正在載入已核對的夜市資料"
-      className="min-h-screen bg-[#f7f4ed] text-slate-950"
+      className="product-shell min-h-screen text-slate-950"
     >
       <div className="mx-auto w-full max-w-6xl px-4 py-5 sm:px-6 lg:px-8">
         <div className="h-8 w-44 animate-pulse rounded-lg bg-slate-200" />
         <div className="mt-10 max-w-2xl space-y-4">
-          <div className="h-4 w-28 animate-pulse rounded bg-orange-200" />
+          <div className="h-4 w-28 animate-pulse rounded bg-coral-200" />
           <div className="h-12 w-full animate-pulse rounded-xl bg-slate-200" />
           <div className="h-6 w-4/5 animate-pulse rounded-lg bg-slate-200" />
         </div>
@@ -69,7 +70,7 @@ class ProductErrorBoundary extends Component<
   render() {
     if (this.state.hasError) {
       return (
-        <main className="flex min-h-screen items-center bg-[#f7f4ed] px-4 py-16 text-slate-950">
+        <main className="product-shell flex min-h-screen items-center px-4 py-16 text-slate-950">
           <section
             aria-labelledby="fatal-error-title"
             className="mx-auto w-full max-w-xl rounded-2xl border border-red-200 bg-white p-6 shadow-ambient sm:p-8"
@@ -84,7 +85,7 @@ class ProductErrorBoundary extends Component<
             </p>
             <div className="mt-6 flex flex-wrap gap-3">
               <button
-                className="min-h-11 rounded-lg bg-slate-950 px-4 font-semibold text-white transition-colors hover:bg-slate-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-950"
+                className="min-h-11 rounded-lg bg-moss-700 px-4 font-semibold text-white transition-colors hover:bg-moss-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-coral-600"
                 onClick={() => window.location.reload()}
                 type="button"
               >
