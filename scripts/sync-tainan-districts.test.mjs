@@ -8,6 +8,8 @@ import {
   assertDistrictOfficialSource,
   buildDistrictArtifact,
   checkCommittedDistrictArtifact,
+  districtSemanticDiff,
+  districtSemanticHash,
   parseDistrictArgs,
   parseDistrictPayload,
 } from "./sync-tainan-districts.mjs";
@@ -44,6 +46,26 @@ describe("Tainan official district source parser", () => {
       sequence: 35,
       fullName: "臺南市安南區",
       shortName: "安南區",
+    });
+  });
+
+  it("ignores random official envelope IDs but reports normalized district changes", async () => {
+    const baseline = await committedPayload();
+    const envelopeOnly = JSON.parse(JSON.stringify(baseline));
+    envelopeOnly.id = "random-envelope-id";
+    expect(districtSemanticHash(JSON.stringify(envelopeOnly))).toBe(
+      districtSemanticHash(JSON.stringify(baseline)),
+    );
+    expect(districtSemanticDiff(JSON.stringify(baseline), JSON.stringify(envelopeOnly))).toMatchObject({
+      hasMeaningfulChange: false,
+      changed: [],
+    });
+
+    const changed = JSON.parse(JSON.stringify(baseline));
+    changed.data[0].AreaName = "臺南市測試區";
+    expect(districtSemanticDiff(JSON.stringify(baseline), JSON.stringify(changed))).toMatchObject({
+      hasMeaningfulChange: true,
+      changed: [{ code: "67000010", fields: ["fullName", "shortName"] }],
     });
   });
 

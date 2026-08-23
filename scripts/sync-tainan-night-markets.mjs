@@ -11,6 +11,7 @@ export const DATASET_ID = "tainan-licensed-night-markets";
 export const PARSER_VERSION = "tainan-license-v2";
 export const APPROVED_ROW_COUNT = 32;
 export const MAX_FUTURE_CLOCK_SKEW_MS = 5 * 60 * 1000;
+export const LIVE_FETCH_TIMEOUT_MS = 15_000;
 
 export const OFFICIAL_SOURCE = Object.freeze({
   sourceId: DATASET_ID,
@@ -282,6 +283,47 @@ export function parseOfficialPayload(rawBody) {
       uniqueRecordIds: recordIds.size === rows.length,
       uniqueNames: names.size === rows.length,
     },
+  };
+}
+
+function semanticRows(rawBody) {
+  return parseOfficialPayload(rawBody).rows
+    .map(({ recordId, adminCode, name, permittedArea, scheduleDays }) => ({
+      recordId,
+      adminCode,
+      name,
+      permittedArea,
+      scheduleDays,
+    }))
+    .sort((left, right) => Number(left.recordId) - Number(right.recordId));
+}
+
+export function semanticHash(rawBody) {
+  return sha256(JSON.stringify(semanticRows(rawBody)));
+}
+
+export function semanticDiff(previousRawBody, nextRawBody) {
+  const previous = semanticRows(previousRawBody);
+  const next = semanticRows(nextRawBody);
+  const previousById = new Map(previous.map((row) => [row.recordId, row]));
+  const nextById = new Map(next.map((row) => [row.recordId, row]));
+  const added = next.filter((row) => !previousById.has(row.recordId)).map((row) => row.recordId);
+  const removed = previous.filter((row) => !nextById.has(row.recordId)).map((row) => row.recordId);
+  const changed = next.flatMap((row) => {
+    const prior = previousById.get(row.recordId);
+    if (!prior) return [];
+    const fields = Object.keys(row).filter(
+      (field) => field !== "recordId" && JSON.stringify(row[field]) !== JSON.stringify(prior[field]),
+    );
+    return fields.length ? [{ recordId: row.recordId, fields }] : [];
+  });
+  return {
+    previousSemanticHash: sha256(JSON.stringify(previous)),
+    nextSemanticHash: sha256(JSON.stringify(next)),
+    changed,
+    added,
+    removed,
+    hasMeaningfulChange: added.length > 0 || removed.length > 0 || changed.length > 0,
   };
 }
 
@@ -675,6 +717,7 @@ async function loadRawInput(inputPath, retrievedAtOption) {
 async function fetchLive(retrievedAtOption) {
   const response = await globalThis.fetch(OFFICIAL_SOURCE.endpointUrl, {
     headers: { accept: "application/json" },
+    signal: AbortSignal.timeout(LIVE_FETCH_TIMEOUT_MS),
   });
   assert(
     response.ok,

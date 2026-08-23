@@ -1,7 +1,10 @@
 const basePath = import.meta.env.BASE_URL.replace(/\/$/u, "");
+type AppLocationInput = Pick<Location, "origin" | "pathname" | "search">;
 
-export function getAppLocation() {
-  const browserLocation = window.location;
+export function getAppLocation(
+  browserLocation: AppLocationInput = window.location,
+  configuredBasePath = basePath,
+) {
   const restoredPath = new URLSearchParams(browserLocation.search).get("p");
 
   if (restoredPath?.startsWith("/")) {
@@ -10,8 +13,8 @@ export function getAppLocation() {
   }
 
   const pathname =
-    basePath && (browserLocation.pathname === basePath || browserLocation.pathname.startsWith(`${basePath}/`))
-      ? browserLocation.pathname.slice(basePath.length) || "/"
+    configuredBasePath && (browserLocation.pathname === configuredBasePath || browserLocation.pathname.startsWith(`${configuredBasePath}/`))
+      ? browserLocation.pathname.slice(configuredBasePath.length) || "/"
       : browserLocation.pathname;
   return { pathname, search: browserLocation.search };
 }
