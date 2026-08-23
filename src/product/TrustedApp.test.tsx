@@ -1,6 +1,7 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import TrustedApp from "./TrustedApp";
+import { scheduleText } from "./scheduleText";
 
 describe("trusted public experience", () => {
   beforeEach(() => {
@@ -10,6 +11,12 @@ describe("trusted public experience", () => {
 
   afterEach(() => {
     vi.useRealTimers();
+  });
+
+  it("renders Chinese regular-schedule weekdays with an unambiguous week prefix", () => {
+    expect(scheduleText(["Mon"], "zh")).toBe("週一");
+    expect(scheduleText(["Wed", "Fri", "Sat"], "zh")).toBe("週三、週五、週六");
+    expect(scheduleText(["Mon"], "en")).toBe("Mon");
   });
 
   it("defaults a Sunday decision to scheduled candidates instead of all markets", () => {
@@ -143,8 +150,8 @@ describe("trusted public experience", () => {
     render(<TrustedApp />);
 
     expect(screen.getByRole("heading", { name: "武聖夜市" })).toBeInTheDocument();
-    expect(screen.getByText("三、五、六")).toBeInTheDocument();
-    expect(screen.getByText("來源記載：三、五、六")).toBeInTheDocument();
+    expect(screen.getByText("週三、週五、週六")).toBeInTheDocument();
+    expect(screen.getByText("來源記載：週三、週五、週六")).toBeInTheDocument();
     expect(screen.getByText("以夜市名稱搜尋，不是官方座標")).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "其他決策欄位來源" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "夜市名稱" })).toBeInTheDocument();

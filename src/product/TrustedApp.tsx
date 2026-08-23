@@ -28,6 +28,7 @@ import {
   type OpeningDay,
   type TrustedMarket,
 } from "./marketData";
+import { dayLabels, scheduleText } from "./scheduleText";
 import { districtDataset, getDistrict, pilotDistricts, type TrustedDistrict } from "./districtData";
 import {
   formatCompactDate,
@@ -40,27 +41,6 @@ import {
 
 type Locale = "zh" | "en";
 type MarketDecision = ReturnType<typeof getMarketDecision>;
-
-const dayLabels: Record<Locale, Record<OpeningDay, string>> = {
-  zh: {
-    Mon: "一",
-    Tue: "二",
-    Wed: "三",
-    Thu: "四",
-    Fri: "五",
-    Sat: "六",
-    Sun: "日",
-  },
-  en: {
-    Mon: "Mon",
-    Tue: "Tue",
-    Wed: "Wed",
-    Thu: "Thu",
-    Fri: "Fri",
-    Sat: "Sat",
-    Sun: "Sun",
-  },
-};
 
 const copy = {
   zh: {
@@ -369,10 +349,6 @@ function setPageMetadata(title: string, description: string, canonicalPath: stri
 
   const ogUrl = document.querySelector<HTMLMetaElement>('meta[property="og:url"]');
   ogUrl?.setAttribute("content", new URL(appUrl(canonicalPath), window.location.origin).toString());
-}
-
-function scheduleText(days: OpeningDay[], locale: Locale) {
-  return days.map((day) => dayLabels[locale][day]).join(locale === "zh" ? "、" : ", ");
 }
 
 function decisionLabel(decision: MarketDecision, locale: Locale) {
