@@ -36,6 +36,14 @@ npm run deploy:metadata -- --site-url https://your-real-domain.example
 - `www` 與 apex 只保留一個 canonical，其餘 301；
 - 不在 host 注入 sample data、環境 secret 或第三方 tracking。
 
+## GitHub Pages
+
+此 repository 使用 GitHub Pages project site，Vite base 固定為 `/taiwan-night-market-finder/`。`deploy-pages.yml` 僅在 `main` push 或手動觸發時部署，使用 GitHub 的短期 `GITHUB_TOKEN` 權限，不讀取或儲存任何 secret。
+
+- public routes 與 hashed assets 會加上 project-site base；不可改成 root-relative asset URL；
+- `public/404.html` 會將 GitHub Pages 無法 rewrite 的深連結安全還原成 app route，例如 `/taiwan-night-market-finder/market/:id`；
+- GitHub Pages 不支援此 repo 的 `_redirects` 規則；部署後仍需直接開啟 root 與一個 `/market/:id` deep link 驗證。
+
 `public/_redirects` 已涵蓋支援 Netlify-style redirect file 的 host。若 host 不支援，需用該平台等價的 SPA rewrite；未驗證前不可只因 root 回 200 就宣稱 deep link 可用。
 
 Vite 的本機 `preview` 不會模擬 host 的 `_redirects` 規則：它可驗證 SPA 與 `/market/:id/` 目錄內的 crawler shell，但不能證明 production 的無尾斜線 rewrite。正式上線後必須直接請求實際網域的 `/market/:id`，確認回傳 HTML 在 JavaScript 執行前已包含該市場的 title、canonical 與 `og:url`。

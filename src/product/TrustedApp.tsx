@@ -20,6 +20,7 @@ import {
   X,
 } from "lucide-react";
 import { clsx } from "clsx";
+import { appUrl, getAppLocation } from "../lib/basePath";
 import {
   getMarketDecision,
   marketDataset,
@@ -245,9 +246,10 @@ interface LocationState {
 }
 
 function readLocation(): LocationState {
-  const pathname = window.location.pathname;
+  const appLocation = getAppLocation();
+  const pathname = appLocation.pathname;
   const segments = pathname.split("/").filter(Boolean);
-  const params = new URLSearchParams(window.location.search);
+  const params = new URLSearchParams(appLocation.search);
   const requestedDate = params.get("date");
   const requestedDistrictCode = params.get("district")?.trim() ?? "";
   const isMarketRoute = segments.length === 2 && segments[0] === "market";
@@ -288,7 +290,7 @@ function writeLocation(
   if (next.districtCode) {
     params.set("district", next.districtCode);
   }
-  const url = `${next.pathname ?? window.location.pathname}?${params.toString()}`;
+  const url = appUrl(next.pathname ?? getAppLocation().pathname, params);
 
   if (options.replace) {
     window.history.replaceState({}, "", url);
@@ -424,18 +426,22 @@ function LanguageToggle({ locale, setLocale }: { locale: Locale; setLocale: (loc
 function AppHeader({ locale, setLocale }: { locale: Locale; setLocale: (locale: Locale) => void }) {
   const c = copy[locale];
   return (
-    <header className="border-b border-slate-900/10 bg-[#fffaf3]/95 backdrop-blur">
+    <header className="border-b border-[#c8d5cf] bg-[#f6f7f2]/90 backdrop-blur">
       <div className="mx-auto flex min-h-16 w-full max-w-6xl items-center justify-between gap-3 px-4 py-2 sm:px-6 lg:px-8">
         <a
-          className="rounded-md transition-opacity hover:opacity-75 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-orange-600"
-          href={`/?date=${getTaipeiToday()}`}
+          className="flex items-center gap-3 rounded-md transition-opacity hover:opacity-75 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-coral-600"
+          href={appUrl("/", new URLSearchParams({ date: getTaipeiToday() }))}
           onClick={(event) => {
             event.preventDefault();
             writeLocation({ pathname: "/", date: getTaipeiToday(), query: "", districtCode: "" });
           }}
         >
-          <span className="block text-lg font-extrabold tracking-tight text-slate-950">{c.brand}</span>
-          <span className="block text-xs font-semibold text-orange-700">{c.pilot}</span>
+          <span className="family-mark" aria-hidden="true"><span /><span /><span /></span>
+          <span>
+            <span className="block text-[11px] font-extrabold tracking-[0.12em] text-plum-600">台灣生活資料誌</span>
+            <span className="block text-lg font-extrabold tracking-tight text-ink">{c.brand}</span>
+            <span className="block text-xs font-semibold text-moss-700">{c.pilot}</span>
+          </span>
         </a>
         <LanguageToggle locale={locale} setLocale={setLocale} />
       </div>
@@ -469,6 +475,14 @@ function DatePicker({
       return;
     }
 
+    // On wide layouts all seven dates fit in view. Resetting the horizontal
+    // offset keeps the first and last dates visible after a user previously
+    // selected a date on mobile, rather than leaving a misleading clipped row.
+    if (typeof window.matchMedia === "function" && window.matchMedia("(min-width: 1024px)").matches) {
+      scroller.scrollLeft = 0;
+      return;
+    }
+
     scroller.scrollLeft = Math.max(
       0,
       selectedButton.offsetLeft - (scroller.clientWidth - selectedButton.clientWidth) / 2,
@@ -491,10 +505,10 @@ function DatePicker({
               aria-label={`${date === today ? `${c.today}，` : ""}${formatDecisionDate(date, locale)}`}
               aria-pressed={selected}
               className={clsx(
-                "min-h-[58px] min-w-[76px] shrink-0 rounded-xl border px-3 py-2 text-left tabular-nums focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange-600",
+                "min-h-[58px] min-w-[76px] shrink-0 rounded-xl border px-3 py-2 text-left tabular-nums focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange-600 lg:min-w-[60px] lg:px-2",
                 selected
-                  ? "border-slate-950 bg-slate-950 text-white shadow-sm"
-                  : "border-slate-300 bg-white text-slate-700 hover:border-slate-500",
+                  ? "border-moss-700 bg-moss-700 text-white shadow-sm"
+                  : "border-[#c8d5cf] bg-white/85 text-slate-700 hover:border-moss-600",
               )}
               key={date}
               onClick={() => writeLocation({ pathname: "/", date, query, districtCode })}
@@ -520,7 +534,7 @@ function DecisionBadge({ decision, locale }: { decision: MarketDecision; locale:
     <span
       className={clsx(
         "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-extrabold",
-        tone === "confirmed" && "border-emerald-300 bg-emerald-50 text-emerald-800",
+        tone === "confirmed" && "border-moss-300 bg-moss-50 text-moss-800",
         tone === "conflict" && "border-amber-300 bg-amber-50 text-amber-900",
         tone === "degraded" && "border-slate-300 bg-slate-100 text-slate-700",
       )}
@@ -552,11 +566,11 @@ function MarketCard({
   const url = `/market/${encodeURIComponent(market.id)}?date=${date}${query ? `&q=${encodeURIComponent(query)}` : ""}${districtCode ? `&district=${encodeURIComponent(districtCode)}` : ""}`;
 
   return (
-    <article className="group flex min-h-full flex-col rounded-2xl border border-slate-200 bg-white p-5 shadow-[0_16px_45px_-36px_rgba(15,23,42,0.65)] transition hover:border-slate-400">
+    <article className="group flex min-h-full flex-col rounded-2xl border border-[#c8d5cf] bg-white/90 p-5 shadow-[0_16px_45px_-36px_rgba(16,33,28,0.55)] transition hover:border-moss-500">
       <DecisionBadge decision={decision} locale={locale} />
       <h3 className="mt-4 text-2xl font-extrabold tracking-tight text-slate-950">{market.name}</h3>
       <div className="mt-4 flex items-start gap-2 text-sm leading-6 text-slate-700">
-        <MapPin aria-hidden="true" className="mt-1 shrink-0 text-orange-700" size={16} />
+        <MapPin aria-hidden="true" className="mt-1 shrink-0 text-coral-600" size={16} />
         <div>
           <span className="block text-xs font-bold uppercase tracking-wide text-slate-500">
             {district.shortName} · {c.permitArea}
@@ -565,7 +579,7 @@ function MarketCard({
         </div>
       </div>
       <div className="mt-4 flex items-start gap-2 text-sm text-slate-700">
-        <CalendarDays aria-hidden="true" className="shrink-0 text-orange-700" size={16} />
+        <CalendarDays aria-hidden="true" className="shrink-0 text-plum-600" size={16} />
         <span>
           <strong>{c.schedule}：</strong>
           {scheduleText(market.scheduleDays, locale)}
@@ -576,7 +590,7 @@ function MarketCard({
           {c.checkedAt} {formatEvidenceDate(market.evidence.scheduleDays[0].verifiedAt, locale)}
         </p>
         <a
-          className="inline-flex min-h-11 w-full items-center justify-between rounded-lg bg-slate-950 px-4 font-bold text-white transition-colors hover:bg-slate-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange-600"
+          className="inline-flex min-h-11 w-full items-center justify-between rounded-lg bg-moss-700 px-4 font-bold text-white transition-colors hover:bg-moss-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-coral-600"
           href={url}
           onClick={(event) => {
             event.preventDefault();
@@ -611,7 +625,7 @@ function SearchControl({
       <div className="relative">
         <Search aria-hidden="true" className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" size={19} />
         <input
-          className="min-h-12 w-full rounded-xl border border-slate-300 bg-white py-2 pl-10 pr-11 text-base text-slate-950 outline-none placeholder:text-slate-400 focus:border-orange-600 focus:ring-2 focus:ring-orange-200"
+          className="min-h-12 w-full rounded-xl border border-[#c8d5cf] bg-white/90 py-2 pl-10 pr-11 text-base text-slate-950 outline-none placeholder:text-slate-400 focus:border-moss-700 focus:ring-2 focus:ring-moss-200"
           id="market-search"
           name="market-search"
           autoComplete="off"
@@ -663,7 +677,7 @@ function DistrictControl({
         {c.chooseDistrict}
       </label>
       <select
-        className="min-h-12 w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-base font-semibold text-slate-950 outline-none focus:border-orange-600 focus:ring-2 focus:ring-orange-200"
+        className="min-h-12 w-full rounded-xl border border-[#c8d5cf] bg-white/90 px-3 py-2 text-base font-semibold text-slate-950 outline-none focus:border-moss-700 focus:ring-2 focus:ring-moss-200"
         id="district-filter"
         name="district-filter"
         onChange={(event) =>
@@ -689,9 +703,9 @@ function DistrictControl({
 function SourceSummary({ headingId, locale }: { headingId: string; locale: Locale }) {
   const c = copy[locale];
   return (
-    <aside className="rounded-2xl border border-orange-200 bg-orange-50/70 p-5" aria-labelledby={headingId}>
+    <aside className="trust-panel rounded-2xl border p-5" aria-labelledby={headingId}>
       <div className="flex gap-3">
-        <Database aria-hidden="true" className="mt-0.5 shrink-0 text-orange-700" size={22} />
+        <Database aria-hidden="true" className="mt-0.5 shrink-0 text-moss-700" size={22} />
         <div>
           <h2 className="font-extrabold text-slate-950" id={headingId}>
             {c.sourceScopeTitle}
@@ -712,7 +726,7 @@ function SourceSummary({ headingId, locale }: { headingId: string; locale: Local
             </div>
           </dl>
           <a
-            className="mt-3 inline-flex items-center gap-1.5 rounded text-sm font-bold text-orange-800 underline decoration-orange-300 underline-offset-4 transition-colors hover:text-orange-950 hover:decoration-orange-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange-600"
+            className="mt-3 inline-flex items-center gap-1.5 rounded text-sm font-bold text-moss-700 underline decoration-moss-300 underline-offset-4 transition-colors hover:text-moss-900 hover:decoration-moss-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-coral-600"
             href={marketDataset.source.datasetUrl}
             rel="noreferrer"
             target="_blank"
@@ -721,7 +735,7 @@ function SourceSummary({ headingId, locale }: { headingId: string; locale: Local
             <ExternalLink aria-hidden="true" size={14} />
           </a>
           <a
-            className="mt-3 inline-flex items-center gap-1.5 rounded text-sm font-bold text-orange-800 underline decoration-orange-300 underline-offset-4 transition-colors hover:text-orange-950 hover:decoration-orange-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange-600"
+            className="mt-3 inline-flex items-center gap-1.5 rounded text-sm font-bold text-moss-700 underline decoration-moss-300 underline-offset-4 transition-colors hover:text-moss-900 hover:decoration-moss-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-coral-600"
             href={districtDataset.source.datasetUrl}
             rel="noreferrer"
             target="_blank"
@@ -788,21 +802,21 @@ function HomeView({ locale, location }: { locale: Locale; location: LocationStat
     if (location.query) {
       params.set("q", location.query);
     }
-    window.history.replaceState({}, "", `/?${params.toString()}`);
+    window.history.replaceState({}, "", appUrl("/", params));
   }, [location.date, location.invalidDistrictCode, location.query]);
 
   return (
     <>
-      <section className="border-b border-slate-900/10 bg-[#fffaf3]">
+      <section className="trusted-hero border-b border-[#c8d5cf]">
         <div className="mx-auto grid w-full max-w-6xl gap-7 px-4 py-8 sm:px-6 sm:py-10 lg:grid-cols-[1.25fr_0.75fr] lg:px-8">
           <div>
-            <p className="text-sm font-extrabold uppercase tracking-[0.12em] text-orange-700">{c.eyebrow}</p>
-            <h1 className="mt-2 max-w-3xl text-balance text-4xl font-extrabold tracking-tight text-slate-950 sm:text-5xl">
+            <p className="text-sm font-extrabold uppercase tracking-[0.12em] text-plum-600">{c.eyebrow}</p>
+            <h1 className="mt-2 max-w-3xl text-balance text-4xl font-extrabold tracking-tight text-ink sm:text-5xl">
               {formatDecisionDate(location.date, locale)}，{c.titleSuffix}
             </h1>
             <p className="mt-4 max-w-3xl text-base leading-7 text-slate-700 sm:text-lg">{c.intro}</p>
-            <div className="mt-4 flex items-center gap-2 rounded-xl border border-orange-200 bg-orange-50 px-3 py-2 text-xs font-bold text-slate-700 lg:hidden">
-              <ShieldCheck aria-hidden="true" className="shrink-0 text-orange-700" size={17} />
+            <div className="mt-4 flex items-center gap-2 rounded-xl border border-moss-200 bg-white/70 px-3 py-2 text-xs font-bold text-slate-700 lg:hidden">
+              <ShieldCheck aria-hidden="true" className="shrink-0 text-moss-700" size={17} />
               <span>
                 {marketDataset.markets.length} · {c.sourceChecked} {formatEvidenceDate(marketDataset.source.retrievedAt, locale)} · {c.upstreamUnknown}
               </span>
@@ -814,7 +828,7 @@ function HomeView({ locale, location }: { locale: Locale; location: LocationStat
         </div>
       </section>
 
-      <section className="border-b border-slate-200 bg-white" aria-label={c.chooseDate}>
+      <section className="filter-shell border-b" aria-label={c.chooseDate}>
         <div className="mx-auto grid w-full max-w-6xl gap-5 px-4 py-5 sm:px-6 lg:grid-cols-[1.25fr_0.6fr_0.85fr] lg:px-8">
           <DatePicker
             districtCode={location.districtCode}
@@ -840,8 +854,8 @@ function HomeView({ locale, location }: { locale: Locale; location: LocationStat
       <section className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6 lg:px-8" aria-labelledby="results-title">
         <div className="flex flex-col gap-3 border-b border-slate-200 pb-5 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <p className="text-sm font-extrabold text-orange-700">{c.confirmed}</p>
-            <h2 className="mt-1 text-2xl font-extrabold text-slate-950" id="results-title">
+            <p className="text-sm font-extrabold text-moss-700">{c.confirmed}</p>
+            <h2 className="mt-1 text-2xl font-extrabold text-ink" id="results-title">
               {c.resultsTitle}
             </h2>
           </div>
@@ -951,7 +965,7 @@ function EvidenceItem<T>({
           className={clsx(
             "rounded-full border px-2 py-0.5 text-xs font-bold",
             displayStatus === "verified" &&
-              "border-emerald-300 bg-emerald-50 text-emerald-800",
+              "border-moss-300 bg-moss-50 text-moss-800",
             displayStatus === "conflict" &&
               "border-amber-300 bg-amber-50 text-amber-900",
             displayStatus === "stale" && "border-red-300 bg-red-50 text-red-800",
@@ -1086,7 +1100,7 @@ function DetailView({
       <div className="mx-auto w-full max-w-5xl px-4 py-6 sm:px-6 sm:py-10 lg:px-8">
         <a
           className="inline-flex min-h-11 items-center gap-2 rounded-lg font-bold text-slate-700 transition-colors hover:text-slate-950 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange-600"
-          href={`/?date=${location.date}${location.query ? `&q=${encodeURIComponent(location.query)}` : ""}${location.districtCode ? `&district=${encodeURIComponent(location.districtCode)}` : ""}`}
+          href={appUrl("/", new URLSearchParams({ date: location.date, ...(location.query ? { q: location.query } : {}), ...(location.districtCode ? { district: location.districtCode } : {}) }))}
           onClick={(event) => {
             event.preventDefault();
             writeLocation({
@@ -1156,7 +1170,7 @@ function DetailView({
             <div className="mt-7 flex flex-col gap-3 sm:flex-row sm:items-start">
               <div>
                 <a
-                  className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-orange-600 px-5 font-extrabold text-white hover:bg-orange-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange-600 sm:w-auto"
+                  className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-coral-600 px-5 font-extrabold text-white hover:bg-coral-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-coral-600 sm:w-auto"
                   href={mapsUrl}
                   rel="noreferrer"
                   target="_blank"
@@ -1171,8 +1185,8 @@ function DetailView({
             </div>
           </article>
 
-          <aside className="rounded-2xl border border-slate-200 bg-[#fffaf3] p-5 sm:p-6" aria-labelledby="evidence-title">
-            <ShieldCheck aria-hidden="true" className="text-orange-700" size={26} />
+          <aside className="trust-panel rounded-2xl border p-5 sm:p-6" aria-labelledby="evidence-title">
+            <ShieldCheck aria-hidden="true" className="text-moss-700" size={26} />
             <h2 className="mt-3 text-2xl font-extrabold text-slate-950" id="evidence-title">
               {c.evidenceTitle}
             </h2>
@@ -1257,7 +1271,7 @@ function NotFoundView({ locale, location }: { locale: Locale; location: Location
         <p className="mt-3 leading-7 text-slate-600">{c.notFoundBody}</p>
         <a
           className="mt-6 inline-flex min-h-11 items-center gap-2 rounded-lg bg-slate-950 px-5 font-extrabold text-white transition-colors hover:bg-slate-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange-600"
-          href={`/?date=${location.date}`}
+          href={appUrl("/", new URLSearchParams({ date: location.date }))}
           onClick={(event) => {
             event.preventDefault();
             writeLocation({
@@ -1317,7 +1331,7 @@ export default function TrustedApp() {
   }, [location.pathname]);
 
   return (
-    <div className="min-h-screen bg-[#f7f4ed] text-slate-950">
+    <div className="product-shell min-h-screen text-slate-950">
       <a className="skip-link" href="#main-content">
         {copy[locale].skip}
       </a>

@@ -4,6 +4,12 @@
 
 :root {
   color-scheme: light;
+  --paper: #f6f7f2;
+  --ink: #10211c;
+  --teal: #0f766e;
+  --coral: #dc624a;
+  --plum: #632a4c;
+  --line: #c8d5cf;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -16,7 +22,7 @@
 
 html {
   min-width: 320px;
-  background: #f7f8f5;
+  background: var(--paper);
 }
 
 body {
@@ -24,6 +30,7 @@ body {
   min-height: 100vh;
   margin: 0;
   font-family:
+    "Noto Sans TC",
     Inter,
     ui-sans-serif,
     system-ui,
@@ -44,7 +51,7 @@ body {
   padding: 0.5rem 0.875rem;
   border-radius: 0.5rem;
   color: #ffffff;
-  background: #0f172a;
+  background: var(--ink);
   font-weight: 700;
   transform: translateY(-180%);
   transition: transform 150ms ease;
@@ -52,12 +59,12 @@ body {
 
 .skip-link:focus {
   transform: translateY(0);
-  outline: 3px solid #ea580c;
+  outline: 3px solid var(--coral);
   outline-offset: 3px;
 }
 
 #main-content:focus-visible {
-  outline: 3px solid #ea580c;
+  outline: 3px solid var(--coral);
   outline-offset: -3px;
 }
 
@@ -85,6 +92,51 @@ button:disabled {
 select option {
   color: #0f172a;
   background: #ffffff;
+}
+
+/* Public product foundations. Legacy visual experiments keep their own scoped styles. */
+.product-shell {
+  background:
+    radial-gradient(circle at 100% -10%, rgb(15 118 110 / 0.10), transparent 28rem),
+    radial-gradient(circle at 0 20%, rgb(99 42 76 / 0.055), transparent 24rem),
+    var(--paper);
+  color: var(--ink);
+}
+
+.family-mark {
+  display: inline-grid;
+  grid-template-columns: repeat(3, 5px);
+  gap: 3px;
+  align-items: end;
+  width: 24px;
+  height: 24px;
+  padding: 4px;
+  border: 1px solid rgb(15 118 110 / 0.28);
+  border-radius: 8px;
+  background: rgb(255 255 255 / 0.72);
+}
+
+.family-mark span { border-radius: 999px; background: var(--teal); }
+.family-mark span:nth-child(1) { height: 7px; background: var(--coral); }
+.family-mark span:nth-child(2) { height: 13px; background: var(--teal); }
+.family-mark span:nth-child(3) { height: 10px; background: var(--plum); }
+
+.trusted-hero {
+  background: linear-gradient(135deg, rgb(255 255 255 / .78), rgb(222 238 233 / .60));
+}
+
+.trust-panel {
+  border-color: rgb(15 118 110 / .24) !important;
+  background: rgb(255 255 255 / .74) !important;
+  box-shadow: 0 18px 44px -36px rgb(16 33 28 / .45);
+}
+
+.filter-shell { border-color: var(--line) !important; background: rgb(255 255 255 / .82) !important; }
+
+@media (prefers-reduced-motion: no-preference) {
+  .product-shell .transition, .product-shell .transition-colors {
+    transition-duration: 180ms;
+  }
 }
 
 .comparison-hero {
