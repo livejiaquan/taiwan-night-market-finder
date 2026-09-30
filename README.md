@@ -18,6 +18,7 @@
 - [outcome-gated roadmap](docs/ROADMAP.md)
 - [第一輪 UX contract](docs/ITERATION_1_UX_BRIEF.md)
 - [行政區可逆實驗](docs/ITERATION_2_DISTRICT_HYPOTHESIS.md)
+- [日期、現場未知與出發前依據](docs/ITERATION_3_DECISION_EVIDENCE.md)
 
 ## Current source of truth
 

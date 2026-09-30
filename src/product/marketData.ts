@@ -578,7 +578,11 @@ export function getMarketDecision(
   if (!isOpeningDay(day)) {
     throw new Error(`Invalid opening day: ${String(day)}`);
   }
-  const freshness = getFreshness(market.verifiedAt, now);
+  // A recently checked record must never freshen an older schedule source.
+  // Both sides of a disagreement remain part of the decision evidence.
+  const freshness = [market.verifiedAt, ...market.evidence.scheduleDays.map((evidence) => evidence.verifiedAt)]
+    .map((verifiedAt) => getFreshness(verifiedAt, now))
+    .reduce((oldest, candidate) => candidate.ageDays > oldest.ageDays ? candidate : oldest);
   const scheduledByPrimarySource = market.scheduleDays.includes(day);
   const conflict = market.conflicts.find((item) => item.days.includes(day));
 

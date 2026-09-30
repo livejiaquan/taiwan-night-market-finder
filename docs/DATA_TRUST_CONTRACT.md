@@ -56,7 +56,7 @@ interface FieldEvidence {
 
 ## 3. Freshness policy
 
-正常營業週期的 freshness 依 `verifiedAt` 計算：
+正常營業週期的 freshness 依 record 與所有 schedule evidence 中最舊的 `verifiedAt` 計算；更新 parent record 不得使舊的欄位來源變新。詳情各欄位仍依自身核對日顯示新鮮度，行政區 reference 使用下述獨立門檻：
 
 - `0–30` 天：current；
 - `31–90` 天：aging，仍可顯示但附核對日期；
@@ -108,6 +108,8 @@ official district-code endpoint
 
 - 第一階段的導航使用名稱＋官方許可區域組成 Maps search query；這是 derived query，不是經官方驗證的經緯度。
 - 未有支持 exact clock hours 的來源時，只顯示營業星期；不得沿用 repository 內手工填寫的精確開收攤時間。
+- 正常週期與「所選日期現場營業」分開呈現。沒有 date-specific 開休市 evidence 時，後者一律為「尚未確認」，不得由週期、資料核對時間或沒有衝突推成已開／已休。
+- 日期使用 Asia/Taipei；implicit 今天跨午夜後更新，明確選取或分享的日期不移動。這不是跨午夜營業時段判斷。
 - 沒有官方座標、定位 permission 或可稽核距離資料時，行政區 select 必須清楚標示為 exact administrative-area filter；不得寫成「附近」「最近」或排序推薦。
 - UI 必須提醒 Maps 或現場資訊可能比名冊更新，並讓使用者在出發前再確認。
 

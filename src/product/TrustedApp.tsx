@@ -3,7 +3,6 @@ import {
   ArrowLeft,
   ArrowUpRight,
   CalendarDays,
-  CheckCircle2,
   ChevronRight,
   CircleAlert,
   Clock3,
@@ -23,6 +22,7 @@ import { clsx } from "clsx";
 import { appUrl, getAppLocation } from "../lib/basePath";
 import {
   getMarketDecision,
+  getFreshness,
   marketDataset,
   type FieldEvidence,
   type OpeningDay,
@@ -52,6 +52,22 @@ const copy = {
     intro:
       "依臺南市政府許可名冊整理，先回答所選日期正常週期有沒有排班。這不是現場即時開門保證，出發前仍請查看原始來源或地圖。",
     chooseDate: "選擇日期",
+    otherDate: "指定日期",
+    backToToday: "回到今天",
+    dateHelp: "依臺灣時間（Asia/Taipei）查當日週期；不判斷跨午夜是否仍營業。",
+    invalidDate: "連結中的日期無效，已改為臺灣時間的今天。",
+    actualOpening: "所選日期現場營業",
+    actualUnknown: "尚未確認",
+    actualUnknownNote: "本產品未收錄這一天的開休市公告；週期排班不代表現場已開。",
+    beforeLeaving: "出發前先確認",
+    beforeLeavingNote: "先核對業者當日公告或最新現場資訊，再確認地圖位置。天候、臨時休市與個別攤商可能不同。",
+    scheduleSources: "週期依據",
+    checkedAge: (days: number) => `距比對 ${days} 天`,
+    agingNote: "超過 30 天未重新比對",
+    scheduledDay: "此星期有排班",
+    unscheduledDay: "此星期未排班",
+    needsCheckHelp: "來源分歧、過期或缺少依據，不能當成正常週期已確認。",
+    regularHelp: "只確認正常週期；以下候選的當日現場營業仍未確認。",
     today: "今天",
     searchLabel: "搜尋夜市或許可區域",
     searchPlaceholder: "搜尋武聖、東區…",
@@ -61,7 +77,7 @@ const copy = {
     districtHelp: "只依官方行政區代碼縮小候選；不是附近、距離或推薦排序。",
     invalidDistrict: "連結中的行政區條件無效，已改為顯示全部本名冊行政區。",
     clearFilters: "清除條件",
-    confirmed: "依週期有營業",
+    confirmed: "正常週期候選",
     needsCheck: "需再確認",
     sourceChecked: "資料比對",
     upstreamUnknown: "來源未提供更新時間",
@@ -76,7 +92,7 @@ const copy = {
     districtCode: "行政區代碼",
     details: "查看依據與導航",
     checkedAt: "資料比對",
-    normalSchedule: "依正常週期有營業",
+    normalSchedule: "正常週期有排班",
     conflict: "資料來源對這一天有分歧",
     stale: "資料已超過比對期限",
     unknown: "目前無法安全判斷",
@@ -112,11 +128,11 @@ const copy = {
     fieldPermitArea: "許可路段或區域",
     fieldNavigation: "Maps 搜尋字串",
     staleDatasetNotice:
-      "這份名冊已超過 90 天未重新比對；只列出舊名冊中曾排定所選星期的項目，而且全部需要出發前再確認。",
+      "部分週期依據已超過 90 天未重新比對；受影響項目只列入需再確認，不代表當日現場營業。",
     staleDetailNotice:
-      "這個判斷使用的名冊也已超過 90 天未重新比對；即使另有來源衝突，出發前仍需重新確認。",
+      "這個判斷的至少一項週期依據已超過 90 天未重新比對；即使另有來源衝突，出發前仍需重新確認。",
     conflictExplanation:
-      "至少兩個臺南市政府來源對這一天的描述不同，因此不列入已確認候選。",
+      "至少兩個臺南市政府來源對這一天的描述不同，因此不列入正常週期候選。",
     sourceScopeTitle: "資料範圍與新鮮度",
     sourceScope: (count: number) =>
       `目前收錄臺南市政府許可名冊 ${count} 筆。名冊提供名稱、許可區域與正常營業日，不提供即時開門狀態。`,
@@ -139,6 +155,22 @@ const copy = {
     intro:
       "Based on Tainan City's licensed-market register. This answers the regular weekly schedule, not whether stalls are open right now. Check the original source or map before leaving.",
     chooseDate: "Choose a date",
+    otherDate: "Specific date",
+    backToToday: "Back to today",
+    dateHelp: "Dates use Taiwan time (Asia/Taipei). Weekly schedules do not establish opening after midnight.",
+    invalidDate: "The linked date is invalid. Showing today in Taiwan instead.",
+    actualOpening: "Actual opening on this date",
+    actualUnknown: "Not confirmed",
+    actualUnknownNote: "No opening or closure announcement for this date is recorded here. A weekly schedule does not establish on-site opening.",
+    beforeLeaving: "Confirm before leaving",
+    beforeLeavingNote: "Check the operator’s announcement or recent on-site information, then confirm the map location. Weather, temporary closures and individual stalls may differ.",
+    scheduleSources: "Schedule evidence",
+    checkedAge: (days: number) => `Checked ${days} days ago`,
+    agingNote: "Not rechecked for over 30 days",
+    scheduledDay: "Scheduled on this weekday",
+    unscheduledDay: "Not scheduled on this weekday",
+    needsCheckHelp: "Conflicting, old or missing evidence cannot confirm the regular schedule.",
+    regularHelp: "Only the weekly schedule is checked. Actual opening is still unconfirmed for every candidate below.",
     today: "Today",
     searchLabel: "Search a market or permitted area",
     searchPlaceholder: "Try 武聖 or 東區…",
@@ -162,7 +194,7 @@ const copy = {
     district: "District",
     districtCode: "District code",
     details: "Evidence and directions",
-    checkedAt: "Verified",
+    checkedAt: "Schedule checked",
     normalSchedule: "Scheduled on its regular cycle",
     conflict: "Sources disagree for this day",
     stale: "Data check is too old",
@@ -199,11 +231,11 @@ const copy = {
     fieldPermitArea: "Permitted area",
     fieldNavigation: "Maps search query",
     staleDatasetNotice:
-      "This register has not been checked for over 90 days. Only entries previously scheduled for this weekday are shown, and every one needs confirmation before travel.",
+      "Some schedule evidence has not been checked for over 90 days. Affected entries are shown only as needing confirmation, never as actual opening.",
     staleDetailNotice:
-      "The register behind this decision has also gone unchecked for over 90 days. Confirm again before travel, even when a separate source conflict is shown.",
+      "At least one schedule source behind this decision has gone unchecked for over 90 days. Confirm again before travel, even when a separate source conflict is shown.",
     conflictExplanation:
-      "At least two Tainan City sources differ for this date, so this market is not placed in the confirmed group.",
+      "At least two Tainan City sources differ for this date, so this market is not placed in the regular-schedule group.",
     sourceScopeTitle: "Coverage and freshness",
     sourceScope: (count: number) =>
       `The pilot contains ${count} records from Tainan City's licensed-market register. It provides names, permitted areas, and regular days—not live opening status.`,
@@ -224,6 +256,8 @@ interface LocationState {
   selectedMarketId: string | null;
   isUnknownPath: boolean;
   date: string;
+  observedAt: number;
+  invalidDate: boolean;
   query: string;
   districtCode: string;
   invalidDistrictCode: string | null;
@@ -251,6 +285,8 @@ function readLocation(): LocationState {
     selectedMarketId,
     isUnknownPath: segments.length > 0 && (!isMarketRoute || selectedMarketId === null),
     date: isIsoDate(requestedDate) ? requestedDate : getTaipeiToday(),
+    observedAt: Date.now(),
+    invalidDate: requestedDate !== null && !isIsoDate(requestedDate),
     query: params.get("q")?.trim() ?? "",
     districtCode: pilotDistricts.some((district) => district.code === requestedDistrictCode)
       ? requestedDistrictCode
@@ -264,10 +300,10 @@ function readLocation(): LocationState {
 
 function writeLocation(
   next: { pathname?: string; date: string; query: string; districtCode: string },
-  options: { replace?: boolean; scroll?: boolean } = {},
+  options: { replace?: boolean; scroll?: boolean; followToday?: boolean } = {},
 ) {
   const params = new URLSearchParams();
-  params.set("date", next.date);
+  if (!options.followToday) params.set("date", next.date);
   if (next.query) {
     params.set("q", next.query);
   }
@@ -292,8 +328,19 @@ function useLocationState() {
 
   useEffect(() => {
     const onPop = () => setLocation(readLocation());
+    const onVisible = () => {
+      if (document.visibilityState === "visible") onPop();
+    };
+    const timer = window.setInterval(onPop, 60_000);
     window.addEventListener("popstate", onPop);
-    return () => window.removeEventListener("popstate", onPop);
+    window.addEventListener("focus", onPop);
+    document.addEventListener("visibilitychange", onVisible);
+    return () => {
+      window.clearInterval(timer);
+      window.removeEventListener("popstate", onPop);
+      window.removeEventListener("focus", onPop);
+      document.removeEventListener("visibilitychange", onVisible);
+    };
   }, []);
 
   return location;
@@ -351,7 +398,7 @@ function setPageMetadata(title: string, description: string, canonicalPath: stri
   ogUrl?.setAttribute("content", new URL(appUrl(canonicalPath), window.location.origin).toString());
 }
 
-function decisionLabel(decision: MarketDecision, locale: Locale) {
+function decisionLabel(decision: Pick<MarketDecision, "status">, locale: Locale) {
   const c = copy[locale];
   switch (decision.status) {
     case "confirmed":
@@ -410,10 +457,10 @@ function AppHeader({ locale, setLocale }: { locale: Locale; setLocale: (locale: 
       <div className="mx-auto flex min-h-16 w-full max-w-6xl items-center justify-between gap-3 px-4 py-2 sm:px-6 lg:px-8">
         <a
           className="flex items-center gap-3 rounded-md transition-opacity hover:opacity-75 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-coral-600"
-          href={appUrl("/", new URLSearchParams({ date: getTaipeiToday() }))}
+          href={appUrl("/")}
           onClick={(event) => {
             event.preventDefault();
-            writeLocation({ pathname: "/", date: getTaipeiToday(), query: "", districtCode: "" });
+            writeLocation({ pathname: "/", date: getTaipeiToday(), query: "", districtCode: "" }, { followToday: true });
           }}
         >
           <span className="family-mark" aria-hidden="true"><span /><span /><span /></span>
@@ -491,7 +538,7 @@ function DatePicker({
                   : "border-[#c8d5cf] bg-white/85 text-slate-700 hover:border-moss-600",
               )}
               key={date}
-              onClick={() => writeLocation({ pathname: "/", date, query, districtCode })}
+              onClick={() => writeLocation({ pathname: "/", date, query, districtCode }, { followToday: date === today })}
               ref={selected ? selectedDateRef : undefined}
               type="button"
             >
@@ -503,13 +550,35 @@ function DatePicker({
           );
         })}
       </div>
+      <div className="mt-2 flex flex-wrap items-center gap-2">
+        <label className="text-xs font-bold text-slate-700" htmlFor="decision-date">{c.otherDate}</label>
+        <input
+          className="min-h-11 min-w-0 max-w-full rounded-lg border border-slate-300 bg-white px-2 text-sm text-slate-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-orange-600"
+          id="decision-date"
+          type="date"
+          value={selectedDate}
+          aria-describedby="decision-date-help"
+          onChange={(event) => {
+            if (isIsoDate(event.target.value)) {
+              writeLocation({ pathname: "/", date: event.target.value, query, districtCode });
+            }
+          }}
+        />
+        {selectedDate !== today ? (
+          <button className="min-h-11 rounded-lg px-2 text-sm font-bold text-moss-800 underline underline-offset-4 focus-visible:outline focus-visible:outline-2 focus-visible:outline-orange-600"
+            type="button" onClick={() => writeLocation({ pathname: "/", date: today, query, districtCode }, { followToday: true })}>
+            {c.backToToday}
+          </button>
+        ) : null}
+      </div>
+      <p className="mt-1 text-xs leading-5 text-slate-600" id="decision-date-help">{c.dateHelp}</p>
     </fieldset>
   );
 }
 
 function DecisionBadge({ decision, locale }: { decision: MarketDecision; locale: Locale }) {
   const tone = decisionTone(decision);
-  const Icon = tone === "confirmed" ? CheckCircle2 : tone === "conflict" ? TriangleAlert : Clock3;
+  const Icon = tone === "confirmed" ? CalendarDays : tone === "conflict" ? TriangleAlert : Clock3;
   return (
     <span
       className={clsx(
@@ -522,6 +591,48 @@ function DecisionBadge({ decision, locale }: { decision: MarketDecision; locale:
       <Icon aria-hidden="true" size={14} />
       {decisionLabel(decision, locale)}
     </span>
+  );
+}
+
+function ActualOpening({ locale, compact = false }: { locale: Locale; compact?: boolean }) {
+  const c = copy[locale];
+  return (
+    <div className="mt-4 rounded-xl border border-slate-200 bg-slate-50 p-3" data-opening-status="unknown">
+      <p className="text-sm font-semibold text-slate-600">{c.actualOpening}</p>
+      <p className="mt-1 flex items-center gap-1.5 text-sm font-extrabold text-slate-900">
+        <CircleAlert aria-hidden="true" size={15} />{c.actualUnknown}
+      </p>
+      {!compact ? <p className="mt-1 text-sm leading-6 text-slate-600">{c.actualUnknownNote}</p> : null}
+    </div>
+  );
+}
+
+function ScheduleEvidenceSummary({ market, decision, locale, compact = false }: {
+  market: TrustedMarket; decision: MarketDecision; locale: Locale; compact?: boolean;
+}) {
+  const c = copy[locale];
+  return (
+    <div className="mt-4 border-t border-slate-200 pt-3">
+      <p className="text-sm font-extrabold text-slate-700">{c.scheduleSources}</p>
+      <ul className="mt-2 space-y-3 text-sm leading-5 text-slate-600">
+        {market.evidence.scheduleDays.map((evidence) => (
+          <li key={`${evidence.sourceId}-${evidence.recordId}`}>
+            <a className="inline-flex items-start gap-1 rounded font-bold text-moss-800 underline underline-offset-4 focus-visible:outline focus-visible:outline-2 focus-visible:outline-orange-600"
+              href={evidence.sourceUrl} rel="noreferrer" target="_blank">
+              {evidence.sourceLabel}<ExternalLink className="mt-1 shrink-0" aria-hidden="true" size={12} />
+            </a>
+            {decision.status === "conflict" ? <p className="font-bold text-amber-900">
+              {dayLabels[locale][decision.day]}：{evidence.value.includes(decision.day) ? c.scheduledDay : c.unscheduledDay}
+            </p> : null}
+            <p>{c.checkedAt} <time dateTime={evidence.verifiedAt}>{formatEvidenceDate(evidence.verifiedAt, locale)}</time></p>
+            {!compact ? <p>{c.sourceUpdated}：{evidence.sourceUpdatedAt ? formatEvidenceDate(evidence.sourceUpdatedAt, locale) : c.sourceUpdatedUnknown}</p> : null}
+          </li>
+        ))}
+      </ul>
+      <p className={clsx("mt-2 text-sm font-semibold", decision.freshness.status === "current" ? "text-slate-600" : "text-amber-900")}>
+        {c.checkedAge(decision.freshness.ageDays)}{decision.freshness.status === "aging" ? ` · ${c.agingNote}` : ""}
+      </p>
+    </div>
   );
 }
 
@@ -555,7 +666,8 @@ function MarketCard({
   return (
     <article className="group flex min-h-full flex-col rounded-2xl border border-[#c8d5cf] bg-white/90 p-5 shadow-[0_16px_45px_-36px_rgba(16,33,28,0.55)] transition hover:border-moss-500">
       <DecisionBadge decision={decision} locale={locale} />
-      <h3 className="mt-4 text-2xl font-extrabold tracking-tight text-slate-950">{market.name}</h3>
+      <h4 className="mt-4 text-2xl font-extrabold tracking-tight text-slate-950">{market.name}</h4>
+      <ActualOpening compact locale={locale} />
       <div className="mt-4 flex items-start gap-2 text-sm leading-6 text-slate-700">
         <MapPin aria-hidden="true" className="mt-1 shrink-0 text-coral-600" size={16} />
         <div>
@@ -572,12 +684,10 @@ function MarketCard({
           {scheduleText(market.scheduleDays, locale)}
         </span>
       </div>
-      <div className="mt-auto border-t border-slate-100 pt-5">
-        <p className="mb-3 text-xs font-semibold text-slate-500">
-          {c.checkedAt} {formatEvidenceDate(market.evidence.scheduleDays[0].verifiedAt, locale)}
-        </p>
+      <div className="mt-auto">
+        <ScheduleEvidenceSummary compact decision={decision} locale={locale} market={market} />
         <a
-          className="inline-flex min-h-11 w-full items-center justify-between rounded-lg bg-moss-700 px-4 font-bold text-white transition-colors hover:bg-moss-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-coral-600"
+          className="mt-4 inline-flex min-h-11 w-full items-center justify-between rounded-lg bg-moss-700 px-4 font-bold text-white transition-colors hover:bg-moss-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-coral-600"
           href={url}
           onClick={(event) => {
             event.preventDefault();
@@ -757,9 +867,9 @@ function HomeView({ locale, location }: { locale: Locale; location: LocationStat
         .map(({ market, district }) => ({
           market,
           district,
-          decision: getMarketDecision(market, selectedDay),
+          decision: getMarketDecision(market, selectedDay, new Date(location.observedAt)),
         })),
-    [locale, location.districtCode, normalizedQuery, selectedDay],
+    [locale, location.districtCode, location.observedAt, normalizedQuery, selectedDay],
   );
   const confirmed = decisions.filter(({ decision }) => decision.status === "confirmed");
   const needsCheck = decisions.filter(
@@ -858,6 +968,10 @@ function HomeView({ locale, location }: { locale: Locale; location: LocationStat
           </div>
         ) : null}
 
+        {location.invalidDate ? (
+          <p className="mt-4 rounded-xl border border-amber-300 bg-amber-50 p-4 text-sm font-semibold text-amber-950" role="status">{c.invalidDate}</p>
+        ) : null}
+
         {location.invalidDistrictCode ? (
           <div className="mt-5 flex gap-3 rounded-xl border border-slate-300 bg-slate-100 p-4 text-slate-800" role="status">
             <Info aria-hidden="true" className="mt-0.5 shrink-0 text-slate-600" size={20} />
@@ -866,18 +980,18 @@ function HomeView({ locale, location }: { locale: Locale; location: LocationStat
         ) : null}
 
         {visible.length ? (
-          <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {visible.map(({ market, district, decision }) => (
-              <MarketCard
-                date={location.date}
-                decision={decision}
-                district={district}
-                districtCode={location.districtCode}
-                key={market.id}
-                locale={locale}
-                market={market}
-                query={location.query}
-              />
+          <div className="space-y-8">
+            {[{ title: c.confirmed, help: c.regularHelp, rows: confirmed }, { title: c.needsCheck, help: c.needsCheckHelp, rows: needsCheck }].filter((group) => group.rows.length > 0).map((group) => (
+              <section className="mt-6" key={group.title} aria-label={group.title}>
+                <h3 className="text-lg font-extrabold text-slate-900">{group.title} · {group.rows.length}</h3>
+                <p className="mt-1 text-sm leading-6 text-slate-600">{group.help}</p>
+                <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                  {group.rows.map(({ market, district, decision }) => (
+                    <MarketCard date={location.date} decision={decision} district={district} districtCode={location.districtCode}
+                      key={market.id} locale={locale} market={market} query={location.query} />
+                  ))}
+                </div>
+              </section>
             ))}
           </div>
         ) : (
@@ -909,21 +1023,21 @@ function HomeView({ locale, location }: { locale: Locale; location: LocationStat
 function EvidenceItem<T>({
   evidence,
   fieldLabel,
-  isDecisionStale = false,
+  isEvidenceStale = false,
   locale,
   selectedDateAgrees = false,
   valueText,
 }: {
   evidence: FieldEvidence<T>;
   fieldLabel: string;
-  isDecisionStale?: boolean;
+  isEvidenceStale?: boolean;
   locale: Locale;
   selectedDateAgrees?: boolean;
   valueText: string;
 }) {
   const c = copy[locale];
   const statusLabel =
-    isDecisionStale
+    isEvidenceStale
       ? c.stale
       : selectedDateAgrees
       ? c.selectedDateAgrees
@@ -934,7 +1048,7 @@ function EvidenceItem<T>({
         : evidence.status === "unknown"
           ? c.unknown
           : c.sourceVerified;
-  const displayStatus = isDecisionStale
+  const displayStatus = isEvidenceStale
     ? "stale"
     : selectedDateAgrees
       ? "verified"
@@ -1068,7 +1182,7 @@ function DetailView({
 }) {
   const c = copy[locale];
   const selectedDay = getScheduleDay(location.date) as OpeningDay;
-  const decision = getMarketDecision(market, selectedDay);
+  const decision = getMarketDecision(market, selectedDay, new Date(location.observedAt));
   const district = getDistrict(market.adminCode);
   const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(market.navigationQuery)}`;
   const mainRef = useRef<HTMLElement>(null);
@@ -1076,11 +1190,14 @@ function DetailView({
   useEffect(() => {
     setPageMetadata(
       `${market.name} · ${formatDecisionDate(location.date, locale)} · ${c.brand}`,
-      `${decisionLabel(decision, locale)}。${c.exceptionNote}`,
+      `${decisionLabel({ status: decision.status }, locale)}。${c.exceptionNote}`,
       `/market/${encodeURIComponent(market.id)}`,
     );
+  }, [c.brand, c.exceptionNote, decision.status, locale, location.date, market.id, market.name]);
+
+  useEffect(() => {
     mainRef.current?.focus({ preventScroll: true });
-  }, [c.brand, c.exceptionNote, decision, locale, location.date, market.id, market.name]);
+  }, [market.id]);
 
   return (
     <main id="main-content" ref={mainRef} tabIndex={-1}>
@@ -1108,6 +1225,8 @@ function DetailView({
             <p className="mt-5 text-sm font-extrabold uppercase tracking-[0.1em] text-orange-700">{c.decisionFor}</p>
             <h1 className="mt-1 text-4xl font-extrabold tracking-tight text-slate-950 sm:text-5xl">{market.name}</h1>
             <p className="mt-2 text-lg font-semibold text-slate-600">{formatDecisionDate(location.date, locale)}</p>
+
+            <ActualOpening locale={locale} />
 
             {decision.status === "conflict" ? (
               <div className="mt-5 flex gap-3 rounded-xl border border-amber-300 bg-amber-50 p-4 text-amber-950">
@@ -1154,6 +1273,12 @@ function DetailView({
               </div>
             </div>
 
+            <ScheduleEvidenceSummary decision={decision} locale={locale} market={market} />
+            <div className="mt-5 rounded-xl border border-amber-200 bg-amber-50 p-4">
+              <h2 className="text-sm font-extrabold text-amber-950">{c.beforeLeaving}</h2>
+              <p className="mt-1 text-sm leading-6 text-amber-950">{c.beforeLeavingNote}</p>
+            </div>
+
             <div className="mt-7 flex flex-col gap-3 sm:flex-row sm:items-start">
               <div>
                 <a
@@ -1184,7 +1309,7 @@ function DetailView({
                 <EvidenceItem
                   evidence={evidence}
                   fieldLabel={c.schedule}
-                  isDecisionStale={decision.status === "stale"}
+                  isEvidenceStale={getFreshness(evidence.verifiedAt, new Date(location.observedAt)).status === "hard-stale"}
                   key={`${evidence.sourceId}-${evidence.recordId}`}
                   locale={locale}
                   selectedDateAgrees={
@@ -1202,7 +1327,7 @@ function DetailView({
               <EvidenceItem
                 evidence={market.evidence.adminCode}
                 fieldLabel={c.districtCode}
-                isDecisionStale={decision.status === "stale"}
+                isEvidenceStale={getFreshness(market.evidence.adminCode.verifiedAt, new Date(location.observedAt)).status === "hard-stale"}
                 locale={locale}
                 valueText={market.evidence.adminCode.value}
               />
@@ -1215,21 +1340,21 @@ function DetailView({
               <EvidenceItem
                 evidence={market.evidence.name}
                 fieldLabel={c.fieldName}
-                isDecisionStale={decision.status === "stale"}
+                isEvidenceStale={getFreshness(market.evidence.name.verifiedAt, new Date(location.observedAt)).status === "hard-stale"}
                 locale={locale}
                 valueText={market.evidence.name.value}
               />
               <EvidenceItem
                 evidence={market.evidence.permittedArea}
                 fieldLabel={c.fieldPermitArea}
-                isDecisionStale={decision.status === "stale"}
+                isEvidenceStale={getFreshness(market.evidence.permittedArea.verifiedAt, new Date(location.observedAt)).status === "hard-stale"}
                 locale={locale}
                 valueText={market.evidence.permittedArea.value}
               />
               <EvidenceItem
                 evidence={market.evidence.navigationQuery}
                 fieldLabel={c.fieldNavigation}
-                isDecisionStale={decision.status === "stale"}
+                isEvidenceStale={getFreshness(market.evidence.navigationQuery.verifiedAt, new Date(location.observedAt)).status === "hard-stale"}
                 locale={locale}
                 valueText={market.evidence.navigationQuery.value}
               />

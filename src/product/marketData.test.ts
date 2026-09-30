@@ -177,4 +177,31 @@ describe("trusted Tainan market dataset", () => {
       expect(() => validateMarketDataset(invalid)).toThrow(/ISO|calendar date/);
     }
   });
+  it("does not let a fresh record timestamp hide older schedule evidence", () => {
+    const market = structuredClone(marketNamed("武聖夜市"));
+    market.verifiedAt = "2026-11-10T00:00:00Z";
+    expect(getMarketDecision(market, "Fri", "2026-11-10T00:00:00Z")).toMatchObject({
+      status: "stale", isPositive: false,
+      freshness: { status: "hard-stale", verifiedAt: market.evidence.scheduleDays[0].verifiedAt },
+    });
+  });
+
+  it("retains stale conflicting-source age even when the primary register is refreshed", () => {
+    const market = structuredClone(marketNamed("花園夜市"));
+    market.verifiedAt = "2026-11-10T00:00:00Z";
+    market.evidence.scheduleDays[0].verifiedAt = market.verifiedAt;
+    expect(getMarketDecision(market, "Fri", market.verifiedAt)).toMatchObject({
+      status: "conflict", isPositive: false, freshness: { status: "hard-stale" },
+    });
+    expect(getMarketDecision(market, "Sun", market.verifiedAt)).toMatchObject({
+      status: "stale", isPositive: false,
+    });
+  });
+
+  it("fails closed when schedule verification time is missing", () => {
+    const invalid = structuredClone(marketDataset);
+    invalid.markets[0].evidence.scheduleDays[0].verifiedAt = "";
+    expect(() => validateMarketDataset(invalid)).toThrow(/verifiedAt must be a non-empty string/);
+  });
+
 });

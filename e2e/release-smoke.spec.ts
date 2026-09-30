@@ -33,11 +33,14 @@ test.describe("GitHub Pages production release smoke", () => {
       "tainan-pilot-v1; static-data-only; no-live-claim",
     );
     await expect(page.getByRole("main")).toContainText("武聖");
+    await expect(page.getByText("所選日期現場營業")).toBeVisible();
+    await expect(page.getByText("尚未確認", { exact: true })).toBeVisible();
     await expect.poll(() => page.locator("html").evaluate((element) => element.scrollWidth <= window.innerWidth)).toBe(true);
 
     await page.getByRole("link", { name: "查看依據與導航" }).first().click();
     await expect(page).toHaveURL(new RegExp(`${basePath}/market/${marketId}`));
     await expect(page.getByText("以夜市名稱搜尋，不是官方座標")).toBeVisible();
+    await expect(page.getByRole("heading", { name: "出發前先確認" })).toBeVisible();
     await expect(page.getByRole("link", { name: "用 Google Maps 搜尋導航" })).toHaveAttribute(
       "href",
       /google\.com\/maps/u,

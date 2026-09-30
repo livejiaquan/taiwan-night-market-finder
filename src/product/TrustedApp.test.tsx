@@ -1,10 +1,11 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { act, fireEvent, render, screen, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import TrustedApp from "./TrustedApp";
 import { scheduleText } from "./scheduleText";
 
 describe("trusted public experience", () => {
   beforeEach(() => {
+    window.localStorage.clear();
     vi.useFakeTimers();
     vi.setSystemTime(new Date("2026-08-09T15:45:00Z"));
   });
@@ -96,7 +97,7 @@ describe("trusted public experience", () => {
     window.history.replaceState({}, "", "/market/tainan-licensed-22?date=2026-08-16");
     render(<TrustedApp />);
 
-    expect(screen.getByText("依正常週期有營業")).toBeInTheDocument();
+    expect(screen.getByText("正常週期有排班")).toBeInTheDocument();
     expect(screen.getAllByText("所選日期一致")).toHaveLength(2);
     expect(screen.queryByText("來源值有差異")).not.toBeInTheDocument();
   });
@@ -115,7 +116,7 @@ describe("trusted public experience", () => {
     render(<TrustedApp />);
 
     expect(screen.getByText("0 個正常週期候選，7 個資料需再確認")).toBeInTheDocument();
-    expect(screen.getByText(/這份名冊已超過 90 天未重新比對/)).toBeInTheDocument();
+    expect(screen.getByText(/部分週期依據已超過 90 天未重新比對/)).toBeInTheDocument();
     expect(screen.queryByRole("heading", { name: "武聖夜市" })).not.toBeInTheDocument();
   });
 
@@ -126,7 +127,7 @@ describe("trusted public experience", () => {
 
     expect(screen.getByText("0 個正常週期候選，1 個資料需再確認")).toBeInTheDocument();
     expect(screen.getByText("資料來源對這一天有分歧")).toBeInTheDocument();
-    expect(screen.getByText(/這份名冊已超過 90 天未重新比對/)).toBeInTheDocument();
+    expect(screen.getByText(/部分週期依據已超過 90 天未重新比對/)).toBeInTheDocument();
   });
 
   it("does not show stale schedule evidence as green while retaining the separately fresh district reference", () => {
@@ -138,7 +139,7 @@ describe("trusted public experience", () => {
     const districtEvidence = screen.getByRole("heading", { name: "行政區" }).closest("article");
     expect(districtEvidence).not.toBeNull();
     expect(districtEvidence).toHaveTextContent("資料已比對");
-    expect(screen.getByText(/這個判斷使用的名冊也已超過 90 天未重新比對/)).toBeInTheDocument();
+    expect(screen.getByText(/這個判斷的至少一項週期依據已超過 90 天未重新比對/)).toBeInTheDocument();
   });
 
   it("renders field evidence and a disclosed name-based Maps action", () => {
@@ -210,4 +211,130 @@ describe("trusted public experience", () => {
     expect(scrollTo).toHaveBeenCalledWith({ top: 0, left: 0, behavior: "auto" });
     scrollTo.mockRestore();
   });
+  it("shows an unknown actual-opening status and source dates on every regular candidate", () => {
+    window.history.replaceState({}, "", "/?date=2026-08-14&q=武聖");
+    render(<TrustedApp />);
+    const card = screen.getByRole("heading", { name: "武聖夜市" }).closest("article")!;
+    expect(within(card).getByText("正常週期有排班")).toBeInTheDocument();
+    expect(within(card).getByText("所選日期現場營業")).toBeInTheDocument();
+    expect(within(card).getByText("尚未確認")).toBeInTheDocument();
+    expect(within(card).getByRole("link", { name: "臺南市已取得設置許可夜市名冊" })).toHaveAttribute("href", expect.stringContaining("soa.tainan.gov.tw"));
+    expect(card.querySelector("time")).toHaveAttribute("datetime", "2026-08-09T15:34:35.999Z");
+    expect(card).not.toHaveTextContent("即時營業中");
+  });
+
+  it("keeps Friday conflict evidence in its own group with both claims visible", () => {
+    window.history.replaceState({}, "", "/?date=2026-08-14&district=67000340");
+    render(<TrustedApp />);
+    expect(screen.queryByRole("region", { name: "正常週期候選" })).not.toBeInTheDocument();
+    const group = screen.getByRole("region", { name: "需再確認" });
+    expect(within(group).getByText("週五：此星期有排班")).toBeInTheDocument();
+    expect(within(group).getByText("週五：此星期未排班")).toBeInTheDocument();
+    expect(within(group).getByRole("link", { name: "臺南旅遊網：花園夜市" })).toHaveAttribute("href", "https://www.twtainan.net/zh-tw/attractions/detail/5572/");
+    expect(within(group).getByText("尚未確認")).toBeInTheDocument();
+  });
+
+  it("shows aging evidence without claiming a fresh field or actual opening", () => {
+    vi.setSystemTime(new Date("2026-09-30T00:00:00Z"));
+    window.history.replaceState({}, "", "/?date=2026-10-02&q=武聖");
+    render(<TrustedApp />);
+    expect(screen.getByText("距比對 51 天 · 超過 30 天未重新比對")).toBeInTheDocument();
+    expect(screen.getByText("尚未確認")).toBeInTheDocument();
+  });
+
+  it("supports arbitrary dates and return-to-today without clearing the district or query", () => {
+    window.history.replaceState({}, "", "/?date=2026-08-14&q=花園&district=67000340");
+    render(<TrustedApp />);
+    fireEvent.change(screen.getByLabelText("指定日期"), { target: { value: "2026-09-04" } });
+    expect(window.location.search).toContain("date=2026-09-04");
+    expect(screen.getByText("0 個正常週期候選，1 個資料需再確認")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "回到今天" }));
+    expect(screen.getByLabelText("指定日期")).toHaveValue("2026-08-09");
+    expect(screen.getByRole("combobox")).toHaveValue("67000340");
+    expect(screen.getByRole("searchbox")).toHaveValue("花園");
+  });
+
+  it("recovers visibly from invalid linked dates", () => {
+    window.history.replaceState({}, "", "/?date=2026-02-30");
+    render(<TrustedApp />);
+    expect(screen.getByText("連結中的日期無效，已改為臺灣時間的今天。")).toBeInTheDocument();
+    expect(screen.getByLabelText("指定日期")).toHaveValue("2026-08-09");
+  });
+
+  it("rolls an implicit today across Taipei midnight and explains the clock-hour limitation", () => {
+    vi.setSystemTime(new Date("2026-08-09T15:59:30Z"));
+    window.history.replaceState({}, "", "/");
+    render(<TrustedApp />);
+    expect(screen.getByLabelText("指定日期")).toHaveValue("2026-08-09");
+    act(() => vi.advanceTimersByTime(60_000));
+    expect(screen.getByLabelText("指定日期")).toHaveValue("2026-08-10");
+    expect(screen.getByText(/不判斷跨午夜是否仍營業/)).toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: "花園夜市" })).not.toBeInTheDocument();
+  });
+
+  it("preserves a shared explicit date across midnight and browser history navigation", () => {
+    vi.setSystemTime(new Date("2026-08-09T15:59:30Z"));
+    window.history.replaceState({}, "", "/?date=2026-08-09");
+    render(<TrustedApp />);
+    act(() => vi.advanceTimersByTime(60_000));
+    expect(screen.getByLabelText("指定日期")).toHaveValue("2026-08-09");
+    act(() => {
+      window.history.replaceState({}, "", "/?date=2026-08-14&district=67000340");
+      window.dispatchEvent(new PopStateEvent("popstate"));
+    });
+    expect(screen.getByLabelText("指定日期")).toHaveValue("2026-08-14");
+    expect(screen.getByText("0 個正常週期候選，1 個資料需再確認")).toBeInTheDocument();
+  });
+
+  it("refreshes freshness on tab return without moving keyboard focus", () => {
+    window.history.replaceState({}, "", "/market/tainan-licensed-5?date=2026-08-14");
+    render(<TrustedApp />);
+    const share = screen.getByRole("button", { name: "分享這個日期與夜市" });
+    share.focus();
+    vi.setSystemTime(new Date("2026-11-10T00:00:00Z"));
+    fireEvent.focus(window);
+    expect(screen.getAllByText("資料已超過比對期限").length).toBeGreaterThan(0);
+    expect(share).toHaveFocus();
+  });
+
+  it("warns about actual opening before the Maps action and keeps the status explicit in English", () => {
+    window.history.replaceState({}, "", "/market/tainan-licensed-5?date=2026-08-14");
+    render(<TrustedApp />);
+    const warning = screen.getByRole("heading", { name: "出發前先確認" });
+    const map = screen.getByRole("link", { name: /用 Google Maps 搜尋導航/ });
+    expect(warning.compareDocumentPosition(map) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: "EN" }));
+    expect(screen.getByText("Actual opening on this date")).toBeInTheDocument();
+    expect(screen.getByText("Not confirmed")).toBeInTheDocument();
+    expect(screen.getByText("Scheduled on its regular cycle")).toBeInTheDocument();
+  });
+
+  it("returns to a live today while preserving filters and keyboard focus across refresh", () => {
+    vi.setSystemTime(new Date("2026-08-09T15:59:30Z"));
+    window.history.replaceState({}, "", "/?date=2026-08-14&q=夜市&district=67000340");
+    render(<TrustedApp />);
+    fireEvent.click(screen.getByRole("button", { name: "回到今天" }));
+    expect(window.location.search).not.toContain("date=");
+    const search = screen.getByRole("searchbox");
+    search.focus();
+    act(() => vi.advanceTimersByTime(60_000));
+    expect(search).toHaveFocus();
+    expect(search).toHaveValue("夜市");
+    expect(screen.getByRole("combobox")).toHaveValue("67000340");
+    expect(screen.getByLabelText("指定日期")).toHaveValue("2026-08-10");
+  });
+
+  it("keeps a newly edited search and an explicit date during a timer refresh", () => {
+    window.history.replaceState({}, "", "/?date=2026-08-14");
+    render(<TrustedApp />);
+    const search = screen.getByRole("searchbox");
+    fireEvent.change(search, { target: { value: "花園" } });
+    search.focus();
+    act(() => vi.advanceTimersByTime(60_000));
+    expect(search).toHaveFocus();
+    expect(search).toHaveValue("花園");
+    expect(screen.getByLabelText("指定日期")).toHaveValue("2026-08-14");
+    expect(screen.getByText("0 個正常週期候選，1 個資料需再確認")).toBeInTheDocument();
+  });
+
 });
