@@ -1,6 +1,83 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import 'tailwindcss';
+
+@custom-variant dark (&:is(.dark *));
+
+@theme {
+  --font-sans:
+    ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, PingFang TC,
+    Noto Sans TC, Noto Sans CJK TC, Microsoft JhengHei, Segoe UI, sans-serif;
+
+  --color-canvas: rgb(var(--canvas));
+  --color-surface: rgb(var(--surface));
+  --color-raised: rgb(var(--raised));
+  --color-fg: rgb(var(--fg));
+  --color-muted: rgb(var(--muted));
+  --color-subtle: rgb(var(--subtle));
+  --color-edge: rgb(var(--edge));
+  --color-lantern: rgb(var(--lantern));
+  --color-lantern-fg: rgb(var(--lantern-fg));
+  --color-gold: rgb(var(--gold));
+  --color-ok: rgb(var(--ok));
+  --color-ok-soft: rgb(var(--ok-soft));
+  --color-warn: rgb(var(--warn));
+  --color-warn-soft: rgb(var(--warn-soft));
+  --color-bad: rgb(var(--bad));
+  --color-bad-soft: rgb(var(--bad-soft));
+  --color-idle: rgb(var(--idle));
+  --color-idle-soft: rgb(var(--idle-soft));
+  --color-ink: #10211c;
+  --color-paper: #f6f7f2;
+
+  --color-moss-50: #f1f7f5;
+  --color-moss-100: #deeee9;
+  --color-moss-200: #b9dcd4;
+  --color-moss-300: #83c4b9;
+  --color-moss-400: #42a497;
+  --color-moss-500: #23877e;
+  --color-moss-600: #0f766e;
+  --color-moss-700: #0c5e58;
+  --color-moss-800: #124b47;
+  --color-moss-900: #123d3a;
+
+  --color-coral-50: #fff4f0;
+  --color-coral-100: #ffe5dc;
+  --color-coral-200: #ffc9b8;
+  --color-coral-300: #f7a287;
+  --color-coral-400: #ee7c5f;
+  --color-coral-500: #dc624a;
+  --color-coral-600: #c64e39;
+  --color-coral-700: #a73d2d;
+  --color-coral-800: #863328;
+  --color-coral-900: #6e2d25;
+
+  --color-plum-50: #fbf5f8;
+  --color-plum-100: #f5e8ee;
+  --color-plum-200: #ead0dd;
+  --color-plum-500: #77415e;
+  --color-plum-600: #632a4c;
+  --color-plum-700: #4f203d;
+
+  --shadow-ambient: 0 18px 48px -34px rgb(16 33 28 / 0.38);
+  --shadow-glow: 0 0 35px rgb(45 212 191 / 0.28);
+}
+
+/*
+  The default border color has changed to `currentcolor` in Tailwind CSS v4,
+  so we've added these compatibility styles to make sure everything still
+  looks the same as it did with Tailwind CSS v3.
+
+  If we ever want to remove these styles, we need to add an explicit border
+  color utility to any element that depends on these defaults.
+*/
+@layer base {
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: var(--color-gray-200, currentcolor);
+  }
+}
 
 :root {
   color-scheme: light;
@@ -57,30 +134,33 @@
   --idle-soft: 44 52 74;
 }
 
-* {
-  box-sizing: border-box;
-}
+/* Element defaults live in the base layer so Tailwind v4 utilities can override them. */
+@layer base {
+  * {
+    box-sizing: border-box;
+  }
 
-html {
-  min-width: 320px;
-  background: rgb(var(--canvas));
-}
+  html {
+    min-width: 320px;
+    background: rgb(var(--canvas));
+  }
 
-body {
-  min-width: 320px;
-  min-height: 100vh;
-  margin: 0;
-  font-family:
-    ui-sans-serif,
-    system-ui,
-    -apple-system,
-    BlinkMacSystemFont,
-    "PingFang TC",
-    "Noto Sans TC",
-    "Noto Sans CJK TC",
-    "Microsoft JhengHei",
-    "Segoe UI",
-    sans-serif;
+  body {
+    min-width: 320px;
+    min-height: 100vh;
+    margin: 0;
+    font-family:
+      ui-sans-serif,
+      system-ui,
+      -apple-system,
+      BlinkMacSystemFont,
+      "PingFang TC",
+      "Noto Sans TC",
+      "Noto Sans CJK TC",
+      "Microsoft JhengHei",
+      "Segoe UI",
+      sans-serif;
+  }
 }
 
 .skip-link {
@@ -111,30 +191,32 @@ body {
   outline-offset: -3px;
 }
 
-button,
-input,
-select {
-  font: inherit;
-}
+@layer base {
+  button,
+  input,
+  select {
+    font: inherit;
+  }
 
-button,
-a,
-input {
-  touch-action: manipulation;
-  -webkit-tap-highlight-color: rgb(234 88 12 / 0.18);
-}
+  button,
+  a,
+  input {
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: rgb(234 88 12 / 0.18);
+  }
 
-button {
-  cursor: pointer;
-}
+  button {
+    cursor: pointer;
+  }
 
-button:disabled {
-  cursor: not-allowed;
-}
+  button:disabled {
+    cursor: not-allowed;
+  }
 
-select option {
-  color: #0f172a;
-  background: #ffffff;
+  select option {
+    color: #0f172a;
+    background: #ffffff;
+  }
 }
 
 /* Public product foundations. Legacy visual experiments keep their own scoped styles. */

@@ -218,7 +218,7 @@ function StyleComparison(props: SharedProps) {
                 <Sparkles size={15} aria-hidden="true" />
                 {copy.compareEyebrow}
               </div>
-              <h1 className="text-balance text-4xl font-semibold tracking-[0] text-slate-950 sm:text-5xl lg:text-6xl">
+              <h1 className="text-balance text-4xl font-semibold tracking-normal text-slate-950 sm:text-5xl lg:text-6xl">
                 {copy.compareTitle}
               </h1>
               <p className="mt-4 max-w-2xl text-lg leading-8 text-slate-700">
@@ -278,7 +278,7 @@ function ComparisonPanel({
             <span className="inline-flex rounded-full border border-fuchsia-300/40 bg-fuchsia-400/15 px-3 py-1 text-xs font-bold uppercase tracking-[0.12em] text-fuchsia-100">
               {meta.version} / {meta.label}
             </span>
-            <h2 className="mt-5 text-3xl font-semibold tracking-[0]">{meta.name}</h2>
+            <h2 className="mt-5 text-3xl font-semibold tracking-normal">{meta.name}</h2>
             <p className="mt-3 text-sm leading-6 text-cyan-50/78">{meta.summary}</p>
           </div>
           <div className="rounded-[8px] border border-white/15 bg-black/45 p-4 backdrop-blur-xl">
@@ -307,7 +307,7 @@ function ComparisonPanel({
         <span className="text-xs font-bold uppercase tracking-[0.14em] text-emerald-700">
           {meta.version} / {meta.label}
         </span>
-        <h2 className="mt-3 text-3xl font-semibold tracking-[0] text-slate-950">
+        <h2 className="mt-3 text-3xl font-semibold tracking-normal text-slate-950">
           {meta.name}
         </h2>
         <p className="mt-3 text-sm leading-6 text-slate-600">{meta.summary}</p>
@@ -350,7 +350,7 @@ function NeonExperience(props: ExperienceProps) {
                 <Sparkles size={15} aria-hidden="true" />
                 {meta.version} / {meta.name}
               </div>
-              <h1 className="mt-5 max-w-4xl text-balance text-4xl font-semibold tracking-[0] text-white sm:text-6xl lg:text-7xl">
+              <h1 className="mt-5 max-w-4xl text-balance text-4xl font-semibold tracking-normal text-white sm:text-6xl lg:text-7xl">
                 {meta.heroTitle}
               </h1>
               <p className="mt-5 max-w-2xl text-lg leading-8 text-cyan-50/78">
@@ -444,11 +444,11 @@ function TravelExperience(props: ExperienceProps) {
         />
         <div className="grid gap-8 border-b border-slate-200 pb-8 lg:grid-cols-[minmax(0,0.9fr)_minmax(400px,0.7fr)] lg:items-center">
           <div>
-            <div className="inline-flex items-center gap-2 rounded-full border border-emerald-800/15 bg-white px-3 py-1 text-sm font-semibold text-emerald-800 shadow-sm">
+            <div className="inline-flex items-center gap-2 rounded-full border border-emerald-800/15 bg-white px-3 py-1 text-sm font-semibold text-emerald-800 shadow-xs">
               <Compass size={15} aria-hidden="true" />
               {meta.version} / {meta.name}
             </div>
-            <h1 className="mt-5 max-w-4xl text-balance text-4xl font-semibold tracking-[0] text-slate-950 sm:text-6xl">
+            <h1 className="mt-5 max-w-4xl text-balance text-4xl font-semibold tracking-normal text-slate-950 sm:text-6xl">
               {meta.heroTitle}
             </h1>
             <p className="mt-5 max-w-2xl text-lg leading-8 text-slate-600">
@@ -511,7 +511,7 @@ function TravelExperience(props: ExperienceProps) {
               locale={props.locale}
               pulseKey={props.detailPulse}
             />
-            <div className="h-80 overflow-hidden rounded-[8px] border border-slate-200 bg-white shadow-sm">
+            <div className="h-80 overflow-hidden rounded-[8px] border border-slate-200 bg-white shadow-xs">
               <TaiwanMap
                 markets={props.filteredMarkets}
                 selectedMarket={props.selectedMarket}
@@ -544,7 +544,7 @@ function TopNav({
   const copy = uiCopy[locale];
   const itemClass = (styleId: StyleId) =>
     clsx(
-      "inline-flex min-h-10 shrink-0 flex-col items-start justify-center gap-0.5 rounded-[8px] px-2 text-left text-sm font-semibold leading-tight transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 sm:flex-row sm:items-center sm:gap-2 sm:px-3",
+      "inline-flex min-h-10 shrink-0 flex-col items-start justify-center gap-0.5 rounded-[8px] px-2 text-left text-sm font-semibold leading-tight transition focus-visible:outline-solid focus-visible:outline-2 focus-visible:outline-offset-2 sm:flex-row sm:items-center sm:gap-2 sm:px-3",
       active === styleId
         ? isDark
           ? "bg-cyan-300 text-slate-950 focus-visible:outline-cyan-200"
@@ -571,7 +571,7 @@ function TopNav({
             event.preventDefault();
             navigateTo("/");
           }}
-          className="inline-flex min-h-10 items-center gap-2 whitespace-nowrap rounded-[8px] text-lg font-bold tracking-[0] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan-300"
+          className="inline-flex min-h-10 items-center gap-2 whitespace-nowrap rounded-[8px] text-lg font-bold tracking-normal focus-visible:outline-solid focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan-300"
         >
           <Utensils size={22} aria-hidden="true" />
           {copy.appName}
@@ -583,7 +583,7 @@ function TopNav({
             navigateTo("/");
           }}
           className={clsx(
-            "inline-flex min-h-9 w-fit items-center rounded-[8px] px-3 text-xs font-bold uppercase tracking-[0.12em] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2",
+            "inline-flex min-h-9 w-fit items-center rounded-[8px] px-3 text-xs font-bold uppercase tracking-[0.12em] focus-visible:outline-solid focus-visible:outline-2 focus-visible:outline-offset-2",
             isDark
               ? "border border-white/15 text-white/70 focus-visible:outline-cyan-200"
               : "border border-slate-200 bg-white text-slate-600 focus-visible:outline-slate-500",
@@ -635,7 +635,7 @@ function LanguageToggle({
   const isDark = tone === "dark";
   const buttonClass = (value: Locale) =>
     clsx(
-      "min-h-9 rounded-[8px] px-3 text-sm font-bold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2",
+      "min-h-9 rounded-[8px] px-3 text-sm font-bold transition focus-visible:outline-solid focus-visible:outline-2 focus-visible:outline-offset-2",
       locale === value
         ? isDark
           ? "bg-white text-slate-950 focus-visible:outline-cyan-200"
@@ -687,10 +687,10 @@ function FilterBar({
   const base = isNeon
     ? "border-white/15 bg-black/45 text-white shadow-glow"
     : tone === "utility"
-      ? "border-slate-300 bg-white text-slate-950 shadow-sm"
+      ? "border-slate-300 bg-white text-slate-950 shadow-xs"
       : "border-slate-200 bg-white text-slate-950 shadow-ambient";
   const control =
-    "min-h-11 w-full rounded-[8px] border px-3 text-sm font-semibold outline-none transition focus:ring-2";
+    "min-h-11 w-full rounded-[8px] border px-3 text-sm font-semibold outline-hidden transition focus:ring-2";
   const controlTone = isNeon
     ? "border-white/15 bg-white/10 text-white placeholder:text-white/45 focus:border-cyan-300 focus:ring-cyan-300/25"
     : "border-slate-200 bg-white text-slate-900 focus:border-slate-400 focus:ring-slate-300/40";
@@ -767,7 +767,7 @@ function FilterBar({
         type="button"
         onClick={clearFilters}
         className={clsx(
-          "inline-flex min-h-11 items-center justify-center gap-2 rounded-[8px] px-4 text-sm font-bold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2",
+          "inline-flex min-h-11 items-center justify-center gap-2 rounded-[8px] px-4 text-sm font-bold transition focus-visible:outline-solid focus-visible:outline-2 focus-visible:outline-offset-2",
           compact && "w-full",
           isNeon
             ? "border border-white/15 bg-white/10 text-white hover:bg-white/15 focus-visible:outline-cyan-300"
@@ -784,7 +784,7 @@ function FilterBar({
             type="button"
             onClick={() => update({ openingDay: filters.openingDay === day ? undefined : day })}
             className={clsx(
-              "min-h-10 rounded-[8px] border font-bold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2",
+              "min-h-10 rounded-[8px] border font-bold transition focus-visible:outline-solid focus-visible:outline-2 focus-visible:outline-offset-2",
               compact ? "min-w-9 px-1.5 text-xs" : "min-w-14 px-3 text-sm",
               filters.openingDay === day
                 ? isNeon
@@ -878,8 +878,8 @@ function MarketCard({
         isNeon
           ? "border-white/12 bg-white/[0.07] text-white shadow-glow hover:border-cyan-300/45"
           : isTravel
-            ? "border-slate-200 bg-white text-slate-950 shadow-sm hover:-translate-y-0.5 hover:shadow-ambient"
-            : "border-slate-300 bg-white text-slate-950 shadow-sm hover:border-blue-400",
+            ? "border-slate-200 bg-white text-slate-950 shadow-xs hover:-translate-y-0.5 hover:shadow-ambient"
+            : "border-slate-300 bg-white text-slate-950 shadow-xs hover:border-blue-400",
         active &&
           (isNeon
             ? "border-cyan-300/65"
@@ -900,7 +900,7 @@ function MarketCard({
             >
               {title.location}
             </p>
-            <h2 className="mt-2 text-2xl font-semibold tracking-[0]">{title.primary}</h2>
+            <h2 className="mt-2 text-2xl font-semibold tracking-normal">{title.primary}</h2>
             <p className={clsx("mt-1 text-base", isNeon ? "text-white/65" : "text-slate-500")}>
               {title.secondary}
             </p>
@@ -934,7 +934,7 @@ function MarketCard({
           onClick={() => onOpen(styleId, market.id)}
           aria-pressed={active}
           className={clsx(
-            "mt-5 inline-flex min-h-11 items-center justify-center gap-2 rounded-[8px] px-4 text-sm font-bold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2",
+            "mt-5 inline-flex min-h-11 items-center justify-center gap-2 rounded-[8px] px-4 text-sm font-bold transition focus-visible:outline-solid focus-visible:outline-2 focus-visible:outline-offset-2",
             active
               ? isNeon
                 ? "bg-white text-slate-950 shadow-glow focus-visible:outline-cyan-200"
@@ -1001,12 +1001,12 @@ function DetailPanel({
       ref={panelRef}
       tabIndex={-1}
       className={clsx(
-        "scroll-mt-4 rounded-[8px] border p-5 transition duration-300 focus:outline-none",
+        "scroll-mt-4 rounded-[8px] border p-5 transition duration-300 focus:outline-hidden",
         isNeon
           ? "border-white/15 bg-black/55 text-white shadow-glow backdrop-blur-xl"
           : isTravel
             ? "border-slate-200 bg-white text-slate-950 shadow-ambient"
-            : "border-slate-300 bg-white text-slate-950 shadow-sm",
+            : "border-slate-300 bg-white text-slate-950 shadow-xs",
         isPulsing &&
           (isNeon
             ? "ring-2 ring-cyan-200/85 shadow-[0_0_42px_rgba(103,232,249,0.35)]"
@@ -1025,7 +1025,7 @@ function DetailPanel({
           >
             {copy.detailView}
           </p>
-          <h2 className="mt-2 text-3xl font-semibold tracking-[0]">{title.primary}</h2>
+          <h2 className="mt-2 text-3xl font-semibold tracking-normal">{title.primary}</h2>
           <p className={clsx("mt-1 text-lg", isNeon ? "text-white/65" : "text-slate-500")}>
             {title.secondary}
           </p>
@@ -1199,7 +1199,7 @@ function TaiwanMap({
 
   return (
     <div
-      className={clsx("relative h-full min-h-[18rem] w-full overflow-hidden", theme.bg)}
+      className={clsx("relative h-full min-h-72 w-full overflow-hidden", theme.bg)}
       aria-label={copy.mapAria}
     >
       {isNeon ? <div className="absolute inset-0 bg-neon-scan opacity-40" /> : null}
@@ -1307,9 +1307,9 @@ function LoadingState({ tone }: { tone: "dark" | "light" | "utility" }) {
               dark ? "border-white/10 bg-white/8" : "border-slate-200 bg-white",
             )}
           >
-            <div className={clsx("m-4 h-4 w-24 rounded", dark ? "bg-white/15" : "bg-slate-200")} />
-            <div className={clsx("mx-4 mt-8 h-8 w-48 rounded", dark ? "bg-white/15" : "bg-slate-200")} />
-            <div className={clsx("mx-4 mt-4 h-4 w-32 rounded", dark ? "bg-white/10" : "bg-slate-100")} />
+            <div className={clsx("m-4 h-4 w-24 rounded-sm", dark ? "bg-white/15" : "bg-slate-200")} />
+            <div className={clsx("mx-4 mt-8 h-8 w-48 rounded-sm", dark ? "bg-white/15" : "bg-slate-200")} />
+            <div className={clsx("mx-4 mt-4 h-4 w-32 rounded-sm", dark ? "bg-white/10" : "bg-slate-100")} />
             <div className={clsx("mx-4 mt-12 h-11 rounded-[8px]", dark ? "bg-cyan-300/20" : "bg-slate-100")} />
           </div>
         ))}
@@ -1325,7 +1325,7 @@ function ErrorState({ retry, tone, locale }: { retry: () => void; tone: "dark" |
     <section className={clsx("mx-auto max-w-3xl px-4 py-16 text-center sm:px-6", dark ? "text-white" : "text-slate-950")}>
       <div className={clsx("rounded-[8px] border p-8", dark ? "border-red-300/30 bg-red-400/10" : "border-red-200 bg-white")}>
         <AlertTriangle className={clsx("mx-auto", dark ? "text-red-200" : "text-red-600")} size={42} aria-hidden="true" />
-        <h2 className="mt-4 text-3xl font-semibold tracking-[0]">{copy.dataErrorTitle}</h2>
+        <h2 className="mt-4 text-3xl font-semibold tracking-normal">{copy.dataErrorTitle}</h2>
         <p className={clsx("mx-auto mt-3 max-w-xl leading-7", dark ? "text-white/68" : "text-slate-600")}>
           {copy.dataErrorBody}
         </p>
@@ -1333,7 +1333,7 @@ function ErrorState({ retry, tone, locale }: { retry: () => void; tone: "dark" |
           type="button"
           onClick={retry}
           className={clsx(
-            "mt-6 inline-flex min-h-11 items-center gap-2 rounded-[8px] px-4 text-sm font-bold focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2",
+            "mt-6 inline-flex min-h-11 items-center gap-2 rounded-[8px] px-4 text-sm font-bold focus-visible:outline-solid focus-visible:outline-2 focus-visible:outline-offset-2",
             dark ? "bg-red-200 text-slate-950 focus-visible:outline-red-100" : "bg-slate-950 text-white focus-visible:outline-slate-500",
           )}
         >
@@ -1352,7 +1352,7 @@ function EmptyState({ clearFilters, tone, locale }: { clearFilters: () => void; 
     <section className={clsx("mx-auto max-w-3xl px-4 py-16 text-center sm:px-6", dark ? "text-white" : "text-slate-950")}>
       <div className={clsx("rounded-[8px] border p-8", dark ? "border-white/12 bg-white/7" : "border-slate-200 bg-white")}>
         <Search className={clsx("mx-auto", dark ? "text-cyan-200" : "text-slate-500")} size={42} aria-hidden="true" />
-        <h2 className="mt-4 text-3xl font-semibold tracking-[0]">{copy.emptyTitle}</h2>
+        <h2 className="mt-4 text-3xl font-semibold tracking-normal">{copy.emptyTitle}</h2>
         <p className={clsx("mx-auto mt-3 max-w-xl leading-7", dark ? "text-white/68" : "text-slate-600")}>
           {copy.emptyBody}
         </p>
@@ -1360,7 +1360,7 @@ function EmptyState({ clearFilters, tone, locale }: { clearFilters: () => void; 
           type="button"
           onClick={clearFilters}
           className={clsx(
-            "mt-6 inline-flex min-h-11 items-center gap-2 rounded-[8px] px-4 text-sm font-bold focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2",
+            "mt-6 inline-flex min-h-11 items-center gap-2 rounded-[8px] px-4 text-sm font-bold focus-visible:outline-solid focus-visible:outline-2 focus-visible:outline-offset-2",
             dark ? "bg-cyan-300 text-slate-950 focus-visible:outline-cyan-200" : "bg-slate-950 text-white focus-visible:outline-slate-500",
           )}
         >
@@ -1437,7 +1437,7 @@ function DetailFact({
 
 function InfoPill({ icon, label }: { icon: React.ReactNode; label: string }) {
   return (
-    <div className="flex min-w-0 items-center gap-2 rounded-[8px] border border-current/10 bg-current/[0.04] px-3 py-2">
+    <div className="flex min-w-0 items-center gap-2 rounded-[8px] border border-current/10 bg-current/4 px-3 py-2">
       <span className="shrink-0">{icon}</span>
       <span className="truncate font-semibold">{label}</span>
     </div>
@@ -1471,7 +1471,7 @@ function TagRow({ tags, tone, locale }: { tags: string[]; tone: StyleId | "neon"
 function Metric({ value, label, tone = "light" }: { value: string; label: string; tone?: "light" | "dark" }) {
   return (
     <div className={clsx("min-w-0 p-2 text-center", tone === "dark" ? "text-white" : "text-slate-950")}>
-      <p className="truncate text-2xl font-semibold tracking-[0]">{value}</p>
+      <p className="truncate text-2xl font-semibold tracking-normal">{value}</p>
       <p className={clsx("mt-1 text-xs font-bold uppercase tracking-[0.12em]", tone === "dark" ? "text-white/52" : "text-slate-500")}>
         {label}
       </p>

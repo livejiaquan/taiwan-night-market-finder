@@ -440,7 +440,7 @@ function decisionTone(decision: MarketDecision) {
 }
 
 const focusRing =
-  "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lantern";
+  "focus-visible:outline-solid focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lantern";
 const weekdayInitials: Record<Locale, string[]> = {
   zh: ["一", "二", "三", "四", "五", "六", "日"],
   en: ["M", "T", "W", "T", "F", "S", "S"],
@@ -515,7 +515,7 @@ function ThemeToggle({ locale }: { locale: Locale }) {
 function AppHeader({ locale, setLocale }: { locale: Locale; setLocale: (locale: Locale) => void }) {
   const c = copy[locale];
   return (
-    <header className="sticky top-0 z-30 border-b border-edge bg-canvas/90 backdrop-blur">
+    <header className="sticky top-0 z-30 border-b border-edge bg-canvas/90 backdrop-blur-sm">
       <div className="mx-auto flex min-h-16 w-full max-w-6xl items-center justify-between gap-3 px-4 py-2 sm:px-6 lg:px-8">
         <a
           className={clsx("flex min-h-11 min-w-0 items-center gap-3 rounded-lg transition-opacity hover:opacity-80", focusRing)}
@@ -721,7 +721,7 @@ function MarketCard({
   );
 
   return (
-    <article className="group flex min-h-full flex-col rounded-2xl border border-edge bg-surface p-5 shadow-sm transition hover:border-lantern/50 hover:shadow-lg">
+    <article className="group flex min-h-full flex-col rounded-2xl border border-edge bg-surface p-5 shadow-xs transition hover:border-lantern/50 hover:shadow-lg">
       <div className="flex items-start justify-between gap-3">
         <DecisionBadge decision={decision} locale={locale} />
         <span className="shrink-0 rounded-full border border-edge px-2.5 py-0.5 text-xs font-bold text-muted">
@@ -775,7 +775,7 @@ function MarketCard({
 }
 
 const fieldClass =
-  "min-h-12 w-full rounded-xl border border-edge bg-canvas text-base text-fg outline-none transition-colors placeholder:text-subtle focus:border-lantern focus:ring-2 focus:ring-lantern/25";
+  "min-h-12 w-full rounded-xl border border-edge bg-canvas text-base text-fg outline-hidden transition-colors placeholder:text-subtle focus:border-lantern focus:ring-2 focus:ring-lantern/25";
 
 function SearchControl({
   locale,
@@ -972,7 +972,7 @@ function DistrictMap({
 }) {
   const c = copy[locale];
   return (
-    <section aria-labelledby="district-map-title" className="rounded-2xl border border-edge bg-surface p-3 shadow-sm sm:p-5">
+    <section aria-labelledby="district-map-title" className="rounded-2xl border border-edge bg-surface p-3 shadow-xs sm:p-5">
       <div className="flex items-start justify-between gap-3">
         <h2 className="flex items-center gap-2 font-extrabold text-fg" id="district-map-title">
           <MapIcon aria-hidden="true" className="text-lantern" size={18} />
@@ -1026,7 +1026,7 @@ function DistrictMap({
                 "relative flex aspect-square flex-col items-center justify-center rounded-md text-[11px] font-extrabold leading-tight transition",
                 focusRing,
                 count
-                  ? "bg-lantern text-lantern-fg shadow-sm hover:brightness-110"
+                  ? "bg-lantern text-lantern-fg shadow-xs hover:brightness-110"
                   : "border border-edge bg-raised text-muted hover:border-lantern",
                 selected && "ring-2 ring-fg ring-offset-2 ring-offset-surface",
               )}
@@ -1043,15 +1043,15 @@ function DistrictMap({
       </div>
       <ul className="mt-4 flex flex-wrap gap-x-4 gap-y-1.5 text-xs text-muted">
         <li className="flex items-center gap-1.5">
-          <span aria-hidden="true" className="h-3 w-3 rounded-sm bg-lantern" />
+          <span aria-hidden="true" className="h-3 w-3 rounded-xs bg-lantern" />
           {c.mapLegendOpen}
         </li>
         <li className="flex items-center gap-1.5">
-          <span aria-hidden="true" className="h-3 w-3 rounded-sm border border-edge bg-raised" />
+          <span aria-hidden="true" className="h-3 w-3 rounded-xs border border-edge bg-raised" />
           {c.mapLegendRegistered}
         </li>
         <li className="flex items-center gap-1.5">
-          <span aria-hidden="true" className="h-3 w-3 rounded-sm border border-dashed border-edge" />
+          <span aria-hidden="true" className="h-3 w-3 rounded-xs border border-dashed border-edge" />
           {c.mapLegendNone}
         </li>
       </ul>
@@ -1060,7 +1060,7 @@ function DistrictMap({
 }
 
 const textLinkClass = clsx(
-  "inline-flex min-h-11 items-center gap-1.5 rounded text-sm font-bold text-lantern underline decoration-lantern/40 underline-offset-4 transition-colors hover:decoration-lantern",
+  "inline-flex min-h-11 items-center gap-1.5 rounded-sm text-sm font-bold text-lantern underline decoration-lantern/40 underline-offset-4 transition-colors hover:decoration-lantern",
   focusRing,
 );
 
@@ -1447,7 +1447,7 @@ function EvidenceItem<T>({
       <div className="flex flex-wrap items-start justify-between gap-2">
         <div className="min-w-0">
           <h4 className="text-sm font-extrabold text-fg">{fieldLabel}</h4>
-          <p className="mt-1 break-words text-sm text-muted">
+          <p className="mt-1 wrap-break-word text-sm text-muted">
             {c.fieldValue}：{valueText}
           </p>
         </div>
@@ -1602,7 +1602,7 @@ function DetailView({
         </a>
 
         <div className="mt-4 grid gap-6 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)] lg:items-start">
-          <article className="overflow-hidden rounded-3xl border border-edge bg-surface shadow-sm">
+          <article className="overflow-hidden rounded-3xl border border-edge bg-surface shadow-xs">
             <div className="lantern-hero lantern-hero--plain px-5 py-7 sm:px-8 sm:py-9">
               <DecisionBadge decision={decision} locale={locale} />
               <p className="mt-5 text-xs font-extrabold uppercase tracking-[0.16em] text-[#ffc56b]">{c.decisionFor}</p>
@@ -1796,7 +1796,7 @@ function NotFoundView({ locale, location }: { locale: Locale; location: Location
 
 function AppFooter({ locale }: { locale: Locale }) {
   const c = copy[locale];
-  const footerLink = clsx("inline-flex min-h-11 items-center gap-1 rounded underline underline-offset-4 transition-colors hover:text-fg", focusRing);
+  const footerLink = clsx("inline-flex min-h-11 items-center gap-1 rounded-sm underline underline-offset-4 transition-colors hover:text-fg", focusRing);
   return (
     <footer className="mt-8 border-t border-edge bg-surface">
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-3 px-4 py-8 text-sm text-muted sm:px-6 lg:px-8">
