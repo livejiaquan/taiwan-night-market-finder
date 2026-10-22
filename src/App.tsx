@@ -299,7 +299,7 @@ function ComparisonPanel({
   return (
     <article className="min-h-[560px] rounded-[8px] border border-slate-200 bg-[#fbfbf8] p-5 shadow-ambient">
       <img
-        src="/assets/night-market-hero.png"
+        src="/assets/night-market-hero.webp"
         alt=""
         className="h-52 w-full rounded-[8px] object-cover"
       />
@@ -457,7 +457,7 @@ function TravelExperience(props: ExperienceProps) {
           </div>
           <div className="overflow-hidden rounded-[8px] border border-slate-200 bg-white shadow-ambient">
             <img
-              src="/assets/night-market-hero.png"
+              src="/assets/night-market-hero.webp"
               alt=""
               className="h-72 w-full object-cover"
             />
@@ -1483,7 +1483,7 @@ function HeroImageOverlay() {
   return (
     <>
       <img
-        src="/assets/night-market-hero.png"
+        src="/assets/night-market-hero.webp"
         alt=""
         className="absolute inset-0 h-full w-full object-cover opacity-46"
       />
