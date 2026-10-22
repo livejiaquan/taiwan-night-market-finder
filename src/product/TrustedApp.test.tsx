@@ -199,6 +199,35 @@ describe("trusted public experience", () => {
     expect(screen.getByRole("button", { name: "清除條件" })).toBeInTheDocument();
   });
 
+  it("filters the visible list by decision status without changing the summary", () => {
+    window.history.replaceState({}, "", "/?date=2026-08-14");
+    render(<TrustedApp />);
+
+    fireEvent.click(screen.getByRole("button", { name: /^需再確認/ }));
+    expect(screen.getByText("8 個正常週期候選，1 個資料需再確認")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "花園夜市" })).toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: "武聖夜市" })).not.toBeInTheDocument();
+  });
+
+  it("applies the official district code from the schematic district map", () => {
+    window.history.replaceState({}, "", "/?date=2026-08-14");
+    render(<TrustedApp />);
+
+    fireEvent.click(screen.getByRole("button", { name: "東區：所選日期 2 個候選，名冊共 4 個" }));
+    expect(window.location.search).toContain("district=67000320");
+    expect(screen.getByText("2 個正常週期候選，0 個資料需再確認")).toBeInTheDocument();
+  });
+
+  it("shows scheduled counts for each date in the seven-day strip", () => {
+    window.history.replaceState({}, "", "/?date=2026-08-14");
+    render(<TrustedApp />);
+
+    const selected = screen
+      .getAllByRole("button", { pressed: true })
+      .find((button) => button.getAttribute("aria-label")?.includes("8/14"));
+    expect(selected).toHaveAccessibleName(/8 個依週期有營業$/);
+  });
+
   it("moves a client-side detail navigation back to the top", () => {
     const scrollTo = vi.spyOn(window, "scrollTo").mockImplementation(() => undefined);
     window.history.replaceState({}, "", "/?date=2026-08-14&q=武聖");
