@@ -28,7 +28,7 @@ function LoadingShell() {
       <div className="mx-auto w-full max-w-6xl px-4 py-5 sm:px-6 lg:px-8">
         <div className="h-8 w-44 animate-pulse rounded-lg bg-edge" />
         <div className="mt-10 max-w-2xl space-y-4">
-          <div className="h-4 w-28 animate-pulse rounded bg-lantern/30" />
+          <div className="h-4 w-28 animate-pulse rounded-sm bg-lantern/30" />
           <div className="h-12 w-full animate-pulse rounded-xl bg-edge" />
           <div className="h-6 w-4/5 animate-pulse rounded-lg bg-edge" />
         </div>
@@ -86,14 +86,14 @@ class ProductErrorBoundary extends Component<
             </p>
             <div className="mt-6 flex flex-wrap gap-3">
               <button
-                className="min-h-11 rounded-lg bg-lantern px-4 font-semibold text-lantern-fg transition hover:brightness-110 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-coral-600"
+                className="min-h-11 rounded-lg bg-lantern px-4 font-semibold text-lantern-fg transition hover:brightness-110 focus-visible:outline-solid focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-coral-600"
                 onClick={() => window.location.reload()}
                 type="button"
               >
                 重新載入
               </button>
               <a
-                className="inline-flex min-h-11 items-center rounded-lg border border-edge px-4 font-semibold text-fg transition-colors hover:border-fg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-950"
+                className="inline-flex min-h-11 items-center rounded-lg border border-edge px-4 font-semibold text-fg transition-colors hover:border-fg focus-visible:outline-solid focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-950"
                 href="https://data.gov.tw/dataset/53634"
                 rel="noreferrer"
                 target="_blank"
