@@ -137,6 +137,8 @@ const copy = {
     home: "回到候選清單",
     family: "台灣生活資料誌",
     introShort: "依官方名冊的正常週期整理，不是即時開門保證。",
+    tonight: "今晚",
+    city: "臺南",
     heroUnit: "個夜市依週期排定營業",
     heroNeedsCheck: (count: number) => `另有 ${count} 個需出發前再確認`,
     heroFreshness: (date: string, days: number) => `名冊比對於 ${date}（${days} 天前）`,
@@ -252,6 +254,8 @@ const copy = {
     home: "Back to candidates",
     family: "Taiwan Life Data",
     introShort: "Regular schedule from the official register—not live opening status.",
+    tonight: "Tonight",
+    city: "Tainan",
     heroUnit: "markets scheduled on their regular cycle",
     heroNeedsCheck: (count: number) => `${count} more need checking before you go`,
     heroFreshness: (date: string, days: number) => `Register checked ${date} (${days} days ago)`,
@@ -439,6 +443,8 @@ function decisionTone(decision: MarketDecision) {
   return "degraded" as const;
 }
 
+// One content container for every section: 1200px of content plus fixed gutters.
+const pageContainer = "mx-auto w-[calc(100%-2rem)] max-w-[1200px] sm:w-[calc(100%-3rem)]";
 const focusRing =
   "focus-visible:outline-solid focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lantern";
 const weekdayInitials: Record<Locale, string[]> = {
@@ -473,12 +479,12 @@ function LanguageToggle({ locale, setLocale }: { locale: Locale; setLocale: (loc
       className="inline-flex items-center rounded-xl border border-edge bg-surface p-1"
       role="group"
     >
-      <Languages aria-hidden="true" className="mx-1.5 hidden text-subtle sm:block" size={16} />
+      <Languages aria-hidden="true" className="mx-2 hidden text-subtle sm:block" size={16} />
       {(["zh", "en"] as const).map((option) => (
         <button
           aria-pressed={locale === option}
           className={clsx(
-            "min-h-11 min-w-11 rounded-lg px-2.5 text-sm font-bold sm:px-3",
+            "min-h-11 min-w-11 rounded-lg px-3 text-sm font-bold sm:px-3",
             focusRing,
             locale === option ? "bg-fg text-canvas" : "text-muted hover:bg-raised",
           )}
@@ -516,7 +522,7 @@ function AppHeader({ locale, setLocale }: { locale: Locale; setLocale: (locale: 
   const c = copy[locale];
   return (
     <header className="sticky top-0 z-30 border-b border-edge bg-canvas/90 backdrop-blur-sm">
-      <div className="mx-auto flex min-h-16 w-full max-w-6xl items-center justify-between gap-3 px-4 py-2 sm:px-6 lg:px-8">
+      <div className={clsx(pageContainer, "flex min-h-16 items-center justify-between gap-3 py-2")}>
         <a
           className={clsx("flex min-h-11 min-w-0 items-center gap-3 rounded-lg transition-opacity hover:opacity-80", focusRing)}
           href={appUrl("/", new URLSearchParams({ date: getTaipeiToday() }))}
@@ -530,7 +536,7 @@ function AppHeader({ locale, setLocale }: { locale: Locale; setLocale: (locale: 
           </span>
           <span className="min-w-0">
             <span className="block truncate text-base font-extrabold tracking-tight text-fg sm:text-lg">{c.brand}</span>
-            <span className="block truncate text-xs font-semibold text-subtle">
+            <span className="block truncate text-sm font-semibold text-subtle">
               <span className="hidden sm:inline">{c.family} · </span>
               {c.pilot}
             </span>
@@ -564,7 +570,7 @@ function WeekDots({
         return (
           <span
             className={clsx(
-              "grid h-6 w-6 place-items-center rounded-md text-[11px] font-bold tabular-nums",
+              "grid h-6 w-6 place-items-center rounded-md text-xs font-bold tabular-nums",
               disputed
                 ? "border border-dashed border-warn bg-warn-soft text-warn"
                 : scheduled
@@ -651,13 +657,13 @@ function DatePicker({
               ref={selected ? selectedDateRef : undefined}
               type="button"
             >
-              <span className={clsx("text-xs font-bold", date === today && !selected && "text-lantern")}>
+              <span className={clsx("text-sm font-bold", date === today && !selected && "text-lantern")}>
                 {date === today ? c.today : weekday}
               </span>
               <span className="whitespace-nowrap text-sm font-extrabold">{formatCompactDate(date, locale)}</span>
               <span
                 className={clsx(
-                  "mt-1 inline-flex items-center gap-1 rounded-full px-1.5 text-[11px] font-bold",
+                  "mt-1 inline-flex items-center gap-1 rounded-full px-2 text-xs font-bold",
                   selected ? "bg-canvas/15" : count ? "bg-lantern/10 text-lantern" : "text-subtle",
                 )}
               >
@@ -680,7 +686,7 @@ function DecisionBadge({ decision, locale }: { decision: MarketDecision; locale:
   return (
     <span
       className={clsx(
-        "inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-extrabold",
+        "inline-flex items-center gap-2 rounded-full px-3 py-1 text-sm font-extrabold",
         tone === "confirmed" && "bg-ok-soft text-ok",
         tone === "conflict" && "bg-warn-soft text-warn",
         tone === "degraded" && "bg-idle-soft text-idle",
@@ -721,10 +727,10 @@ function MarketCard({
   );
 
   return (
-    <article className="group flex min-h-full flex-col rounded-2xl border border-edge bg-surface p-5 shadow-xs transition hover:border-lantern/50 hover:shadow-lg">
+    <article className="group flex min-h-full flex-col rounded-2xl border border-edge bg-surface p-4 shadow-xs lg:p-6 transition hover:border-lantern/50 hover:shadow-lg">
       <div className="flex items-start justify-between gap-3">
         <DecisionBadge decision={decision} locale={locale} />
-        <span className="shrink-0 rounded-full border border-edge px-2.5 py-0.5 text-xs font-bold text-muted">
+        <span className="shrink-0 rounded-full border border-edge px-3 py-1 text-sm font-bold text-muted">
           {district.shortName}
         </span>
       </div>
@@ -737,17 +743,17 @@ function MarketCard({
           locale={locale}
         />
       </div>
-      <p className="mt-2 text-sm text-muted">
+      <p className="mt-2 text-base text-muted">
         <strong className="text-fg">{c.schedule}：</strong>
         {scheduleText(market.scheduleDays, locale)}
       </p>
-      <div className="mt-3 flex items-start gap-2 text-sm leading-6 text-muted">
+      <div className="mt-2 flex items-start gap-2 text-base text-muted">
         <MapPin aria-hidden="true" className="mt-1 shrink-0 text-lantern" size={15} />
         <p className="line-clamp-2">{market.permittedArea}</p>
       </div>
       <div className="mt-auto pt-4">
-        <p className="flex items-start gap-1.5 border-t border-edge pt-3 text-xs leading-5 text-subtle">
-          <Database aria-hidden="true" className="mt-0.5 shrink-0" size={13} />
+        <p className="flex items-start gap-2 border-t border-edge pt-3 text-sm leading-6 text-subtle">
+          <Database aria-hidden="true" className="mt-1 shrink-0" size={13} />
           <span>
             {c.cardSource}：{scheduleEvidence.publisher} ·{" "}
             <span className="whitespace-nowrap">
@@ -797,7 +803,7 @@ function SearchControl({
       <div className="relative">
         <Search aria-hidden="true" className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-subtle" size={19} />
         <input
-          className={clsx(fieldClass, "py-2 pl-10 pr-12")}
+          className={clsx(fieldClass, "py-2 pl-12 pr-12")}
           id="market-search"
           name="market-search"
           autoComplete="off"
@@ -870,7 +876,7 @@ function DistrictControl({
           </option>
         ))}
       </select>
-      <p className="mt-1.5 hidden text-xs leading-5 text-subtle sm:block">{c.districtHelp}</p>
+      <p className="mt-2 hidden text-sm leading-6 text-subtle sm:block">{c.districtHelp}</p>
     </div>
   );
 }
@@ -895,12 +901,12 @@ function StatusChips({
     ["check", c.statusCheck],
   ];
   return (
-    <div aria-label={c.statusLabel} className="flex flex-wrap gap-1.5 sm:gap-2" role="group">
+    <div aria-label={c.statusLabel} className="flex flex-wrap gap-2 sm:gap-2" role="group">
       {options.map(([option, label]) => (
         <button
           aria-pressed={value === option}
           className={clsx(
-            "inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-full border px-3 text-[13px] font-bold transition-colors sm:gap-2 sm:px-3.5 sm:text-sm",
+            "inline-flex min-h-11 shrink-0 items-center gap-2 rounded-full border px-3 text-sm font-bold transition-colors sm:gap-2 sm:px-4 sm:text-sm",
             focusRing,
             value === option
               ? "border-fg bg-fg text-canvas"
@@ -941,7 +947,7 @@ function ViewToggle({
         <button
           aria-pressed={view === option}
           className={clsx(
-            "inline-flex min-h-11 items-center justify-center gap-1.5 rounded-lg px-3 text-sm font-bold",
+            "inline-flex min-h-11 items-center justify-center gap-2 rounded-lg px-3 text-sm font-bold",
             focusRing,
             view === option ? "bg-fg text-canvas" : "text-muted hover:bg-raised",
           )}
@@ -972,7 +978,7 @@ function DistrictMap({
 }) {
   const c = copy[locale];
   return (
-    <section aria-labelledby="district-map-title" className="rounded-2xl border border-edge bg-surface p-3 shadow-xs sm:p-5">
+    <section aria-labelledby="district-map-title" className="sm:rounded-2xl sm:border sm:border-edge sm:bg-surface sm:p-6 sm:shadow-xs">
       <div className="flex items-start justify-between gap-3">
         <h2 className="flex items-center gap-2 font-extrabold text-fg" id="district-map-title">
           <MapIcon aria-hidden="true" className="text-lantern" size={18} />
@@ -980,7 +986,7 @@ function DistrictMap({
         </h2>
         {selectedCode ? (
           <button
-            className={clsx("-my-2 min-h-11 shrink-0 rounded-lg px-2 text-xs font-bold text-lantern underline underline-offset-4", focusRing)}
+            className={clsx("-my-2 min-h-11 shrink-0 rounded-lg px-2 text-sm font-bold text-lantern underline underline-offset-4", focusRing)}
             onClick={() => onSelect("")}
             type="button"
           >
@@ -988,9 +994,9 @@ function DistrictMap({
           </button>
         ) : null}
       </div>
-      <p className="mt-1 text-xs leading-5 text-subtle">{c.mapNote}</p>
+      <p className="mt-1 text-sm leading-6 text-subtle">{c.mapNote}</p>
       <div
-        className="mx-auto mt-4 grid max-w-md gap-1"
+        className="mt-4 grid gap-1"
         style={{
           gridTemplateColumns: `repeat(${DISTRICT_TILE_COLUMNS}, minmax(0, 1fr))`,
           gridTemplateRows: `repeat(${DISTRICT_TILE_ROWS}, minmax(0, 1fr))`,
@@ -1009,7 +1015,7 @@ function DistrictMap({
             return (
               <div
                 aria-hidden="true"
-                className="grid aspect-square place-items-center rounded-md border border-dashed border-edge text-[10px] font-semibold text-subtle"
+                className="grid aspect-square place-items-center rounded-md border border-dashed border-edge text-xs font-semibold text-subtle"
                 key={district.code}
                 style={style}
               >
@@ -1023,7 +1029,7 @@ function DistrictMap({
               aria-label={c.mapTile(district.shortName, count, registered)}
               aria-pressed={selected}
               className={clsx(
-                "relative flex aspect-square flex-col items-center justify-center rounded-md text-[11px] font-extrabold leading-tight transition",
+                "relative flex aspect-square flex-col items-center justify-center rounded-md text-sm font-extrabold leading-tight transition",
                 focusRing,
                 count
                   ? "bg-lantern text-lantern-fg shadow-xs hover:brightness-110"
@@ -1036,21 +1042,21 @@ function DistrictMap({
               type="button"
             >
               <span>{label}</span>
-              {count ? <span className="text-[10px] font-bold tabular-nums opacity-90">{count}</span> : null}
+              {count ? <span className="text-xs font-bold tabular-nums opacity-90">{count}</span> : null}
             </button>
           );
         })}
       </div>
-      <ul className="mt-4 flex flex-wrap gap-x-4 gap-y-1.5 text-xs text-muted">
-        <li className="flex items-center gap-1.5">
+      <ul className="mt-4 flex flex-wrap gap-x-4 gap-y-2 text-sm text-muted">
+        <li className="flex items-center gap-2">
           <span aria-hidden="true" className="h-3 w-3 rounded-xs bg-lantern" />
           {c.mapLegendOpen}
         </li>
-        <li className="flex items-center gap-1.5">
+        <li className="flex items-center gap-2">
           <span aria-hidden="true" className="h-3 w-3 rounded-xs border border-edge bg-raised" />
           {c.mapLegendRegistered}
         </li>
-        <li className="flex items-center gap-1.5">
+        <li className="flex items-center gap-2">
           <span aria-hidden="true" className="h-3 w-3 rounded-xs border border-dashed border-edge" />
           {c.mapLegendNone}
         </li>
@@ -1060,22 +1066,22 @@ function DistrictMap({
 }
 
 const textLinkClass = clsx(
-  "inline-flex min-h-11 items-center gap-1.5 rounded-sm text-sm font-bold text-lantern underline decoration-lantern/40 underline-offset-4 transition-colors hover:decoration-lantern",
+  "inline-flex min-h-11 items-center gap-2 rounded-sm text-sm font-bold text-lantern underline decoration-lantern/40 underline-offset-4 transition-colors hover:decoration-lantern",
   focusRing,
 );
 
 function SourceSummary({ headingId, locale }: { headingId: string; locale: Locale }) {
   const c = copy[locale];
   return (
-    <aside className="rounded-2xl border border-edge bg-raised/60 p-5" aria-labelledby={headingId}>
+    <aside className="rounded-2xl border border-edge bg-raised/60 p-4 lg:p-6" aria-labelledby={headingId}>
       <div className="flex gap-3">
-        <Database aria-hidden="true" className="mt-0.5 shrink-0 text-lantern" size={20} />
+        <Database aria-hidden="true" className="mt-1 shrink-0 text-lantern" size={20} />
         <div>
           <h2 className="font-extrabold text-fg" id={headingId}>
             {c.sourceScopeTitle}
           </h2>
-          <p className="mt-1 text-sm leading-6 text-muted">{c.sourceScope(marketDataset.markets.length)}</p>
-          <dl className="mt-3 flex flex-wrap gap-x-5 gap-y-1 text-xs font-semibold text-subtle">
+          <p className="mt-1 text-base text-muted">{c.sourceScope(marketDataset.markets.length)}</p>
+          <dl className="mt-3 flex flex-wrap gap-x-6 gap-y-1 text-sm font-semibold text-subtle">
             <div>
               <dt className="inline">{c.sourceChecked}：</dt>{" "}
               <dd className="inline">{formatEvidenceDate(marketDataset.source.retrievedAt, locale)}</dd>
@@ -1238,48 +1244,41 @@ function HomeView({ locale, location }: { locale: Locale; location: LocationStat
   return (
     <>
       <section className="lantern-hero">
-        <div className="mx-auto w-full max-w-6xl px-4 pb-11 pt-5 sm:px-6 sm:pb-20 sm:pt-12 lg:px-8">
-          <p className="text-xs font-extrabold uppercase tracking-[0.18em] text-[#ffc56b] sm:text-sm">{c.eyebrow}</p>
-          <h1 className="mt-1.5 max-w-3xl text-2xl font-black leading-tight tracking-tight sm:mt-2 sm:text-5xl">
-            <span className="block">{formatDecisionDate(location.date, locale)}</span>
-            <span className="sr-only">，</span>
-            <span className="block text-xl text-white/90 sm:text-4xl">{c.titleSuffix}</span>
-          </h1>
-          <p className="mt-3 flex flex-wrap items-end gap-x-3 gap-y-1 sm:mt-5">
-            <span className="text-5xl font-black leading-none tracking-tight tabular-nums text-[#ffb35c] sm:text-7xl">
-              {headline.confirmed}
+        <div className={clsx(pageContainer, "pb-12 pt-8 sm:pb-16 sm:pt-12")}>
+          <h1>
+            <span className="block text-lg font-bold text-[#ffc56b] sm:text-xl">
+              {location.date === today ? `${c.tonight} · ` : ""}
+              {formatDecisionDate(location.date, locale)} · {c.city}
             </span>
-            <span className="pb-1 text-lg font-extrabold sm:text-xl">{c.heroUnit}</span>
-          </p>
+            <span className="mt-2 flex flex-wrap items-baseline gap-x-4 gap-y-2">
+              <span className="text-5xl font-black tracking-tight tabular-nums text-[#ffb35c] sm:text-6xl">
+                {headline.confirmed}
+              </span>
+              <span className="text-xl font-extrabold sm:text-2xl">{c.heroUnit}</span>
+            </span>
+          </h1>
           {headline.needsCheck ? (
-            <p className="mt-2 flex items-center gap-1.5 text-sm font-bold text-[#ffd98a]">
-              <TriangleAlert aria-hidden="true" size={15} />
+            <p className="mt-3 flex items-center gap-2 text-base font-bold text-[#ffd98a]">
+              <TriangleAlert aria-hidden="true" size={16} />
               {c.heroNeedsCheck(headline.needsCheck)}
             </p>
           ) : null}
-          <p className="mt-2 text-sm leading-6 text-white/80 sm:hidden">{c.introShort}</p>
-          <p className="mt-4 hidden max-w-2xl text-base leading-7 text-white/80 sm:block">{c.intro}</p>
-          <div className="mt-3 flex flex-wrap gap-2 text-xs font-bold sm:mt-5">
-            {headline.freshness ? (
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-3 py-1.5 ring-1 ring-white/20">
-                <ShieldCheck aria-hidden="true" size={14} />
-                {c.heroFreshness(
-                  formatEvidenceDate(headline.freshness.verifiedAt, locale),
-                  headline.freshness.ageDays,
-                )}
-              </span>
-            ) : null}
-            <span className="hidden items-center gap-1.5 rounded-full bg-white/10 px-3 py-1.5 ring-1 ring-white/20 sm:inline-flex">
-              <Database aria-hidden="true" size={14} />
-              {c.records(marketDataset.markets.length)} · {c.upstreamUnknown}
-            </span>
-          </div>
+          <p className="mt-4 text-base text-white/85">{c.introShort}</p>
+          {headline.freshness ? (
+            <p className="mt-4 inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-sm font-semibold ring-1 ring-white/20">
+              <ShieldCheck aria-hidden="true" size={16} />
+              {c.heroFreshness(
+                formatEvidenceDate(headline.freshness.verifiedAt, locale),
+                headline.freshness.ageDays,
+              )}
+            </p>
+          ) : null}
         </div>
-        <span className="absolute bottom-2 right-3 text-[10px] font-semibold text-white/60">{c.illustration}</span>
+        <span className="absolute bottom-2 right-3 text-xs font-semibold text-white/60">{c.illustration}</span>
       </section>
 
-      <section aria-label={c.chooseDate} className="relative z-10 mx-auto -mt-8 w-full max-w-6xl px-4 sm:px-6 lg:px-8">
-        <div className="rounded-2xl border border-edge bg-surface p-4 shadow-xl sm:p-5">
+      <section aria-label={c.chooseDate} className="border-b border-edge bg-surface">
+        <div className={clsx(pageContainer, "py-4 sm:py-6")}>
           <DatePicker
             counts={dateCounts}
             dates={dates}
@@ -1305,13 +1304,13 @@ function HomeView({ locale, location }: { locale: Locale; location: LocationStat
         </div>
       </section>
 
-      <section className="mx-auto w-full max-w-6xl px-4 pb-8 pt-6 sm:px-6 sm:pt-8 lg:px-8" aria-labelledby="results-title">
+      <section className={clsx(pageContainer, "pb-12 pt-6 sm:pt-8")} aria-labelledby="results-title">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between sm:gap-4">
           <div>
             <h2 className="text-xl font-black text-fg sm:text-2xl" id="results-title">
               {c.resultsTitle}
             </h2>
-            <p aria-live="polite" className="mt-1 text-sm font-semibold tabular-nums text-muted">
+            <p aria-live="polite" className="mt-1 text-base font-semibold tabular-nums text-muted">
               {c.resultsSummary(confirmed.length, needsCheck.length)}
             </p>
           </div>
@@ -1331,21 +1330,21 @@ function HomeView({ locale, location }: { locale: Locale; location: LocationStat
         </div>
 
         {hasHardStaleData ? (
-          <div className="mt-5 flex gap-3 rounded-xl border border-warn/40 bg-warn-soft p-4 text-warn" role="status">
-            <TriangleAlert aria-hidden="true" className="mt-0.5 shrink-0" size={20} />
+          <div className="mt-6 flex gap-3 rounded-xl border border-warn/40 bg-warn-soft p-4 text-warn" role="status">
+            <TriangleAlert aria-hidden="true" className="mt-1 shrink-0" size={20} />
             <p className="text-sm font-semibold leading-6">{c.staleDatasetNotice}</p>
           </div>
         ) : null}
 
         {location.invalidDistrictCode ? (
-          <div className="mt-5 flex gap-3 rounded-xl border border-edge bg-idle-soft p-4 text-idle" role="status">
-            <Info aria-hidden="true" className="mt-0.5 shrink-0" size={20} />
+          <div className="mt-6 flex gap-3 rounded-xl border border-edge bg-idle-soft p-4 text-idle" role="status">
+            <Info aria-hidden="true" className="mt-1 shrink-0" size={20} />
             <p className="text-sm font-semibold leading-6">{c.invalidDistrict}</p>
           </div>
         ) : null}
 
-        <div className="mt-6 grid gap-6 lg:grid-cols-[minmax(0,1fr)_400px] lg:items-start">
-          <div className={clsx(view === "map" && "hidden lg:block")}>
+        <div className="mt-6 grid gap-6 lg:grid-cols-12 lg:items-start">
+          <div className={clsx("lg:col-span-8", view === "map" && "hidden lg:block")}>
             {visible.length ? (
               <div className="grid gap-4 sm:grid-cols-2">
                 {visible.map(({ market, district, decision }) => (
@@ -1362,14 +1361,14 @@ function HomeView({ locale, location }: { locale: Locale; location: LocationStat
                 ))}
               </div>
             ) : (
-              <div className="rounded-2xl border border-dashed border-edge bg-surface p-8 text-center">
+              <div className="rounded-2xl border border-dashed border-edge bg-surface p-4 text-center sm:p-8">
                 <CircleAlert aria-hidden="true" className="mx-auto text-subtle" size={30} />
                 <h3 className="mt-3 text-xl font-extrabold text-fg">{c.noResults}</h3>
-                <p className="mx-auto mt-2 max-w-xl leading-7 text-muted">{c.noResultsHint}</p>
+                <p className="mx-auto mt-2 max-w-xl text-base text-muted">{c.noResultsHint}</p>
                 {location.query || location.districtCode ? (
                   <button
                     className={clsx(
-                      "mt-5 min-h-11 rounded-xl bg-fg px-4 font-bold text-canvas transition-colors hover:bg-lantern hover:text-lantern-fg",
+                      "mt-6 min-h-11 rounded-xl bg-fg px-4 font-bold text-canvas transition-colors hover:bg-lantern hover:text-lantern-fg",
                       focusRing,
                     )}
                     onClick={() =>
@@ -1383,7 +1382,7 @@ function HomeView({ locale, location }: { locale: Locale; location: LocationStat
               </div>
             )}
           </div>
-          <div className="space-y-4 lg:sticky lg:top-24">
+          <div className="space-y-4 lg:sticky lg:top-24 lg:col-span-4">
             <div className={clsx(view === "list" && "hidden lg:block")}>
               <DistrictMap
                 candidateCounts={candidateCounts}
@@ -1447,13 +1446,13 @@ function EvidenceItem<T>({
       <div className="flex flex-wrap items-start justify-between gap-2">
         <div className="min-w-0">
           <h4 className="text-sm font-extrabold text-fg">{fieldLabel}</h4>
-          <p className="mt-1 wrap-break-word text-sm text-muted">
+          <p className="mt-1 wrap-break-word text-base text-muted">
             {c.fieldValue}：{valueText}
           </p>
         </div>
         <span
           className={clsx(
-            "rounded-full px-2 py-0.5 text-xs font-bold",
+            "rounded-full px-2 py-1 text-sm font-bold",
             displayStatus === "verified" && "bg-ok-soft text-ok",
             displayStatus === "conflict" && "bg-warn-soft text-warn",
             displayStatus === "stale" && "bg-bad-soft text-bad",
@@ -1463,7 +1462,7 @@ function EvidenceItem<T>({
           {statusLabel}
         </span>
       </div>
-      <dl className="mt-3 grid gap-2 text-xs text-muted sm:grid-cols-2">
+      <dl className="mt-3 grid gap-2 text-sm text-muted sm:grid-cols-2">
         <div>
           <dt className="font-bold text-fg">{c.publisher}</dt>
           <dd>{evidence.publisher}</dd>
@@ -1473,7 +1472,7 @@ function EvidenceItem<T>({
           <dd>{evidence.sourceLabel}</dd>
         </div>
       </dl>
-      <dl className="mt-3 grid grid-cols-3 gap-2 rounded-lg bg-raised/70 p-2.5 text-xs text-muted">
+      <dl className="mt-3 grid grid-cols-3 gap-2 rounded-lg bg-raised/70 p-3 text-sm text-muted">
         <div>
           <dt className="font-bold text-fg">{c.retrieved}</dt>
           <dd>{formatEvidenceDate(evidence.retrievedAt, locale)}</dd>
@@ -1492,7 +1491,7 @@ function EvidenceItem<T>({
         </div>
       </dl>
       {evidence.derivation ? (
-        <p className="mt-3 text-xs leading-5 text-muted">
+        <p className="mt-3 text-sm leading-6 text-muted">
           <strong className="text-fg">{c.derivationLabel}：</strong>
           {evidence.derivation}
         </p>
@@ -1583,7 +1582,7 @@ function DetailView({
 
   return (
     <main id="main-content" ref={mainRef} tabIndex={-1}>
-      <div className="mx-auto w-full max-w-6xl px-4 py-6 sm:px-6 sm:py-10 lg:px-8">
+      <div className={clsx(pageContainer, "py-6 sm:py-12")}>
         <a
           className={clsx("inline-flex min-h-11 items-center gap-2 rounded-lg font-bold text-muted transition-colors hover:text-fg", focusRing)}
           href={appUrl("/", new URLSearchParams({ date: location.date, ...(location.query ? { q: location.query } : {}), ...(location.districtCode ? { district: location.districtCode } : {}) }))}
@@ -1603,24 +1602,24 @@ function DetailView({
 
         <div className="mt-4 grid gap-6 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)] lg:items-start">
           <article className="overflow-hidden rounded-3xl border border-edge bg-surface shadow-xs">
-            <div className="lantern-hero lantern-hero--plain px-5 py-7 sm:px-8 sm:py-9">
+            <div className="lantern-hero lantern-hero--plain px-4 py-8 sm:px-8">
               <DecisionBadge decision={decision} locale={locale} />
-              <p className="mt-5 text-xs font-extrabold uppercase tracking-[0.16em] text-[#ffc56b]">{c.decisionFor}</p>
+              <p className="mt-6 text-sm font-extrabold uppercase tracking-[0.16em] text-[#ffc56b]">{c.decisionFor}</p>
               <h1 className="mt-1 text-4xl font-black tracking-tight sm:text-5xl">{market.name}</h1>
               <p className="mt-2 text-lg font-semibold text-white/80">{formatDecisionDate(location.date, locale)}</p>
             </div>
 
-            <div className="p-5 sm:p-8">
+            <div className="p-4 sm:p-8">
               {decision.status === "conflict" ? (
-                <div className="mb-5 flex gap-3 rounded-xl border border-warn/40 bg-warn-soft p-4 text-warn">
-                  <TriangleAlert aria-hidden="true" className="mt-0.5 shrink-0" size={21} />
+                <div className="mb-6 flex gap-3 rounded-xl border border-warn/40 bg-warn-soft p-4 text-warn">
+                  <TriangleAlert aria-hidden="true" className="mt-1 shrink-0" size={21} />
                   <p className="text-sm font-semibold leading-6">{c.conflictExplanation}</p>
                 </div>
               ) : null}
 
               {decision.freshness.status === "hard-stale" ? (
-                <div className="mb-5 flex gap-3 rounded-xl border border-bad/40 bg-bad-soft p-4 text-bad" role="status">
-                  <Clock3 aria-hidden="true" className="mt-0.5 shrink-0" size={20} />
+                <div className="mb-6 flex gap-3 rounded-xl border border-bad/40 bg-bad-soft p-4 text-bad" role="status">
+                  <Clock3 aria-hidden="true" className="mt-1 shrink-0" size={20} />
                   <p className="text-sm font-semibold leading-6">{c.staleDetailNotice}</p>
                 </div>
               ) : null}
@@ -1659,16 +1658,16 @@ function DetailView({
                 </div>
               </dl>
 
-              <div className="mt-7 flex gap-3 rounded-xl bg-raised p-4">
-                <Info aria-hidden="true" className="mt-0.5 shrink-0 text-muted" size={20} />
+              <div className="mt-8 flex gap-3 rounded-xl bg-raised p-4">
+                <Info aria-hidden="true" className="mt-1 shrink-0 text-muted" size={20} />
                 <p className="text-sm font-semibold leading-6 text-muted">{c.exceptionNote}</p>
               </div>
 
-              <div className="mt-7 flex flex-col gap-3 sm:flex-row sm:items-start">
+              <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-start">
                 <div>
                   <a
                     className={clsx(
-                      "inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-lantern px-5 font-extrabold text-lantern-fg shadow-md transition hover:brightness-110 sm:w-auto",
+                      "inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-lantern px-6 font-extrabold text-lantern-fg shadow-md transition hover:brightness-110 sm:w-auto",
                       focusRing,
                     )}
                     href={mapsUrl}
@@ -1679,19 +1678,19 @@ function DetailView({
                     {c.map}
                     <ArrowUpRight aria-hidden="true" size={16} />
                   </a>
-                  <p className="mt-1.5 text-xs font-semibold text-subtle">{c.mapDisclosure}</p>
+                  <p className="mt-2 text-sm font-semibold text-subtle">{c.mapDisclosure}</p>
                 </div>
                 <ShareAction date={location.date} locale={locale} market={market} />
               </div>
             </div>
           </article>
 
-          <aside className="rounded-3xl border border-edge bg-raised/50 p-5 sm:p-6" aria-labelledby="evidence-title">
+          <aside className="rounded-3xl border border-edge bg-raised/50 p-4 sm:p-6" aria-labelledby="evidence-title">
             <ShieldCheck aria-hidden="true" className="text-ok" size={26} />
             <h2 className="mt-3 text-2xl font-black text-fg" id="evidence-title">
               {c.evidenceTitle}
             </h2>
-            <p className="mt-2 text-sm leading-6 text-muted">{c.evidenceIntro}</p>
+            <p className="mt-2 text-base text-muted">{c.evidenceIntro}</p>
             <h3 className="mt-6 text-sm font-extrabold uppercase tracking-wide text-subtle">{c.officialSchedule}</h3>
             <div className="mt-3 space-y-3">
               {market.evidence.scheduleDays.map((evidence) => (
@@ -1766,13 +1765,13 @@ function NotFoundView({ locale, location }: { locale: Locale; location: Location
 
   return (
     <main id="main-content" ref={mainRef} tabIndex={-1}>
-      <section className="mx-auto max-w-xl px-4 py-20 text-center sm:px-6">
+      <section className="mx-auto max-w-xl px-4 py-16 text-center sm:px-6">
         <CircleAlert aria-hidden="true" className="mx-auto text-lantern" size={38} />
         <h1 className="mt-4 text-3xl font-black text-fg">{c.notFoundTitle}</h1>
         <p className="mt-3 leading-7 text-muted">{c.notFoundBody}</p>
         <a
           className={clsx(
-            "mt-6 inline-flex min-h-11 items-center gap-2 rounded-xl bg-fg px-5 font-extrabold text-canvas transition-colors hover:bg-lantern hover:text-lantern-fg",
+            "mt-6 inline-flex min-h-11 items-center gap-2 rounded-xl bg-fg px-6 font-extrabold text-canvas transition-colors hover:bg-lantern hover:text-lantern-fg",
             focusRing,
           )}
           href={appUrl("/", new URLSearchParams({ date: location.date }))}
@@ -1799,9 +1798,9 @@ function AppFooter({ locale }: { locale: Locale }) {
   const footerLink = clsx("inline-flex min-h-11 items-center gap-1 rounded-sm underline underline-offset-4 transition-colors hover:text-fg", focusRing);
   return (
     <footer className="mt-8 border-t border-edge bg-surface">
-      <div className="mx-auto flex w-full max-w-6xl flex-col gap-3 px-4 py-8 text-sm text-muted sm:px-6 lg:px-8">
+      <div className={clsx(pageContainer, "flex flex-col gap-3 py-8 text-sm text-muted")}>
         <p>{c.attribution}</p>
-        <div className="flex flex-wrap gap-x-5 gap-y-2 font-bold">
+        <div className="flex flex-wrap gap-x-6 gap-y-2 font-bold">
           <a className={footerLink} href="https://data.gov.tw/license" rel="noreferrer" target="_blank">
             Open Government Data License 1.0
             <ExternalLink aria-hidden="true" size={13} />
