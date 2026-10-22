@@ -8,14 +8,15 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        display: ["Noto Serif TC", "Noto Sans TC", "ui-serif", "serif"],
         sans: [
-          "Noto Sans TC",
-          "Inter",
           "ui-sans-serif",
           "system-ui",
           "-apple-system",
           "BlinkMacSystemFont",
+          "PingFang TC",
+          "Noto Sans TC",
+          "Noto Sans CJK TC",
+          "Microsoft JhengHei",
           "Segoe UI",
           "sans-serif",
         ],

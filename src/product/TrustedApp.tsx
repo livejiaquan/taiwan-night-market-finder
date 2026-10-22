@@ -478,7 +478,7 @@ function LanguageToggle({ locale, setLocale }: { locale: Locale; setLocale: (loc
         <button
           aria-pressed={locale === option}
           className={clsx(
-            "min-h-9 rounded-lg px-2.5 text-sm font-bold sm:px-3",
+            "min-h-11 min-w-11 rounded-lg px-2.5 text-sm font-bold sm:px-3",
             focusRing,
             locale === option ? "bg-fg text-canvas" : "text-muted hover:bg-raised",
           )}
@@ -518,14 +518,14 @@ function AppHeader({ locale, setLocale }: { locale: Locale; setLocale: (locale: 
     <header className="sticky top-0 z-30 border-b border-edge bg-canvas/90 backdrop-blur">
       <div className="mx-auto flex min-h-16 w-full max-w-6xl items-center justify-between gap-3 px-4 py-2 sm:px-6 lg:px-8">
         <a
-          className={clsx("flex min-w-0 items-center gap-3 rounded-lg transition-opacity hover:opacity-80", focusRing)}
+          className={clsx("flex min-h-11 min-w-0 items-center gap-3 rounded-lg transition-opacity hover:opacity-80", focusRing)}
           href={appUrl("/", new URLSearchParams({ date: getTaipeiToday() }))}
           onClick={(event) => {
             event.preventDefault();
             writeLocation({ pathname: "/", date: getTaipeiToday(), query: "", districtCode: "" });
           }}
         >
-          <span aria-hidden="true" className="lantern-mark shrink-0 font-display text-lg font-black">
+          <span aria-hidden="true" className="lantern-mark shrink-0 text-lg font-black">
             市
           </span>
           <span className="min-w-0">
@@ -626,7 +626,7 @@ function DatePicker({
 
   return (
     <fieldset className="min-w-0">
-      <legend className="mb-2 flex items-center gap-2 text-sm font-bold text-fg">
+      <legend className="sr-only items-center gap-2 text-sm font-bold text-fg sm:not-sr-only sm:mb-2 sm:flex">
         <CalendarDays aria-hidden="true" className="text-lantern" size={17} />
         {c.chooseDate}
       </legend>
@@ -728,7 +728,7 @@ function MarketCard({
           {district.shortName}
         </span>
       </div>
-      <h3 className="mt-3 font-display text-2xl font-black tracking-tight text-fg">{market.name}</h3>
+      <h3 className="mt-3 text-2xl font-black tracking-tight text-fg">{market.name}</h3>
       <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-2">
         <WeekDots
           conflictDays={market.conflicts.flatMap((conflict) => conflict.days)}
@@ -791,13 +791,13 @@ function SearchControl({
   const c = copy[locale];
   return (
     <div>
-      <label className="mb-2 block text-sm font-bold text-fg" htmlFor="market-search">
+      <label className="sr-only text-sm font-bold text-fg sm:not-sr-only sm:mb-2 sm:block" htmlFor="market-search">
         {c.searchLabel}
       </label>
       <div className="relative">
         <Search aria-hidden="true" className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-subtle" size={19} />
         <input
-          className={clsx(fieldClass, "py-2 pl-10 pr-11")}
+          className={clsx(fieldClass, "py-2 pl-10 pr-12")}
           id="market-search"
           name="market-search"
           autoComplete="off"
@@ -815,7 +815,7 @@ function SearchControl({
           <button
             aria-label={c.clearSearch}
             className={clsx(
-              "absolute right-1.5 top-1/2 inline-flex min-h-9 min-w-9 -translate-y-1/2 items-center justify-center rounded-lg text-muted hover:bg-raised",
+              "absolute right-0.5 top-1/2 inline-flex min-h-11 min-w-11 -translate-y-1/2 items-center justify-center rounded-lg text-muted hover:bg-raised",
               focusRing,
             )}
             onClick={() =>
@@ -848,7 +848,7 @@ function DistrictControl({
   const c = copy[locale];
   return (
     <div>
-      <label className="mb-2 block text-sm font-bold text-fg" htmlFor="district-filter">
+      <label className="sr-only text-sm font-bold text-fg sm:not-sr-only sm:mb-2 sm:block" htmlFor="district-filter">
         {c.chooseDistrict}
       </label>
       <select
@@ -870,7 +870,7 @@ function DistrictControl({
           </option>
         ))}
       </select>
-      <p className="mt-1.5 text-xs leading-5 text-subtle">{c.districtHelp}</p>
+      <p className="mt-1.5 hidden text-xs leading-5 text-subtle sm:block">{c.districtHelp}</p>
     </div>
   );
 }
@@ -895,12 +895,12 @@ function StatusChips({
     ["check", c.statusCheck],
   ];
   return (
-    <div aria-label={c.statusLabel} className="no-scrollbar -mx-1 flex gap-2 overflow-x-auto px-1" role="group">
+    <div aria-label={c.statusLabel} className="flex flex-wrap gap-1.5 sm:gap-2" role="group">
       {options.map(([option, label]) => (
         <button
           aria-pressed={value === option}
           className={clsx(
-            "inline-flex min-h-10 shrink-0 items-center gap-2 rounded-full border px-3.5 text-sm font-bold transition-colors",
+            "inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-full border px-3 text-[13px] font-bold transition-colors sm:gap-2 sm:px-3.5 sm:text-sm",
             focusRing,
             value === option
               ? "border-fg bg-fg text-canvas"
@@ -910,8 +910,8 @@ function StatusChips({
           onClick={() => onChange(option)}
           type="button"
         >
-          {option === "confirmed" ? <CheckCircle2 aria-hidden="true" size={15} /> : null}
-          {option === "check" ? <TriangleAlert aria-hidden="true" size={15} /> : null}
+          {option === "confirmed" ? <CheckCircle2 aria-hidden="true" className="hidden sm:block" size={15} /> : null}
+          {option === "check" ? <TriangleAlert aria-hidden="true" className="hidden sm:block" size={15} /> : null}
           {label}
           <span className="tabular-nums opacity-70">{counts[option]}</span>
         </button>
@@ -931,7 +931,7 @@ function ViewToggle({
 }) {
   const c = copy[locale];
   return (
-    <div aria-label={c.viewLabel} className="inline-flex rounded-xl border border-edge bg-surface p-1 lg:hidden" role="group">
+    <div aria-label={c.viewLabel} className="grid grid-cols-2 rounded-xl border border-edge bg-surface p-1 sm:inline-flex lg:hidden" role="group">
       {(
         [
           ["list", c.viewList, List],
@@ -941,7 +941,7 @@ function ViewToggle({
         <button
           aria-pressed={view === option}
           className={clsx(
-            "inline-flex min-h-9 items-center gap-1.5 rounded-lg px-3 text-sm font-bold",
+            "inline-flex min-h-11 items-center justify-center gap-1.5 rounded-lg px-3 text-sm font-bold",
             focusRing,
             view === option ? "bg-fg text-canvas" : "text-muted hover:bg-raised",
           )}
@@ -972,7 +972,7 @@ function DistrictMap({
 }) {
   const c = copy[locale];
   return (
-    <section aria-labelledby="district-map-title" className="rounded-2xl border border-edge bg-surface p-4 shadow-sm sm:p-5">
+    <section aria-labelledby="district-map-title" className="rounded-2xl border border-edge bg-surface p-3 shadow-sm sm:p-5">
       <div className="flex items-start justify-between gap-3">
         <h2 className="flex items-center gap-2 font-extrabold text-fg" id="district-map-title">
           <MapIcon aria-hidden="true" className="text-lantern" size={18} />
@@ -980,7 +980,7 @@ function DistrictMap({
         </h2>
         {selectedCode ? (
           <button
-            className={clsx("min-h-8 rounded-lg px-2 text-xs font-bold text-lantern underline underline-offset-4", focusRing)}
+            className={clsx("-my-2 min-h-11 shrink-0 rounded-lg px-2 text-xs font-bold text-lantern underline underline-offset-4", focusRing)}
             onClick={() => onSelect("")}
             type="button"
           >
@@ -990,7 +990,7 @@ function DistrictMap({
       </div>
       <p className="mt-1 text-xs leading-5 text-subtle">{c.mapNote}</p>
       <div
-        className="mx-auto mt-4 grid max-w-sm gap-1.5"
+        className="mx-auto mt-4 grid max-w-md gap-1"
         style={{
           gridTemplateColumns: `repeat(${DISTRICT_TILE_COLUMNS}, minmax(0, 1fr))`,
           gridTemplateRows: `repeat(${DISTRICT_TILE_ROWS}, minmax(0, 1fr))`,
@@ -1060,7 +1060,7 @@ function DistrictMap({
 }
 
 const textLinkClass = clsx(
-  "inline-flex items-center gap-1.5 rounded text-sm font-bold text-lantern underline decoration-lantern/40 underline-offset-4 transition-colors hover:decoration-lantern",
+  "inline-flex min-h-11 items-center gap-1.5 rounded text-sm font-bold text-lantern underline decoration-lantern/40 underline-offset-4 transition-colors hover:decoration-lantern",
   focusRing,
 );
 
@@ -1089,7 +1089,7 @@ function SourceSummary({ headingId, locale }: { headingId: string; locale: Local
               </dd>
             </div>
           </dl>
-          <div className="mt-3 flex flex-col items-start gap-2">
+          <div className="mt-2 flex flex-col items-start">
             <a className={textLinkClass} href={marketDataset.source.datasetUrl} rel="noreferrer" target="_blank">
               {c.sourcePage}
               <ExternalLink aria-hidden="true" size={14} />
@@ -1238,15 +1238,15 @@ function HomeView({ locale, location }: { locale: Locale; location: LocationStat
   return (
     <>
       <section className="lantern-hero">
-        <div className="mx-auto w-full max-w-6xl px-4 pb-12 pt-6 sm:px-6 sm:pb-20 sm:pt-12 lg:px-8">
+        <div className="mx-auto w-full max-w-6xl px-4 pb-11 pt-5 sm:px-6 sm:pb-20 sm:pt-12 lg:px-8">
           <p className="text-xs font-extrabold uppercase tracking-[0.18em] text-[#ffc56b] sm:text-sm">{c.eyebrow}</p>
-          <h1 className="mt-2 max-w-3xl font-display text-3xl font-black leading-tight sm:text-5xl">
+          <h1 className="mt-1.5 max-w-3xl text-2xl font-black leading-tight tracking-tight sm:mt-2 sm:text-5xl">
             <span className="block">{formatDecisionDate(location.date, locale)}</span>
             <span className="sr-only">，</span>
-            <span className="block text-2xl text-white/90 sm:text-4xl">{c.titleSuffix}</span>
+            <span className="block text-xl text-white/90 sm:text-4xl">{c.titleSuffix}</span>
           </h1>
-          <p className="mt-5 flex flex-wrap items-end gap-x-3 gap-y-1">
-            <span className="font-display text-6xl font-black leading-none tabular-nums text-[#ffb35c] sm:text-7xl">
+          <p className="mt-3 flex flex-wrap items-end gap-x-3 gap-y-1 sm:mt-5">
+            <span className="text-5xl font-black leading-none tracking-tight tabular-nums text-[#ffb35c] sm:text-7xl">
               {headline.confirmed}
             </span>
             <span className="pb-1 text-lg font-extrabold sm:text-xl">{c.heroUnit}</span>
@@ -1257,9 +1257,9 @@ function HomeView({ locale, location }: { locale: Locale; location: LocationStat
               {c.heroNeedsCheck(headline.needsCheck)}
             </p>
           ) : null}
-          <p className="mt-3 text-sm leading-6 text-white/80 sm:hidden">{c.introShort}</p>
+          <p className="mt-2 text-sm leading-6 text-white/80 sm:hidden">{c.introShort}</p>
           <p className="mt-4 hidden max-w-2xl text-base leading-7 text-white/80 sm:block">{c.intro}</p>
-          <div className="mt-5 flex flex-wrap gap-2 text-xs font-bold">
+          <div className="mt-3 flex flex-wrap gap-2 text-xs font-bold sm:mt-5">
             {headline.freshness ? (
               <span className="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-3 py-1.5 ring-1 ring-white/20">
                 <ShieldCheck aria-hidden="true" size={14} />
@@ -1269,7 +1269,7 @@ function HomeView({ locale, location }: { locale: Locale; location: LocationStat
                 )}
               </span>
             ) : null}
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-3 py-1.5 ring-1 ring-white/20">
+            <span className="hidden items-center gap-1.5 rounded-full bg-white/10 px-3 py-1.5 ring-1 ring-white/20 sm:inline-flex">
               <Database aria-hidden="true" size={14} />
               {c.records(marketDataset.markets.length)} · {c.upstreamUnknown}
             </span>
@@ -1288,7 +1288,7 @@ function HomeView({ locale, location }: { locale: Locale; location: LocationStat
             query={location.query}
             selectedDate={location.date}
           />
-          <div className="mt-4 grid gap-4 md:grid-cols-2">
+          <div className="mt-3 grid gap-3 sm:mt-4 sm:gap-4 md:grid-cols-2">
             <SearchControl
               date={location.date}
               districtCode={location.districtCode}
@@ -1305,10 +1305,10 @@ function HomeView({ locale, location }: { locale: Locale; location: LocationStat
         </div>
       </section>
 
-      <section className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6 lg:px-8" aria-labelledby="results-title">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+      <section className="mx-auto w-full max-w-6xl px-4 pb-8 pt-6 sm:px-6 sm:pt-8 lg:px-8" aria-labelledby="results-title">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between sm:gap-4">
           <div>
-            <h2 className="font-display text-2xl font-black text-fg" id="results-title">
+            <h2 className="text-xl font-black text-fg sm:text-2xl" id="results-title">
               {c.resultsTitle}
             </h2>
             <p aria-live="polite" className="mt-1 text-sm font-semibold tabular-nums text-muted">
@@ -1317,7 +1317,7 @@ function HomeView({ locale, location }: { locale: Locale; location: LocationStat
           </div>
           <ViewToggle locale={locale} setView={setView} view={view} />
         </div>
-        <div className="mt-4">
+        <div className="mt-3 sm:mt-4">
           <StatusChips
             counts={{
               all: confirmed.length + needsCheck.length,
@@ -1344,7 +1344,7 @@ function HomeView({ locale, location }: { locale: Locale; location: LocationStat
           </div>
         ) : null}
 
-        <div className="mt-6 grid gap-6 lg:grid-cols-[minmax(0,1fr)_340px] lg:items-start">
+        <div className="mt-6 grid gap-6 lg:grid-cols-[minmax(0,1fr)_400px] lg:items-start">
           <div className={clsx(view === "map" && "hidden lg:block")}>
             {visible.length ? (
               <div className="grid gap-4 sm:grid-cols-2">
@@ -1606,7 +1606,7 @@ function DetailView({
             <div className="lantern-hero lantern-hero--plain px-5 py-7 sm:px-8 sm:py-9">
               <DecisionBadge decision={decision} locale={locale} />
               <p className="mt-5 text-xs font-extrabold uppercase tracking-[0.16em] text-[#ffc56b]">{c.decisionFor}</p>
-              <h1 className="mt-1 font-display text-4xl font-black tracking-tight sm:text-5xl">{market.name}</h1>
+              <h1 className="mt-1 text-4xl font-black tracking-tight sm:text-5xl">{market.name}</h1>
               <p className="mt-2 text-lg font-semibold text-white/80">{formatDecisionDate(location.date, locale)}</p>
             </div>
 
@@ -1688,7 +1688,7 @@ function DetailView({
 
           <aside className="rounded-3xl border border-edge bg-raised/50 p-5 sm:p-6" aria-labelledby="evidence-title">
             <ShieldCheck aria-hidden="true" className="text-ok" size={26} />
-            <h2 className="mt-3 font-display text-2xl font-black text-fg" id="evidence-title">
+            <h2 className="mt-3 text-2xl font-black text-fg" id="evidence-title">
               {c.evidenceTitle}
             </h2>
             <p className="mt-2 text-sm leading-6 text-muted">{c.evidenceIntro}</p>
@@ -1768,7 +1768,7 @@ function NotFoundView({ locale, location }: { locale: Locale; location: Location
     <main id="main-content" ref={mainRef} tabIndex={-1}>
       <section className="mx-auto max-w-xl px-4 py-20 text-center sm:px-6">
         <CircleAlert aria-hidden="true" className="mx-auto text-lantern" size={38} />
-        <h1 className="mt-4 font-display text-3xl font-black text-fg">{c.notFoundTitle}</h1>
+        <h1 className="mt-4 text-3xl font-black text-fg">{c.notFoundTitle}</h1>
         <p className="mt-3 leading-7 text-muted">{c.notFoundBody}</p>
         <a
           className={clsx(
@@ -1796,7 +1796,7 @@ function NotFoundView({ locale, location }: { locale: Locale; location: Location
 
 function AppFooter({ locale }: { locale: Locale }) {
   const c = copy[locale];
-  const footerLink = clsx("inline-flex items-center gap-1 rounded underline underline-offset-4 transition-colors hover:text-fg", focusRing);
+  const footerLink = clsx("inline-flex min-h-11 items-center gap-1 rounded underline underline-offset-4 transition-colors hover:text-fg", focusRing);
   return (
     <footer className="mt-8 border-t border-edge bg-surface">
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-3 px-4 py-8 text-sm text-muted sm:px-6 lg:px-8">

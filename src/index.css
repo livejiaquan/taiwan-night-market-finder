@@ -71,12 +71,14 @@ body {
   min-height: 100vh;
   margin: 0;
   font-family:
-    "Noto Sans TC",
-    Inter,
     ui-sans-serif,
     system-ui,
     -apple-system,
     BlinkMacSystemFont,
+    "PingFang TC",
+    "Noto Sans TC",
+    "Noto Sans CJK TC",
+    "Microsoft JhengHei",
     "Segoe UI",
     sans-serif;
 }
@@ -169,6 +171,10 @@ select option {
 }
 
 @media (max-width: 767px) {
+  .lantern-hero::before {
+    background-image: url("/assets/night-market-hero-800.webp");
+  }
+
   .lantern-hero::after {
     background: linear-gradient(180deg, rgb(10 14 28 / 0.70), rgb(10 14 28 / 0.92));
   }
