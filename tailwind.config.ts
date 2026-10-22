@@ -1,22 +1,46 @@
 import type { Config } from "tailwindcss";
 
+const token = (name: string) => `rgb(var(--${name}) / <alpha-value>)`;
+
 export default {
+  darkMode: "class",
   content: ["./index.html", "./src/**/*.{ts,tsx}"],
   theme: {
     extend: {
       fontFamily: {
         sans: [
-          "Noto Sans TC",
-          "Inter",
           "ui-sans-serif",
           "system-ui",
           "-apple-system",
           "BlinkMacSystemFont",
+          "PingFang TC",
+          "Noto Sans TC",
+          "Noto Sans CJK TC",
+          "Microsoft JhengHei",
           "Segoe UI",
           "sans-serif",
         ],
       },
       colors: {
+        // Semantic tokens for the public product; values switch with the `.dark` class.
+        canvas: token("canvas"),
+        surface: token("surface"),
+        raised: token("raised"),
+        fg: token("fg"),
+        muted: token("muted"),
+        subtle: token("subtle"),
+        edge: token("edge"),
+        lantern: token("lantern"),
+        "lantern-fg": token("lantern-fg"),
+        gold: token("gold"),
+        ok: token("ok"),
+        "ok-soft": token("ok-soft"),
+        warn: token("warn"),
+        "warn-soft": token("warn-soft"),
+        bad: token("bad"),
+        "bad-soft": token("bad-soft"),
+        idle: token("idle"),
+        "idle-soft": token("idle-soft"),
         ink: "#10211C",
         paper: "#F6F7F2",
         moss: {

@@ -11,17 +11,22 @@ import {
   ExternalLink,
   Info,
   Languages,
+  List,
+  Map as MapIcon,
   MapPin,
+  Moon,
   Navigation,
   Search,
   Share2,
   ShieldCheck,
+  Sun,
   TriangleAlert,
   X,
 } from "lucide-react";
 import { clsx } from "clsx";
 import { appUrl, getAppLocation } from "../lib/basePath";
 import {
+  OPENING_DAYS,
   getMarketDecision,
   marketDataset,
   type FieldEvidence,
@@ -30,6 +35,7 @@ import {
 } from "./marketData";
 import { dayLabels, scheduleText } from "./scheduleText";
 import { districtDataset, getDistrict, pilotDistricts, type TrustedDistrict } from "./districtData";
+import { DISTRICT_TILE_COLUMNS, DISTRICT_TILE_ROWS, districtTiles } from "./districtTiles";
 import {
   formatCompactDate,
   formatDecisionDate,
@@ -129,6 +135,34 @@ const copy = {
     notFoundTitle: "找不到這個夜市資料",
     notFoundBody: "連結可能已過期或輸入有誤；我們不會靜默改成另一個夜市。",
     home: "回到候選清單",
+    family: "台灣生活資料誌",
+    introShort: "依官方名冊的正常週期整理，不是即時開門保證。",
+    heroUnit: "個夜市依週期排定營業",
+    heroNeedsCheck: (count: number) => `另有 ${count} 個需出發前再確認`,
+    heroFreshness: (date: string, days: number) => `名冊比對於 ${date}（${days} 天前）`,
+    records: (count: number) => `收錄 ${count} 筆許可夜市`,
+    illustration: "示意插圖，非特定夜市",
+    dateCount: (count: number) => `${count} 個`,
+    dateCountLabel: (count: number) => `${count} 個依週期有營業`,
+    statusLabel: "依判斷篩選",
+    statusAll: "全部候選",
+    statusConfirmed: "依週期有營業",
+    statusCheck: "需再確認",
+    viewLabel: "檢視方式",
+    viewList: "列表",
+    viewMap: "行政區圖",
+    mapTitle: "行政區示意圖",
+    mapNote: "依官方行政區排列的示意方格，不是比例地圖，也不代表夜市位置。點選有夜市的區可直接篩選。",
+    mapLegendOpen: "所選日期有候選",
+    mapLegendRegistered: "名冊有夜市、當日無",
+    mapLegendNone: "名冊無夜市",
+    mapTile: (district: string, count: number, registered: number) =>
+      `${district}：所選日期 ${count} 個候選，名冊共 ${registered} 個`,
+    mapShowAll: "顯示全部行政區",
+    cardSource: "來源",
+    themeToDark: "切換為深色模式",
+    themeToLight: "切換為淺色模式",
+    weekLabel: "一週排班",
   },
   en: {
     brand: "Tonight's Tainan Markets",
@@ -216,6 +250,34 @@ const copy = {
     notFoundTitle: "This market record was not found",
     notFoundBody: "The link may be old or mistyped. We will not silently substitute another market.",
     home: "Back to candidates",
+    family: "Taiwan Life Data",
+    introShort: "Regular schedule from the official register—not live opening status.",
+    heroUnit: "markets scheduled on their regular cycle",
+    heroNeedsCheck: (count: number) => `${count} more need checking before you go`,
+    heroFreshness: (date: string, days: number) => `Register checked ${date} (${days} days ago)`,
+    records: (count: number) => `${count} licensed markets`,
+    illustration: "Illustration, not a specific market",
+    dateCount: (count: number) => `${count}`,
+    dateCountLabel: (count: number) => `${count} scheduled`,
+    statusLabel: "Filter by decision",
+    statusAll: "All candidates",
+    statusConfirmed: "Scheduled",
+    statusCheck: "Needs checking",
+    viewLabel: "View",
+    viewList: "List",
+    viewMap: "District map",
+    mapTitle: "District tile map",
+    mapNote: "Official districts arranged as schematic tiles—not a scaled map and not market locations. Tap a district with markets to filter.",
+    mapLegendOpen: "Candidates on this date",
+    mapLegendRegistered: "Registered, none this date",
+    mapLegendNone: "No registered market",
+    mapTile: (district: string, count: number, registered: number) =>
+      `${district}: ${count} candidates on this date, ${registered} in the register`,
+    mapShowAll: "Show all districts",
+    cardSource: "Source",
+    themeToDark: "Switch to dark mode",
+    themeToLight: "Switch to light mode",
+    weekLabel: "Weekly schedule",
   },
 } as const;
 
@@ -377,20 +439,48 @@ function decisionTone(decision: MarketDecision) {
   return "degraded" as const;
 }
 
+const focusRing =
+  "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lantern";
+const weekdayInitials: Record<Locale, string[]> = {
+  zh: ["一", "二", "三", "四", "五", "六", "日"],
+  en: ["M", "T", "W", "T", "F", "S", "S"],
+};
+
+function useTheme() {
+  const [dark, setDark] = useState(() => document.documentElement.classList.contains("dark"));
+
+  useEffect(() => {
+    document.documentElement.classList.toggle("dark", dark);
+  }, [dark]);
+
+  const toggle = () => {
+    const next = !dark;
+    try {
+      window.localStorage?.setItem("night-market-theme", next ? "dark" : "light");
+    } catch {
+      // The theme still switches for this visit when storage is blocked.
+    }
+    setDark(next);
+  };
+
+  return [dark, toggle] as const;
+}
+
 function LanguageToggle({ locale, setLocale }: { locale: Locale; setLocale: (locale: Locale) => void }) {
   return (
     <div
       aria-label={locale === "zh" ? "語言" : "Language"}
-      className="inline-flex items-center rounded-lg border border-slate-300 bg-white p-1"
+      className="inline-flex items-center rounded-xl border border-edge bg-surface p-1"
       role="group"
     >
-      <Languages aria-hidden="true" className="mx-2 text-slate-500" size={16} />
+      <Languages aria-hidden="true" className="mx-1.5 hidden text-subtle sm:block" size={16} />
       {(["zh", "en"] as const).map((option) => (
         <button
           aria-pressed={locale === option}
           className={clsx(
-            "min-h-9 rounded-md px-3 text-sm font-bold focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange-600",
-            locale === option ? "bg-slate-950 text-white" : "text-slate-600 hover:bg-slate-100",
+            "min-h-11 min-w-11 rounded-lg px-2.5 text-sm font-bold sm:px-3",
+            focusRing,
+            locale === option ? "bg-fg text-canvas" : "text-muted hover:bg-raised",
           )}
           key={option}
           onClick={() => setLocale(option)}
@@ -403,46 +493,111 @@ function LanguageToggle({ locale, setLocale }: { locale: Locale; setLocale: (loc
   );
 }
 
+function ThemeToggle({ locale }: { locale: Locale }) {
+  const [dark, toggle] = useTheme();
+  const c = copy[locale];
+  return (
+    <button
+      aria-label={dark ? c.themeToLight : c.themeToDark}
+      className={clsx(
+        "inline-flex min-h-11 min-w-11 items-center justify-center rounded-xl border border-edge bg-surface text-muted transition-colors hover:text-fg",
+        focusRing,
+      )}
+      onClick={toggle}
+      title={dark ? c.themeToLight : c.themeToDark}
+      type="button"
+    >
+      {dark ? <Sun aria-hidden="true" size={18} /> : <Moon aria-hidden="true" size={18} />}
+    </button>
+  );
+}
+
 function AppHeader({ locale, setLocale }: { locale: Locale; setLocale: (locale: Locale) => void }) {
   const c = copy[locale];
   return (
-    <header className="border-b border-[#c8d5cf] bg-[#f6f7f2]/90 backdrop-blur">
+    <header className="sticky top-0 z-30 border-b border-edge bg-canvas/90 backdrop-blur">
       <div className="mx-auto flex min-h-16 w-full max-w-6xl items-center justify-between gap-3 px-4 py-2 sm:px-6 lg:px-8">
         <a
-          className="flex items-center gap-3 rounded-md transition-opacity hover:opacity-75 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-coral-600"
+          className={clsx("flex min-h-11 min-w-0 items-center gap-3 rounded-lg transition-opacity hover:opacity-80", focusRing)}
           href={appUrl("/", new URLSearchParams({ date: getTaipeiToday() }))}
           onClick={(event) => {
             event.preventDefault();
             writeLocation({ pathname: "/", date: getTaipeiToday(), query: "", districtCode: "" });
           }}
         >
-          <span className="family-mark" aria-hidden="true"><span /><span /><span /></span>
-          <span>
-            <span className="block text-[11px] font-extrabold tracking-[0.12em] text-plum-600">台灣生活資料誌</span>
-            <span className="block text-lg font-extrabold tracking-tight text-ink">{c.brand}</span>
-            <span className="block text-xs font-semibold text-moss-700">{c.pilot}</span>
+          <span aria-hidden="true" className="lantern-mark shrink-0 text-lg font-black">
+            市
+          </span>
+          <span className="min-w-0">
+            <span className="block truncate text-base font-extrabold tracking-tight text-fg sm:text-lg">{c.brand}</span>
+            <span className="block truncate text-xs font-semibold text-subtle">
+              <span className="hidden sm:inline">{c.family} · </span>
+              {c.pilot}
+            </span>
           </span>
         </a>
-        <LanguageToggle locale={locale} setLocale={setLocale} />
+        <div className="flex shrink-0 items-center gap-2">
+          <ThemeToggle locale={locale} />
+          <LanguageToggle locale={locale} setLocale={setLocale} />
+        </div>
       </div>
     </header>
   );
 }
 
+function WeekDots({
+  days,
+  conflictDays = [],
+  highlight,
+  locale,
+}: {
+  days: readonly OpeningDay[];
+  conflictDays?: readonly OpeningDay[];
+  highlight?: OpeningDay;
+  locale: Locale;
+}) {
+  return (
+    <span aria-hidden="true" className="flex gap-1">
+      {OPENING_DAYS.map((day, index) => {
+        const scheduled = days.includes(day);
+        const disputed = conflictDays.includes(day);
+        return (
+          <span
+            className={clsx(
+              "grid h-6 w-6 place-items-center rounded-md text-[11px] font-bold tabular-nums",
+              disputed
+                ? "border border-dashed border-warn bg-warn-soft text-warn"
+                : scheduled
+                  ? "bg-lantern text-lantern-fg"
+                  : "bg-raised text-subtle",
+              day === highlight && "ring-2 ring-fg ring-offset-1 ring-offset-surface",
+            )}
+            key={day}
+          >
+            {weekdayInitials[locale][index]}
+          </span>
+        );
+      })}
+    </span>
+  );
+}
+
 function DatePicker({
   locale,
+  dates,
+  counts,
   selectedDate,
   query,
   districtCode,
 }: {
   locale: Locale;
+  dates: string[];
+  counts: Map<string, number>;
   selectedDate: string;
   query: string;
   districtCode: string;
 }) {
   const today = getTaipeiToday();
-  const currentWindow = getDateChoices(today);
-  const dates = currentWindow.includes(selectedDate) ? currentWindow : getDateChoices(selectedDate);
   const c = copy[locale];
   const dateScrollerRef = useRef<HTMLDivElement>(null);
   const selectedDateRef = useRef<HTMLButtonElement>(null);
@@ -471,33 +626,45 @@ function DatePicker({
 
   return (
     <fieldset className="min-w-0">
-      <legend className="mb-2 flex items-center gap-2 text-sm font-bold text-slate-800">
-        <CalendarDays aria-hidden="true" size={17} />
+      <legend className="sr-only items-center gap-2 text-sm font-bold text-fg sm:not-sr-only sm:mb-2 sm:flex">
+        <CalendarDays aria-hidden="true" className="text-lantern" size={17} />
         {c.chooseDate}
       </legend>
-      <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-2" ref={dateScrollerRef}>
+      <div className="no-scrollbar -mx-1 flex gap-2 overflow-x-auto px-1 pb-1 lg:grid lg:grid-cols-7" ref={dateScrollerRef}>
         {dates.map((date) => {
           const selected = date === selectedDate;
           const weekday = dayLabels[locale][getScheduleDay(date) as OpeningDay];
-          const calendarDate = formatCompactDate(date, locale);
+          const count = counts.get(date) ?? 0;
           return (
             <button
-              aria-label={`${date === today ? `${c.today}，` : ""}${formatDecisionDate(date, locale)}`}
+              aria-label={`${date === today ? `${c.today}，` : ""}${formatDecisionDate(date, locale)}，${c.dateCountLabel(count)}`}
               aria-pressed={selected}
               className={clsx(
-                "min-h-[58px] min-w-[76px] shrink-0 rounded-xl border px-3 py-2 text-left tabular-nums focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange-600 lg:min-w-[60px] lg:px-2",
+                "flex min-h-[72px] min-w-[78px] shrink-0 flex-col items-start rounded-xl border px-3 py-2 text-left tabular-nums transition-colors lg:min-w-0",
+                focusRing,
                 selected
-                  ? "border-moss-700 bg-moss-700 text-white shadow-sm"
-                  : "border-[#c8d5cf] bg-white/85 text-slate-700 hover:border-moss-600",
+                  ? "border-fg bg-fg text-canvas shadow-md"
+                  : "border-edge bg-surface text-muted hover:border-lantern/60",
               )}
               key={date}
               onClick={() => writeLocation({ pathname: "/", date, query, districtCode })}
               ref={selected ? selectedDateRef : undefined}
               type="button"
             >
-              <span className="block text-xs font-bold opacity-70">{date === today ? c.today : weekday}</span>
-              <span className="mt-0.5 block whitespace-nowrap text-sm font-extrabold">
-                {calendarDate}
+              <span className={clsx("text-xs font-bold", date === today && !selected && "text-lantern")}>
+                {date === today ? c.today : weekday}
+              </span>
+              <span className="whitespace-nowrap text-sm font-extrabold">{formatCompactDate(date, locale)}</span>
+              <span
+                className={clsx(
+                  "mt-1 inline-flex items-center gap-1 rounded-full px-1.5 text-[11px] font-bold",
+                  selected ? "bg-canvas/15" : count ? "bg-lantern/10 text-lantern" : "text-subtle",
+                )}
+              >
+                <span
+                  className={clsx("h-1.5 w-1.5 rounded-full", count ? "bg-lantern" : "bg-subtle/50")}
+                />
+                {c.dateCount(count)}
               </span>
             </button>
           );
@@ -513,10 +680,10 @@ function DecisionBadge({ decision, locale }: { decision: MarketDecision; locale:
   return (
     <span
       className={clsx(
-        "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-extrabold",
-        tone === "confirmed" && "border-moss-300 bg-moss-50 text-moss-800",
-        tone === "conflict" && "border-amber-300 bg-amber-50 text-amber-900",
-        tone === "degraded" && "border-slate-300 bg-slate-100 text-slate-700",
+        "inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-extrabold",
+        tone === "confirmed" && "bg-ok-soft text-ok",
+        tone === "conflict" && "bg-warn-soft text-warn",
+        tone === "degraded" && "bg-idle-soft text-idle",
       )}
     >
       <Icon aria-hidden="true" size={14} />
@@ -543,6 +710,7 @@ function MarketCard({
   locale: Locale;
 }) {
   const c = copy[locale];
+  const scheduleEvidence = market.evidence.scheduleDays[0];
   const url = appUrl(
     `/market/${encodeURIComponent(market.id)}`,
     new URLSearchParams({
@@ -553,31 +721,45 @@ function MarketCard({
   );
 
   return (
-    <article className="group flex min-h-full flex-col rounded-2xl border border-[#c8d5cf] bg-white/90 p-5 shadow-[0_16px_45px_-36px_rgba(16,33,28,0.55)] transition hover:border-moss-500">
-      <DecisionBadge decision={decision} locale={locale} />
-      <h3 className="mt-4 text-2xl font-extrabold tracking-tight text-slate-950">{market.name}</h3>
-      <div className="mt-4 flex items-start gap-2 text-sm leading-6 text-slate-700">
-        <MapPin aria-hidden="true" className="mt-1 shrink-0 text-coral-600" size={16} />
-        <div>
-          <span className="block text-xs font-bold uppercase tracking-wide text-slate-500">
-            {district.shortName} · {c.permitArea}
-          </span>
-          <p className="line-clamp-3 mt-0.5">{market.permittedArea}</p>
-        </div>
-      </div>
-      <div className="mt-4 flex items-start gap-2 text-sm text-slate-700">
-        <CalendarDays aria-hidden="true" className="shrink-0 text-plum-600" size={16} />
-        <span>
-          <strong>{c.schedule}：</strong>
-          {scheduleText(market.scheduleDays, locale)}
+    <article className="group flex min-h-full flex-col rounded-2xl border border-edge bg-surface p-5 shadow-sm transition hover:border-lantern/50 hover:shadow-lg">
+      <div className="flex items-start justify-between gap-3">
+        <DecisionBadge decision={decision} locale={locale} />
+        <span className="shrink-0 rounded-full border border-edge px-2.5 py-0.5 text-xs font-bold text-muted">
+          {district.shortName}
         </span>
       </div>
-      <div className="mt-auto border-t border-slate-100 pt-5">
-        <p className="mb-3 text-xs font-semibold text-slate-500">
-          {c.checkedAt} {formatEvidenceDate(market.evidence.scheduleDays[0].verifiedAt, locale)}
+      <h3 className="mt-3 text-2xl font-black tracking-tight text-fg">{market.name}</h3>
+      <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-2">
+        <WeekDots
+          conflictDays={market.conflicts.flatMap((conflict) => conflict.days)}
+          days={market.scheduleDays}
+          highlight={decision.day}
+          locale={locale}
+        />
+      </div>
+      <p className="mt-2 text-sm text-muted">
+        <strong className="text-fg">{c.schedule}：</strong>
+        {scheduleText(market.scheduleDays, locale)}
+      </p>
+      <div className="mt-3 flex items-start gap-2 text-sm leading-6 text-muted">
+        <MapPin aria-hidden="true" className="mt-1 shrink-0 text-lantern" size={15} />
+        <p className="line-clamp-2">{market.permittedArea}</p>
+      </div>
+      <div className="mt-auto pt-4">
+        <p className="flex items-start gap-1.5 border-t border-edge pt-3 text-xs leading-5 text-subtle">
+          <Database aria-hidden="true" className="mt-0.5 shrink-0" size={13} />
+          <span>
+            {c.cardSource}：{scheduleEvidence.publisher} ·{" "}
+            <span className="whitespace-nowrap">
+              {c.checkedAt} {formatEvidenceDate(scheduleEvidence.verifiedAt, locale)}
+            </span>
+          </span>
         </p>
         <a
-          className="inline-flex min-h-11 w-full items-center justify-between rounded-lg bg-moss-700 px-4 font-bold text-white transition-colors hover:bg-moss-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-coral-600"
+          className={clsx(
+            "mt-3 inline-flex min-h-11 w-full items-center justify-between rounded-xl bg-fg px-4 font-bold text-canvas transition-colors hover:bg-lantern hover:text-lantern-fg",
+            focusRing,
+          )}
           href={url}
           onClick={(event) => {
             event.preventDefault();
@@ -591,6 +773,9 @@ function MarketCard({
     </article>
   );
 }
+
+const fieldClass =
+  "min-h-12 w-full rounded-xl border border-edge bg-canvas text-base text-fg outline-none transition-colors placeholder:text-subtle focus:border-lantern focus:ring-2 focus:ring-lantern/25";
 
 function SearchControl({
   locale,
@@ -606,13 +791,13 @@ function SearchControl({
   const c = copy[locale];
   return (
     <div>
-      <label className="mb-2 block text-sm font-bold text-slate-800" htmlFor="market-search">
+      <label className="sr-only text-sm font-bold text-fg sm:not-sr-only sm:mb-2 sm:block" htmlFor="market-search">
         {c.searchLabel}
       </label>
       <div className="relative">
-        <Search aria-hidden="true" className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" size={19} />
+        <Search aria-hidden="true" className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-subtle" size={19} />
         <input
-          className="min-h-12 w-full rounded-xl border border-[#c8d5cf] bg-white/90 py-2 pl-10 pr-11 text-base text-slate-950 outline-none placeholder:text-slate-400 focus:border-moss-700 focus:ring-2 focus:ring-moss-200"
+          className={clsx(fieldClass, "py-2 pl-10 pr-12")}
           id="market-search"
           name="market-search"
           autoComplete="off"
@@ -629,7 +814,10 @@ function SearchControl({
         {query ? (
           <button
             aria-label={c.clearSearch}
-            className="absolute right-1.5 top-1/2 inline-flex min-h-9 min-w-9 -translate-y-1/2 items-center justify-center rounded-lg text-slate-600 hover:bg-slate-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-orange-600"
+            className={clsx(
+              "absolute right-0.5 top-1/2 inline-flex min-h-11 min-w-11 -translate-y-1/2 items-center justify-center rounded-lg text-muted hover:bg-raised",
+              focusRing,
+            )}
             onClick={() =>
               writeLocation(
                 { pathname: "/", date, query: "", districtCode },
@@ -660,11 +848,11 @@ function DistrictControl({
   const c = copy[locale];
   return (
     <div>
-      <label className="mb-2 block text-sm font-bold text-slate-800" htmlFor="district-filter">
+      <label className="sr-only text-sm font-bold text-fg sm:not-sr-only sm:mb-2 sm:block" htmlFor="district-filter">
         {c.chooseDistrict}
       </label>
       <select
-        className="min-h-12 w-full rounded-xl border border-[#c8d5cf] bg-white/90 px-3 py-2 text-base font-semibold text-slate-950 outline-none focus:border-moss-700 focus:ring-2 focus:ring-moss-200"
+        className={clsx(fieldClass, "px-3 py-2 font-semibold")}
         id="district-filter"
         name="district-filter"
         onChange={(event) =>
@@ -682,23 +870,212 @@ function DistrictControl({
           </option>
         ))}
       </select>
-      <p className="mt-1.5 text-xs font-semibold leading-5 text-slate-600">{c.districtHelp}</p>
+      <p className="mt-1.5 hidden text-xs leading-5 text-subtle sm:block">{c.districtHelp}</p>
     </div>
   );
 }
 
+type StatusFilter = "all" | "confirmed" | "check";
+
+function StatusChips({
+  locale,
+  value,
+  onChange,
+  counts,
+}: {
+  locale: Locale;
+  value: StatusFilter;
+  onChange: (value: StatusFilter) => void;
+  counts: Record<StatusFilter, number>;
+}) {
+  const c = copy[locale];
+  const options: [StatusFilter, string][] = [
+    ["all", c.statusAll],
+    ["confirmed", c.statusConfirmed],
+    ["check", c.statusCheck],
+  ];
+  return (
+    <div aria-label={c.statusLabel} className="flex flex-wrap gap-1.5 sm:gap-2" role="group">
+      {options.map(([option, label]) => (
+        <button
+          aria-pressed={value === option}
+          className={clsx(
+            "inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-full border px-3 text-[13px] font-bold transition-colors sm:gap-2 sm:px-3.5 sm:text-sm",
+            focusRing,
+            value === option
+              ? "border-fg bg-fg text-canvas"
+              : "border-edge bg-surface text-muted hover:border-lantern/60 hover:text-fg",
+          )}
+          key={option}
+          onClick={() => onChange(option)}
+          type="button"
+        >
+          {option === "confirmed" ? <CheckCircle2 aria-hidden="true" className="hidden sm:block" size={15} /> : null}
+          {option === "check" ? <TriangleAlert aria-hidden="true" className="hidden sm:block" size={15} /> : null}
+          {label}
+          <span className="tabular-nums opacity-70">{counts[option]}</span>
+        </button>
+      ))}
+    </div>
+  );
+}
+
+function ViewToggle({
+  locale,
+  view,
+  setView,
+}: {
+  locale: Locale;
+  view: "list" | "map";
+  setView: (view: "list" | "map") => void;
+}) {
+  const c = copy[locale];
+  return (
+    <div aria-label={c.viewLabel} className="grid grid-cols-2 rounded-xl border border-edge bg-surface p-1 sm:inline-flex lg:hidden" role="group">
+      {(
+        [
+          ["list", c.viewList, List],
+          ["map", c.viewMap, MapIcon],
+        ] as const
+      ).map(([option, label, Icon]) => (
+        <button
+          aria-pressed={view === option}
+          className={clsx(
+            "inline-flex min-h-11 items-center justify-center gap-1.5 rounded-lg px-3 text-sm font-bold",
+            focusRing,
+            view === option ? "bg-fg text-canvas" : "text-muted hover:bg-raised",
+          )}
+          key={option}
+          onClick={() => setView(option)}
+          type="button"
+        >
+          <Icon aria-hidden="true" size={15} />
+          {label}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+function DistrictMap({
+  locale,
+  candidateCounts,
+  registeredCounts,
+  selectedCode,
+  onSelect,
+}: {
+  locale: Locale;
+  candidateCounts: Map<string, number>;
+  registeredCounts: Map<string, number>;
+  selectedCode: string;
+  onSelect: (code: string) => void;
+}) {
+  const c = copy[locale];
+  return (
+    <section aria-labelledby="district-map-title" className="rounded-2xl border border-edge bg-surface p-3 shadow-sm sm:p-5">
+      <div className="flex items-start justify-between gap-3">
+        <h2 className="flex items-center gap-2 font-extrabold text-fg" id="district-map-title">
+          <MapIcon aria-hidden="true" className="text-lantern" size={18} />
+          {c.mapTitle}
+        </h2>
+        {selectedCode ? (
+          <button
+            className={clsx("-my-2 min-h-11 shrink-0 rounded-lg px-2 text-xs font-bold text-lantern underline underline-offset-4", focusRing)}
+            onClick={() => onSelect("")}
+            type="button"
+          >
+            {c.mapShowAll}
+          </button>
+        ) : null}
+      </div>
+      <p className="mt-1 text-xs leading-5 text-subtle">{c.mapNote}</p>
+      <div
+        className="mx-auto mt-4 grid max-w-md gap-1"
+        style={{
+          gridTemplateColumns: `repeat(${DISTRICT_TILE_COLUMNS}, minmax(0, 1fr))`,
+          gridTemplateRows: `repeat(${DISTRICT_TILE_ROWS}, minmax(0, 1fr))`,
+        }}
+      >
+        {districtDataset.districts.map((district) => {
+          const tile = districtTiles[district.shortName];
+          if (!tile) {
+            return null;
+          }
+          const count = candidateCounts.get(district.code) ?? 0;
+          const registered = registeredCounts.get(district.code) ?? 0;
+          const label = district.shortName.length > 2 ? district.shortName.replace(/區$/u, "") : district.shortName;
+          const style = { gridColumn: tile.col + 1, gridRow: tile.row + 1 };
+          if (!registered) {
+            return (
+              <div
+                aria-hidden="true"
+                className="grid aspect-square place-items-center rounded-md border border-dashed border-edge text-[10px] font-semibold text-subtle"
+                key={district.code}
+                style={style}
+              >
+                {label}
+              </div>
+            );
+          }
+          const selected = selectedCode === district.code;
+          return (
+            <button
+              aria-label={c.mapTile(district.shortName, count, registered)}
+              aria-pressed={selected}
+              className={clsx(
+                "relative flex aspect-square flex-col items-center justify-center rounded-md text-[11px] font-extrabold leading-tight transition",
+                focusRing,
+                count
+                  ? "bg-lantern text-lantern-fg shadow-sm hover:brightness-110"
+                  : "border border-edge bg-raised text-muted hover:border-lantern",
+                selected && "ring-2 ring-fg ring-offset-2 ring-offset-surface",
+              )}
+              key={district.code}
+              onClick={() => onSelect(selected ? "" : district.code)}
+              style={style}
+              type="button"
+            >
+              <span>{label}</span>
+              {count ? <span className="text-[10px] font-bold tabular-nums opacity-90">{count}</span> : null}
+            </button>
+          );
+        })}
+      </div>
+      <ul className="mt-4 flex flex-wrap gap-x-4 gap-y-1.5 text-xs text-muted">
+        <li className="flex items-center gap-1.5">
+          <span aria-hidden="true" className="h-3 w-3 rounded-sm bg-lantern" />
+          {c.mapLegendOpen}
+        </li>
+        <li className="flex items-center gap-1.5">
+          <span aria-hidden="true" className="h-3 w-3 rounded-sm border border-edge bg-raised" />
+          {c.mapLegendRegistered}
+        </li>
+        <li className="flex items-center gap-1.5">
+          <span aria-hidden="true" className="h-3 w-3 rounded-sm border border-dashed border-edge" />
+          {c.mapLegendNone}
+        </li>
+      </ul>
+    </section>
+  );
+}
+
+const textLinkClass = clsx(
+  "inline-flex min-h-11 items-center gap-1.5 rounded text-sm font-bold text-lantern underline decoration-lantern/40 underline-offset-4 transition-colors hover:decoration-lantern",
+  focusRing,
+);
+
 function SourceSummary({ headingId, locale }: { headingId: string; locale: Locale }) {
   const c = copy[locale];
   return (
-    <aside className="trust-panel rounded-2xl border p-5" aria-labelledby={headingId}>
+    <aside className="rounded-2xl border border-edge bg-raised/60 p-5" aria-labelledby={headingId}>
       <div className="flex gap-3">
-        <Database aria-hidden="true" className="mt-0.5 shrink-0 text-moss-700" size={22} />
+        <Database aria-hidden="true" className="mt-0.5 shrink-0 text-lantern" size={20} />
         <div>
-          <h2 className="font-extrabold text-slate-950" id={headingId}>
+          <h2 className="font-extrabold text-fg" id={headingId}>
             {c.sourceScopeTitle}
           </h2>
-          <p className="mt-1 text-sm leading-6 text-slate-700">{c.sourceScope(marketDataset.markets.length)}</p>
-          <dl className="mt-3 flex flex-wrap gap-x-5 gap-y-1 text-xs font-semibold text-slate-600">
+          <p className="mt-1 text-sm leading-6 text-muted">{c.sourceScope(marketDataset.markets.length)}</p>
+          <dl className="mt-3 flex flex-wrap gap-x-5 gap-y-1 text-xs font-semibold text-subtle">
             <div>
               <dt className="inline">{c.sourceChecked}：</dt>{" "}
               <dd className="inline">{formatEvidenceDate(marketDataset.source.retrievedAt, locale)}</dd>
@@ -712,65 +1089,121 @@ function SourceSummary({ headingId, locale }: { headingId: string; locale: Local
               </dd>
             </div>
           </dl>
-          <a
-            className="mt-3 inline-flex items-center gap-1.5 rounded text-sm font-bold text-moss-700 underline decoration-moss-300 underline-offset-4 transition-colors hover:text-moss-900 hover:decoration-moss-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-coral-600"
-            href={marketDataset.source.datasetUrl}
-            rel="noreferrer"
-            target="_blank"
-          >
-            {c.sourcePage}
-            <ExternalLink aria-hidden="true" size={14} />
-          </a>
-          <a
-            className="mt-3 inline-flex items-center gap-1.5 rounded text-sm font-bold text-moss-700 underline decoration-moss-300 underline-offset-4 transition-colors hover:text-moss-900 hover:decoration-moss-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-coral-600"
-            href={districtDataset.source.datasetUrl}
-            rel="noreferrer"
-            target="_blank"
-          >
-            {c.districtSourcePage}
-            <ExternalLink aria-hidden="true" size={14} />
-          </a>
+          <div className="mt-2 flex flex-col items-start">
+            <a className={textLinkClass} href={marketDataset.source.datasetUrl} rel="noreferrer" target="_blank">
+              {c.sourcePage}
+              <ExternalLink aria-hidden="true" size={14} />
+            </a>
+            <a className={textLinkClass} href={districtDataset.source.datasetUrl} rel="noreferrer" target="_blank">
+              {c.districtSourcePage}
+              <ExternalLink aria-hidden="true" size={14} />
+            </a>
+          </div>
         </div>
       </div>
     </aside>
   );
 }
 
+function isCandidate(decision: MarketDecision) {
+  return (
+    decision.status === "confirmed" ||
+    decision.status === "conflict" ||
+    (["stale", "unknown"].includes(decision.status) && decision.scheduledByPrimarySource)
+  );
+}
+
 function HomeView({ locale, location }: { locale: Locale; location: LocationState }) {
   const c = copy[locale];
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
+  const [view, setView] = useState<"list" | "map">("list");
   const selectedDay = getScheduleDay(location.date) as OpeningDay;
-  const normalizedQuery = location.query.toLocaleLowerCase(locale === "zh" ? "zh-TW" : "en-US");
-  const decisions = useMemo(
+  const collator = locale === "zh" ? "zh-TW" : "en-US";
+  const normalizedQuery = location.query.toLocaleLowerCase(collator);
+  const today = getTaipeiToday();
+  const currentWindow = getDateChoices(today);
+  const dates = currentWindow.includes(location.date) ? currentWindow : getDateChoices(location.date);
+
+  const queryMatches = useMemo(
     () =>
       marketDataset.markets
         .map((market) => ({ market, district: getDistrict(market.adminCode) }))
-        .filter(({ market, district }) => {
-          if (location.districtCode && market.adminCode !== location.districtCode) {
-            return false;
-          }
-          return normalizedQuery
+        .filter(({ market, district }) =>
+          normalizedQuery
             ? `${market.name} ${market.permittedArea} ${district.fullName} ${district.shortName}`
-                .toLocaleLowerCase(locale === "zh" ? "zh-TW" : "en-US")
+                .toLocaleLowerCase(collator)
                 .includes(normalizedQuery)
-            : true;
-        })
-        .map(({ market, district }) => ({
-          market,
-          district,
-          decision: getMarketDecision(market, selectedDay),
-        })),
-    [locale, location.districtCode, normalizedQuery, selectedDay],
+            : true,
+        ),
+    [collator, normalizedQuery],
+  );
+  const filtered = useMemo(
+    () =>
+      queryMatches.filter(
+        ({ market }) => !location.districtCode || market.adminCode === location.districtCode,
+      ),
+    [location.districtCode, queryMatches],
+  );
+  const decisions = useMemo(
+    () =>
+      filtered.map(({ market, district }) => ({
+        market,
+        district,
+        decision: getMarketDecision(market, selectedDay),
+      })),
+    [filtered, selectedDay],
   );
   const confirmed = decisions.filter(({ decision }) => decision.status === "confirmed");
   const needsCheck = decisions.filter(
-    ({ decision }) =>
-      decision.status === "conflict" ||
-      (["stale", "unknown"].includes(decision.status) && decision.scheduledByPrimarySource),
+    ({ decision }) => decision.status !== "confirmed" && isCandidate(decision),
   );
   const hasHardStaleData = decisions.some(
     ({ decision }) => decision.freshness.status === "hard-stale",
   );
-  const visible = [...confirmed, ...needsCheck];
+  const visible =
+    statusFilter === "confirmed"
+      ? confirmed
+      : statusFilter === "check"
+        ? needsCheck
+        : [...confirmed, ...needsCheck];
+
+  // The headline answers "tonight" for the whole register, independent of search filters.
+  const headline = useMemo(() => {
+    const all = marketDataset.markets.map((market) => getMarketDecision(market, selectedDay));
+    return {
+      confirmed: all.filter((decision) => decision.status === "confirmed").length,
+      needsCheck: all.filter((decision) => decision.status !== "confirmed" && isCandidate(decision)).length,
+      freshness: all[0]?.freshness,
+    };
+  }, [selectedDay]);
+
+  const dateCounts = useMemo(
+    () =>
+      new Map(
+        dates.map((date) => {
+          const day = getScheduleDay(date) as OpeningDay;
+          return [
+            date,
+            filtered.filter(({ market }) => getMarketDecision(market, day).status === "confirmed").length,
+          ];
+        }),
+      ),
+    [dates, filtered],
+  );
+
+  const { candidateCounts, registeredCounts } = useMemo(() => {
+    const candidates = new Map<string, number>();
+    const registered = new Map<string, number>();
+    for (const market of marketDataset.markets) {
+      registered.set(market.adminCode, (registered.get(market.adminCode) ?? 0) + 1);
+    }
+    for (const { market } of queryMatches) {
+      if (isCandidate(getMarketDecision(market, selectedDay))) {
+        candidates.set(market.adminCode, (candidates.get(market.adminCode) ?? 0) + 1);
+      }
+    }
+    return { candidateCounts: candidates, registeredCounts: registered };
+  }, [queryMatches, selectedDay]);
 
   useEffect(() => {
     setPageMetadata(
@@ -792,114 +1225,176 @@ function HomeView({ locale, location }: { locale: Locale; location: LocationStat
     window.history.replaceState({}, "", appUrl("/", params));
   }, [location.date, location.invalidDistrictCode, location.query]);
 
+  const selectDistrict = (code: string) => {
+    writeLocation(
+      { pathname: "/", date: location.date, query: location.query, districtCode: code },
+      { replace: true, scroll: false },
+    );
+    if (code) {
+      setView("list");
+    }
+  };
+
   return (
     <>
-      <section className="trusted-hero border-b border-[#c8d5cf]">
-        <div className="mx-auto grid w-full max-w-6xl gap-7 px-4 py-8 sm:px-6 sm:py-10 lg:grid-cols-[1.25fr_0.75fr] lg:px-8">
-          <div>
-            <p className="text-sm font-extrabold uppercase tracking-[0.12em] text-plum-600">{c.eyebrow}</p>
-            <h1 className="mt-2 max-w-3xl text-balance text-4xl font-extrabold tracking-tight text-ink sm:text-5xl">
-              {formatDecisionDate(location.date, locale)}，{c.titleSuffix}
-            </h1>
-            <p className="mt-4 max-w-3xl text-base leading-7 text-slate-700 sm:text-lg">{c.intro}</p>
-            <div className="mt-4 flex items-center gap-2 rounded-xl border border-moss-200 bg-white/70 px-3 py-2 text-xs font-bold text-slate-700 lg:hidden">
-              <ShieldCheck aria-hidden="true" className="shrink-0 text-moss-700" size={17} />
-              <span>
-                {marketDataset.markets.length} · {c.sourceChecked} {formatEvidenceDate(marketDataset.source.retrievedAt, locale)} · {c.upstreamUnknown}
+      <section className="lantern-hero">
+        <div className="mx-auto w-full max-w-6xl px-4 pb-11 pt-5 sm:px-6 sm:pb-20 sm:pt-12 lg:px-8">
+          <p className="text-xs font-extrabold uppercase tracking-[0.18em] text-[#ffc56b] sm:text-sm">{c.eyebrow}</p>
+          <h1 className="mt-1.5 max-w-3xl text-2xl font-black leading-tight tracking-tight sm:mt-2 sm:text-5xl">
+            <span className="block">{formatDecisionDate(location.date, locale)}</span>
+            <span className="sr-only">，</span>
+            <span className="block text-xl text-white/90 sm:text-4xl">{c.titleSuffix}</span>
+          </h1>
+          <p className="mt-3 flex flex-wrap items-end gap-x-3 gap-y-1 sm:mt-5">
+            <span className="text-5xl font-black leading-none tracking-tight tabular-nums text-[#ffb35c] sm:text-7xl">
+              {headline.confirmed}
+            </span>
+            <span className="pb-1 text-lg font-extrabold sm:text-xl">{c.heroUnit}</span>
+          </p>
+          {headline.needsCheck ? (
+            <p className="mt-2 flex items-center gap-1.5 text-sm font-bold text-[#ffd98a]">
+              <TriangleAlert aria-hidden="true" size={15} />
+              {c.heroNeedsCheck(headline.needsCheck)}
+            </p>
+          ) : null}
+          <p className="mt-2 text-sm leading-6 text-white/80 sm:hidden">{c.introShort}</p>
+          <p className="mt-4 hidden max-w-2xl text-base leading-7 text-white/80 sm:block">{c.intro}</p>
+          <div className="mt-3 flex flex-wrap gap-2 text-xs font-bold sm:mt-5">
+            {headline.freshness ? (
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-3 py-1.5 ring-1 ring-white/20">
+                <ShieldCheck aria-hidden="true" size={14} />
+                {c.heroFreshness(
+                  formatEvidenceDate(headline.freshness.verifiedAt, locale),
+                  headline.freshness.ageDays,
+                )}
               </span>
-            </div>
-          </div>
-          <div className="hidden lg:block">
-            <SourceSummary headingId="source-scope-title-desktop" locale={locale} />
+            ) : null}
+            <span className="hidden items-center gap-1.5 rounded-full bg-white/10 px-3 py-1.5 ring-1 ring-white/20 sm:inline-flex">
+              <Database aria-hidden="true" size={14} />
+              {c.records(marketDataset.markets.length)} · {c.upstreamUnknown}
+            </span>
           </div>
         </div>
+        <span className="absolute bottom-2 right-3 text-[10px] font-semibold text-white/60">{c.illustration}</span>
       </section>
 
-      <section className="filter-shell border-b" aria-label={c.chooseDate}>
-        <div className="mx-auto grid w-full max-w-6xl gap-5 px-4 py-5 sm:px-6 lg:grid-cols-[1.25fr_0.6fr_0.85fr] lg:px-8">
+      <section aria-label={c.chooseDate} className="relative z-10 mx-auto -mt-8 w-full max-w-6xl px-4 sm:px-6 lg:px-8">
+        <div className="rounded-2xl border border-edge bg-surface p-4 shadow-xl sm:p-5">
           <DatePicker
+            counts={dateCounts}
+            dates={dates}
             districtCode={location.districtCode}
             locale={locale}
             query={location.query}
             selectedDate={location.date}
           />
-          <DistrictControl
-            date={location.date}
-            districtCode={location.districtCode}
-            locale={locale}
-            query={location.query}
-          />
-          <SearchControl
-            date={location.date}
-            districtCode={location.districtCode}
-            locale={locale}
-            query={location.query}
-          />
+          <div className="mt-3 grid gap-3 sm:mt-4 sm:gap-4 md:grid-cols-2">
+            <SearchControl
+              date={location.date}
+              districtCode={location.districtCode}
+              locale={locale}
+              query={location.query}
+            />
+            <DistrictControl
+              date={location.date}
+              districtCode={location.districtCode}
+              locale={locale}
+              query={location.query}
+            />
+          </div>
         </div>
       </section>
 
-      <section className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6 lg:px-8" aria-labelledby="results-title">
-        <div className="flex flex-col gap-3 border-b border-slate-200 pb-5 sm:flex-row sm:items-end sm:justify-between">
+      <section className="mx-auto w-full max-w-6xl px-4 pb-8 pt-6 sm:px-6 sm:pt-8 lg:px-8" aria-labelledby="results-title">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between sm:gap-4">
           <div>
-            <p className="text-sm font-extrabold text-moss-700">{c.confirmed}</p>
-            <h2 className="mt-1 text-2xl font-extrabold text-ink" id="results-title">
+            <h2 className="text-xl font-black text-fg sm:text-2xl" id="results-title">
               {c.resultsTitle}
             </h2>
+            <p aria-live="polite" className="mt-1 text-sm font-semibold tabular-nums text-muted">
+              {c.resultsSummary(confirmed.length, needsCheck.length)}
+            </p>
           </div>
-          <p aria-live="polite" className="text-sm font-semibold tabular-nums text-slate-600">
-            {c.resultsSummary(confirmed.length, needsCheck.length)}
-          </p>
+          <ViewToggle locale={locale} setView={setView} view={view} />
+        </div>
+        <div className="mt-3 sm:mt-4">
+          <StatusChips
+            counts={{
+              all: confirmed.length + needsCheck.length,
+              confirmed: confirmed.length,
+              check: needsCheck.length,
+            }}
+            locale={locale}
+            onChange={setStatusFilter}
+            value={statusFilter}
+          />
         </div>
 
         {hasHardStaleData ? (
-          <div className="mt-5 flex gap-3 rounded-xl border border-amber-300 bg-amber-50 p-4 text-amber-950" role="status">
+          <div className="mt-5 flex gap-3 rounded-xl border border-warn/40 bg-warn-soft p-4 text-warn" role="status">
             <TriangleAlert aria-hidden="true" className="mt-0.5 shrink-0" size={20} />
             <p className="text-sm font-semibold leading-6">{c.staleDatasetNotice}</p>
           </div>
         ) : null}
 
         {location.invalidDistrictCode ? (
-          <div className="mt-5 flex gap-3 rounded-xl border border-slate-300 bg-slate-100 p-4 text-slate-800" role="status">
-            <Info aria-hidden="true" className="mt-0.5 shrink-0 text-slate-600" size={20} />
+          <div className="mt-5 flex gap-3 rounded-xl border border-edge bg-idle-soft p-4 text-idle" role="status">
+            <Info aria-hidden="true" className="mt-0.5 shrink-0" size={20} />
             <p className="text-sm font-semibold leading-6">{c.invalidDistrict}</p>
           </div>
         ) : null}
 
-        {visible.length ? (
-          <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {visible.map(({ market, district, decision }) => (
-              <MarketCard
-                date={location.date}
-                decision={decision}
-                district={district}
-                districtCode={location.districtCode}
-                key={market.id}
+        <div className="mt-6 grid gap-6 lg:grid-cols-[minmax(0,1fr)_400px] lg:items-start">
+          <div className={clsx(view === "map" && "hidden lg:block")}>
+            {visible.length ? (
+              <div className="grid gap-4 sm:grid-cols-2">
+                {visible.map(({ market, district, decision }) => (
+                  <MarketCard
+                    date={location.date}
+                    decision={decision}
+                    district={district}
+                    districtCode={location.districtCode}
+                    key={market.id}
+                    locale={locale}
+                    market={market}
+                    query={location.query}
+                  />
+                ))}
+              </div>
+            ) : (
+              <div className="rounded-2xl border border-dashed border-edge bg-surface p-8 text-center">
+                <CircleAlert aria-hidden="true" className="mx-auto text-subtle" size={30} />
+                <h3 className="mt-3 text-xl font-extrabold text-fg">{c.noResults}</h3>
+                <p className="mx-auto mt-2 max-w-xl leading-7 text-muted">{c.noResultsHint}</p>
+                {location.query || location.districtCode ? (
+                  <button
+                    className={clsx(
+                      "mt-5 min-h-11 rounded-xl bg-fg px-4 font-bold text-canvas transition-colors hover:bg-lantern hover:text-lantern-fg",
+                      focusRing,
+                    )}
+                    onClick={() =>
+                      writeLocation({ pathname: "/", date: location.date, query: "", districtCode: "" })
+                    }
+                    type="button"
+                  >
+                    {c.clearFilters}
+                  </button>
+                ) : null}
+              </div>
+            )}
+          </div>
+          <div className="space-y-4 lg:sticky lg:top-24">
+            <div className={clsx(view === "list" && "hidden lg:block")}>
+              <DistrictMap
+                candidateCounts={candidateCounts}
                 locale={locale}
-                market={market}
-                query={location.query}
+                onSelect={selectDistrict}
+                registeredCounts={registeredCounts}
+                selectedCode={location.districtCode}
               />
-            ))}
+            </div>
+            <SourceSummary headingId="source-scope-title" locale={locale} />
           </div>
-        ) : (
-          <div className="mt-6 rounded-2xl border border-dashed border-slate-300 bg-white p-8 text-center">
-            <CircleAlert aria-hidden="true" className="mx-auto text-slate-500" size={30} />
-            <h3 className="mt-3 text-xl font-extrabold text-slate-950">{c.noResults}</h3>
-            <p className="mx-auto mt-2 max-w-xl leading-7 text-slate-600">{c.noResultsHint}</p>
-            {location.query || location.districtCode ? (
-              <button
-                className="mt-5 min-h-11 rounded-lg bg-slate-950 px-4 font-bold text-white transition-colors hover:bg-slate-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange-600"
-                onClick={() =>
-                  writeLocation({ pathname: "/", date: location.date, query: "", districtCode: "" })
-                }
-                type="button"
-              >
-                {c.clearFilters}
-              </button>
-            ) : null}
-          </div>
-        )}
-        <div className="mt-8 lg:hidden">
-          <SourceSummary headingId="source-scope-title-mobile" locale={locale} />
         </div>
       </section>
     </>
@@ -940,45 +1435,51 @@ function EvidenceItem<T>({
       ? "verified"
       : evidence.status;
   return (
-    <article className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+    <article
+      className={clsx(
+        "rounded-xl border border-l-4 border-edge bg-surface p-4",
+        displayStatus === "verified" && "border-l-ok",
+        displayStatus === "conflict" && "border-l-warn",
+        displayStatus === "stale" && "border-l-bad",
+        displayStatus === "unknown" && "border-l-idle",
+      )}
+    >
       <div className="flex flex-wrap items-start justify-between gap-2">
-        <div>
-          <h4 className="text-sm font-extrabold text-slate-950">{fieldLabel}</h4>
-          <p className="mt-1 text-sm text-slate-700">
+        <div className="min-w-0">
+          <h4 className="text-sm font-extrabold text-fg">{fieldLabel}</h4>
+          <p className="mt-1 break-words text-sm text-muted">
             {c.fieldValue}：{valueText}
           </p>
         </div>
         <span
           className={clsx(
-            "rounded-full border px-2 py-0.5 text-xs font-bold",
-            displayStatus === "verified" &&
-              "border-moss-300 bg-moss-50 text-moss-800",
-            displayStatus === "conflict" &&
-              "border-amber-300 bg-amber-50 text-amber-900",
-            displayStatus === "stale" && "border-red-300 bg-red-50 text-red-800",
-            displayStatus === "unknown" && "border-slate-300 bg-slate-100 text-slate-700",
+            "rounded-full px-2 py-0.5 text-xs font-bold",
+            displayStatus === "verified" && "bg-ok-soft text-ok",
+            displayStatus === "conflict" && "bg-warn-soft text-warn",
+            displayStatus === "stale" && "bg-bad-soft text-bad",
+            displayStatus === "unknown" && "bg-idle-soft text-idle",
           )}
         >
           {statusLabel}
         </span>
       </div>
-      <dl className="mt-3 grid gap-2 text-xs text-slate-600 sm:grid-cols-2">
+      <dl className="mt-3 grid gap-2 text-xs text-muted sm:grid-cols-2">
         <div>
-          <dt className="font-bold text-slate-800">{c.publisher}</dt>
+          <dt className="font-bold text-fg">{c.publisher}</dt>
           <dd>{evidence.publisher}</dd>
         </div>
         <div>
-          <dt className="font-bold text-slate-800">{c.sourceLabel}</dt>
+          <dt className="font-bold text-fg">{c.sourceLabel}</dt>
           <dd>{evidence.sourceLabel}</dd>
         </div>
       </dl>
-      <dl className="mt-3 grid gap-2 text-xs text-slate-600 sm:grid-cols-3">
+      <dl className="mt-3 grid grid-cols-3 gap-2 rounded-lg bg-raised/70 p-2.5 text-xs text-muted">
         <div>
-          <dt className="font-bold text-slate-800">{c.retrieved}</dt>
+          <dt className="font-bold text-fg">{c.retrieved}</dt>
           <dd>{formatEvidenceDate(evidence.retrievedAt, locale)}</dd>
         </div>
         <div>
-          <dt className="font-bold text-slate-800">{c.sourceUpdated}</dt>
+          <dt className="font-bold text-fg">{c.sourceUpdated}</dt>
           <dd>
             {evidence.sourceUpdatedAt
               ? formatEvidenceDate(evidence.sourceUpdatedAt, locale)
@@ -986,22 +1487,17 @@ function EvidenceItem<T>({
           </dd>
         </div>
         <div>
-          <dt className="font-bold text-slate-800">{c.verified}</dt>
+          <dt className="font-bold text-fg">{c.verified}</dt>
           <dd>{formatEvidenceDate(evidence.verifiedAt, locale)}</dd>
         </div>
       </dl>
       {evidence.derivation ? (
-        <p className="mt-3 text-xs leading-5 text-slate-600">
-          <strong className="text-slate-800">{c.derivationLabel}：</strong>
+        <p className="mt-3 text-xs leading-5 text-muted">
+          <strong className="text-fg">{c.derivationLabel}：</strong>
           {evidence.derivation}
         </p>
       ) : null}
-      <a
-        className="mt-3 inline-flex items-center gap-1.5 rounded text-sm font-bold text-orange-800 underline decoration-orange-300 underline-offset-4 transition-colors hover:text-orange-950 hover:decoration-orange-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange-600"
-        href={evidence.sourceUrl}
-        rel="noreferrer"
-        target="_blank"
-      >
+      <a className={clsx(textLinkClass, "mt-3")} href={evidence.sourceUrl} rel="noreferrer" target="_blank">
         {c.openSource}
         <ExternalLink aria-hidden="true" size={14} />
       </a>
@@ -1042,7 +1538,10 @@ function ShareAction({ market, date, locale }: { market: TrustedMarket; date: st
   return (
     <div>
       <button
-        className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl border border-slate-300 bg-white px-4 font-extrabold text-slate-900 hover:border-slate-500 disabled:cursor-wait disabled:opacity-60 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange-600 sm:w-auto"
+        className={clsx(
+          "inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl border border-edge bg-surface px-4 font-extrabold text-fg transition-colors hover:border-fg disabled:cursor-wait disabled:opacity-60 sm:w-auto",
+          focusRing,
+        )}
         disabled={status === "pending"}
         onClick={share}
         type="button"
@@ -1050,7 +1549,7 @@ function ShareAction({ market, date, locale }: { market: TrustedMarket; date: st
         <Share2 aria-hidden="true" size={18} />
         {status === "pending" ? c.sharing : c.share}
       </button>
-      <p aria-live="polite" className={clsx("mt-2 text-sm font-semibold", status === "error" ? "text-red-700" : "text-emerald-700")}>
+      <p aria-live="polite" className={clsx("mt-2 text-sm font-semibold", status === "error" ? "text-bad" : "text-ok")}>
         {statusMessage}
       </p>
     </div>
@@ -1084,9 +1583,9 @@ function DetailView({
 
   return (
     <main id="main-content" ref={mainRef} tabIndex={-1}>
-      <div className="mx-auto w-full max-w-5xl px-4 py-6 sm:px-6 sm:py-10 lg:px-8">
+      <div className="mx-auto w-full max-w-6xl px-4 py-6 sm:px-6 sm:py-10 lg:px-8">
         <a
-          className="inline-flex min-h-11 items-center gap-2 rounded-lg font-bold text-slate-700 transition-colors hover:text-slate-950 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange-600"
+          className={clsx("inline-flex min-h-11 items-center gap-2 rounded-lg font-bold text-muted transition-colors hover:text-fg", focusRing)}
           href={appUrl("/", new URLSearchParams({ date: location.date, ...(location.query ? { q: location.query } : {}), ...(location.districtCode ? { district: location.districtCode } : {}) }))}
           onClick={(event) => {
             event.preventDefault();
@@ -1102,83 +1601,98 @@ function DetailView({
           {c.back}
         </a>
 
-        <div className="mt-5 grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
-          <article className="rounded-2xl border border-slate-200 bg-white p-5 shadow-ambient sm:p-7">
-            <DecisionBadge decision={decision} locale={locale} />
-            <p className="mt-5 text-sm font-extrabold uppercase tracking-[0.1em] text-orange-700">{c.decisionFor}</p>
-            <h1 className="mt-1 text-4xl font-extrabold tracking-tight text-slate-950 sm:text-5xl">{market.name}</h1>
-            <p className="mt-2 text-lg font-semibold text-slate-600">{formatDecisionDate(location.date, locale)}</p>
-
-            {decision.status === "conflict" ? (
-              <div className="mt-5 flex gap-3 rounded-xl border border-amber-300 bg-amber-50 p-4 text-amber-950">
-                <TriangleAlert aria-hidden="true" className="mt-0.5 shrink-0" size={21} />
-                <p className="text-sm font-semibold leading-6">{c.conflictExplanation}</p>
-              </div>
-            ) : null}
-
-            {decision.freshness.status === "hard-stale" ? (
-              <div className="mt-4 flex gap-3 rounded-xl border border-red-300 bg-red-50 p-4 text-red-950" role="status">
-                <Clock3 aria-hidden="true" className="mt-0.5 shrink-0" size={20} />
-                <p className="text-sm font-semibold leading-6">{c.staleDetailNotice}</p>
-              </div>
-            ) : null}
-
-            <dl className="mt-7 space-y-5">
-              <div>
-                <dt className="flex items-center gap-2 text-sm font-extrabold text-slate-600">
-                  <MapPin aria-hidden="true" size={18} />
-                  {c.district}
-                </dt>
-                <dd className="mt-1 text-xl font-extrabold text-slate-950">{district.shortName}</dd>
-              </div>
-              <div>
-                <dt className="flex items-center gap-2 text-sm font-extrabold text-slate-600">
-                  <CalendarDays aria-hidden="true" size={18} />
-                  {c.schedule}
-                </dt>
-                <dd className="mt-1 text-xl font-extrabold text-slate-950">{scheduleText(market.scheduleDays, locale)}</dd>
-              </div>
-              <div>
-                <dt className="flex items-center gap-2 text-sm font-extrabold text-slate-600">
-                  <MapPin aria-hidden="true" size={18} />
-                  {c.permitArea}
-                </dt>
-                <dd className="mt-1 whitespace-pre-wrap text-base leading-7 text-slate-800">{market.permittedArea}</dd>
-              </div>
-            </dl>
-
-            <div className="mt-7 rounded-xl border border-blue-200 bg-blue-50 p-4">
-              <div className="flex gap-3">
-                <Info aria-hidden="true" className="mt-0.5 shrink-0 text-blue-800" size={20} />
-                <p className="text-sm font-semibold leading-6 text-blue-950">{c.exceptionNote}</p>
-              </div>
+        <div className="mt-4 grid gap-6 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)] lg:items-start">
+          <article className="overflow-hidden rounded-3xl border border-edge bg-surface shadow-sm">
+            <div className="lantern-hero lantern-hero--plain px-5 py-7 sm:px-8 sm:py-9">
+              <DecisionBadge decision={decision} locale={locale} />
+              <p className="mt-5 text-xs font-extrabold uppercase tracking-[0.16em] text-[#ffc56b]">{c.decisionFor}</p>
+              <h1 className="mt-1 text-4xl font-black tracking-tight sm:text-5xl">{market.name}</h1>
+              <p className="mt-2 text-lg font-semibold text-white/80">{formatDecisionDate(location.date, locale)}</p>
             </div>
 
-            <div className="mt-7 flex flex-col gap-3 sm:flex-row sm:items-start">
-              <div>
-                <a
-                  className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-coral-600 px-5 font-extrabold text-white hover:bg-coral-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-coral-600 sm:w-auto"
-                  href={mapsUrl}
-                  rel="noreferrer"
-                  target="_blank"
-                >
-                  <Navigation aria-hidden="true" size={18} />
-                  {c.map}
-                  <ArrowUpRight aria-hidden="true" size={16} />
-                </a>
-                <p className="mt-1.5 text-xs font-semibold text-slate-500">{c.mapDisclosure}</p>
+            <div className="p-5 sm:p-8">
+              {decision.status === "conflict" ? (
+                <div className="mb-5 flex gap-3 rounded-xl border border-warn/40 bg-warn-soft p-4 text-warn">
+                  <TriangleAlert aria-hidden="true" className="mt-0.5 shrink-0" size={21} />
+                  <p className="text-sm font-semibold leading-6">{c.conflictExplanation}</p>
+                </div>
+              ) : null}
+
+              {decision.freshness.status === "hard-stale" ? (
+                <div className="mb-5 flex gap-3 rounded-xl border border-bad/40 bg-bad-soft p-4 text-bad" role="status">
+                  <Clock3 aria-hidden="true" className="mt-0.5 shrink-0" size={20} />
+                  <p className="text-sm font-semibold leading-6">{c.staleDetailNotice}</p>
+                </div>
+              ) : null}
+
+              <dl className="grid gap-6 sm:grid-cols-2">
+                <div>
+                  <dt className="flex items-center gap-2 text-sm font-extrabold text-subtle">
+                    <MapPin aria-hidden="true" size={17} />
+                    {c.district}
+                  </dt>
+                  <dd className="mt-1 text-xl font-extrabold text-fg">{district.shortName}</dd>
+                </div>
+                <div>
+                  <dt className="flex items-center gap-2 text-sm font-extrabold text-subtle">
+                    <CalendarDays aria-hidden="true" size={17} />
+                    {c.schedule}
+                  </dt>
+                  <dd className="mt-1">
+                    <span className="block text-xl font-extrabold text-fg">{scheduleText(market.scheduleDays, locale)}</span>
+                    <span className="mt-2 block">
+                      <WeekDots
+                        conflictDays={market.conflicts.flatMap((conflict) => conflict.days)}
+                        days={market.scheduleDays}
+                        highlight={selectedDay}
+                        locale={locale}
+                      />
+                    </span>
+                  </dd>
+                </div>
+                <div className="sm:col-span-2">
+                  <dt className="flex items-center gap-2 text-sm font-extrabold text-subtle">
+                    <MapPin aria-hidden="true" size={17} />
+                    {c.permitArea}
+                  </dt>
+                  <dd className="mt-1 whitespace-pre-wrap text-base leading-7 text-fg">{market.permittedArea}</dd>
+                </div>
+              </dl>
+
+              <div className="mt-7 flex gap-3 rounded-xl bg-raised p-4">
+                <Info aria-hidden="true" className="mt-0.5 shrink-0 text-muted" size={20} />
+                <p className="text-sm font-semibold leading-6 text-muted">{c.exceptionNote}</p>
               </div>
-              <ShareAction date={location.date} locale={locale} market={market} />
+
+              <div className="mt-7 flex flex-col gap-3 sm:flex-row sm:items-start">
+                <div>
+                  <a
+                    className={clsx(
+                      "inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-lantern px-5 font-extrabold text-lantern-fg shadow-md transition hover:brightness-110 sm:w-auto",
+                      focusRing,
+                    )}
+                    href={mapsUrl}
+                    rel="noreferrer"
+                    target="_blank"
+                  >
+                    <Navigation aria-hidden="true" size={18} />
+                    {c.map}
+                    <ArrowUpRight aria-hidden="true" size={16} />
+                  </a>
+                  <p className="mt-1.5 text-xs font-semibold text-subtle">{c.mapDisclosure}</p>
+                </div>
+                <ShareAction date={location.date} locale={locale} market={market} />
+              </div>
             </div>
           </article>
 
-          <aside className="trust-panel rounded-2xl border p-5 sm:p-6" aria-labelledby="evidence-title">
-            <ShieldCheck aria-hidden="true" className="text-moss-700" size={26} />
-            <h2 className="mt-3 text-2xl font-extrabold text-slate-950" id="evidence-title">
+          <aside className="rounded-3xl border border-edge bg-raised/50 p-5 sm:p-6" aria-labelledby="evidence-title">
+            <ShieldCheck aria-hidden="true" className="text-ok" size={26} />
+            <h2 className="mt-3 text-2xl font-black text-fg" id="evidence-title">
               {c.evidenceTitle}
             </h2>
-            <p className="mt-2 text-sm leading-6 text-slate-700">{c.evidenceIntro}</p>
-            <h3 className="mt-6 text-sm font-extrabold uppercase tracking-wide text-slate-600">{c.officialSchedule}</h3>
+            <p className="mt-2 text-sm leading-6 text-muted">{c.evidenceIntro}</p>
+            <h3 className="mt-6 text-sm font-extrabold uppercase tracking-wide text-subtle">{c.officialSchedule}</h3>
             <div className="mt-3 space-y-3">
               {market.evidence.scheduleDays.map((evidence) => (
                 <EvidenceItem
@@ -1195,7 +1709,7 @@ function DetailView({
                 />
               ))}
             </div>
-            <h3 className="mt-6 text-sm font-extrabold uppercase tracking-wide text-slate-600">
+            <h3 className="mt-6 text-sm font-extrabold uppercase tracking-wide text-subtle">
               {c.otherEvidence}
             </h3>
             <div className="mt-3 space-y-3">
@@ -1253,11 +1767,14 @@ function NotFoundView({ locale, location }: { locale: Locale; location: Location
   return (
     <main id="main-content" ref={mainRef} tabIndex={-1}>
       <section className="mx-auto max-w-xl px-4 py-20 text-center sm:px-6">
-        <CircleAlert aria-hidden="true" className="mx-auto text-orange-700" size={38} />
-        <h1 className="mt-4 text-3xl font-extrabold text-slate-950">{c.notFoundTitle}</h1>
-        <p className="mt-3 leading-7 text-slate-600">{c.notFoundBody}</p>
+        <CircleAlert aria-hidden="true" className="mx-auto text-lantern" size={38} />
+        <h1 className="mt-4 text-3xl font-black text-fg">{c.notFoundTitle}</h1>
+        <p className="mt-3 leading-7 text-muted">{c.notFoundBody}</p>
         <a
-          className="mt-6 inline-flex min-h-11 items-center gap-2 rounded-lg bg-slate-950 px-5 font-extrabold text-white transition-colors hover:bg-slate-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange-600"
+          className={clsx(
+            "mt-6 inline-flex min-h-11 items-center gap-2 rounded-xl bg-fg px-5 font-extrabold text-canvas transition-colors hover:bg-lantern hover:text-lantern-fg",
+            focusRing,
+          )}
           href={appUrl("/", new URLSearchParams({ date: location.date }))}
           onClick={(event) => {
             event.preventDefault();
@@ -1279,22 +1796,18 @@ function NotFoundView({ locale, location }: { locale: Locale; location: Location
 
 function AppFooter({ locale }: { locale: Locale }) {
   const c = copy[locale];
+  const footerLink = clsx("inline-flex min-h-11 items-center gap-1 rounded underline underline-offset-4 transition-colors hover:text-fg", focusRing);
   return (
-    <footer className="border-t border-slate-200 bg-white">
-      <div className="mx-auto flex w-full max-w-6xl flex-col gap-3 px-4 py-6 text-sm text-slate-600 sm:px-6 lg:px-8">
+    <footer className="mt-8 border-t border-edge bg-surface">
+      <div className="mx-auto flex w-full max-w-6xl flex-col gap-3 px-4 py-8 text-sm text-muted sm:px-6 lg:px-8">
         <p>{c.attribution}</p>
         <div className="flex flex-wrap gap-x-5 gap-y-2 font-bold">
-          <a
-            className="inline-flex items-center gap-1 rounded underline underline-offset-4 transition-colors hover:text-slate-950 focus-visible:outline focus-visible:outline-2 focus-visible:outline-orange-600"
-            href="https://data.gov.tw/license"
-            rel="noreferrer"
-            target="_blank"
-          >
+          <a className={footerLink} href="https://data.gov.tw/license" rel="noreferrer" target="_blank">
             Open Government Data License 1.0
             <ExternalLink aria-hidden="true" size={13} />
           </a>
           <a
-            className="inline-flex items-center gap-1 rounded underline underline-offset-4 transition-colors hover:text-slate-950 focus-visible:outline focus-visible:outline-2 focus-visible:outline-coral-600"
+            className={footerLink}
             href="https://github.com/livejiaquan/taiwan-night-market-finder/issues/new?template=data-correction.yml"
             rel="noreferrer"
             target="_blank"
@@ -1303,7 +1816,7 @@ function AppFooter({ locale }: { locale: Locale }) {
             <ExternalLink aria-hidden="true" size={13} />
           </a>
           <a
-            className="inline-flex items-center gap-1 rounded underline underline-offset-4 transition-colors hover:text-slate-950 focus-visible:outline focus-visible:outline-2 focus-visible:outline-coral-600"
+            className={footerLink}
             href="https://github.com/livejiaquan/taiwan-night-market-finder/blob/main/docs/PUBLIC_OPERABILITY.md"
             rel="noreferrer"
             target="_blank"
@@ -1312,7 +1825,7 @@ function AppFooter({ locale }: { locale: Locale }) {
             <ExternalLink aria-hidden="true" size={13} />
           </a>
         </div>
-        <p className="text-xs text-slate-500">{c.lab}</p>
+        <p className="text-xs text-subtle">{c.lab}</p>
       </div>
     </footer>
   );
@@ -1336,7 +1849,7 @@ export default function TrustedApp() {
   }, [location.pathname]);
 
   return (
-    <div className="product-shell min-h-screen text-slate-950">
+    <div className="product-shell min-h-screen">
       <a className="skip-link" href="#main-content">
         {copy[locale].skip}
       </a>
