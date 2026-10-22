@@ -4,15 +4,15 @@
 
 **線上 demo：<https://livejiaquan.github.io/taiwan-night-market-finder/>**
 
-| 桌面（淺色） | 手機（深色） | 手機行政區圖 |
+| 手機（淺色） | 手機（深色） | 手機行政區圖 |
 |---|---|---|
-| ![桌面首頁](docs/screenshots/after-desktop.webp) | ![手機深色首頁](docs/screenshots/after-mobile-dark.webp) | ![手機行政區示意圖](docs/screenshots/after-mobile-map.webp) |
+| ![手機首頁](docs/screenshots/home-390-light.webp) | ![手機深色首頁](docs/screenshots/home-390-dark.webp) | ![手機行政區示意圖](docs/screenshots/map-390-light.webp) |
 
-| 夜市詳情與逐欄位來源 |
-|---|
-| ![詳情頁](docs/screenshots/after-detail-desktop.webp) |
+| 桌面首頁 | 夜市詳情與逐欄位來源 |
+|---|---|
+| ![桌面首頁](docs/screenshots/home-1440-light.webp) | ![詳情頁](docs/screenshots/detail-1440-dark.webp) |
 
-首頁第一眼是「所選日期有幾個夜市依週期排定營業」、七日日期列（每天附候選數）、狀態篩選，以及臺南 37 區示意方格圖；每張卡片都顯示來源機關與比對日期。介面設計依據見 [design research](docs/design-research.md)。
+首頁第一眼是「所選日期有幾個夜市依週期排定營業」、七日日期列（每天附候選數）、狀態篩選，以及臺南 37 區示意方格圖；每張卡片都顯示來源機關與比對日期。介面設計依據見 [design research](docs/design-research.md) 與 [UX research](docs/ux-research.md)；本機 Lighthouse 行動版 99／100／100／100。
 
 它不宣稱即時開門，也不以沒有來源的精確鐘點、美食排行或路線填補官方資料缺口。目前是 `pre-alpha / 臺南資料可追溯試行版`，不是全臺完整名冊。
 
@@ -31,6 +31,7 @@
 - [第一輪 UX contract](docs/ITERATION_1_UX_BRIEF.md)
 - [行政區可逆實驗](docs/ITERATION_2_DISTRICT_HYPOTHESIS.md)
 - [介面設計研究與取捨](docs/design-research.md)
+- [使用者與裝置研究](docs/ux-research.md)
 
 ## Current source of truth
 
@@ -135,4 +136,4 @@ npm run deploy:metadata -- --site-url https://your-real-domain.example
 
 ## Repository boundary
 
-原有的 generated hero、SVG map、19 筆 prototype data 與視覺 screenshots 都被保留；它們僅支援 `/lab`，不得當成 production truth。唯一例外是 hero 圖：已由 2.4 MB PNG 壓成約 150 KB WebP，首頁只拿來當裝飾背景並標註「示意插圖，非特定夜市」。此 repository 不含 API key、Google Places 抓取、帳號或 AI branding。
+原有的 generated hero、SVG map、19 筆 prototype data 與視覺 screenshots 都被保留；它們僅支援 `/lab`，不得當成 production truth。唯一例外是 hero 圖：已由 2.4 MB PNG 壓成 156 KB／50 KB（手機）WebP，首頁只拿來當裝飾背景並標註「示意插圖，非特定夜市」。此 repository 不含 API key、Google Places 抓取、帳號或 AI branding。
