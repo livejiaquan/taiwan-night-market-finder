@@ -290,17 +290,6 @@
   }
 }
 
-.lantern-mark {
-  display: inline-grid;
-  place-items: center;
-  width: 2.25rem;
-  height: 2.25rem;
-  border-radius: 0.75rem;
-  background: rgb(var(--lantern));
-  color: rgb(var(--lantern-fg));
-  box-shadow: 0 6px 18px -6px rgb(var(--lantern) / 0.7);
-}
-
 .no-scrollbar { scrollbar-width: none; }
 .no-scrollbar::-webkit-scrollbar { display: none; }
 
@@ -363,4 +352,9 @@
 
 .lantern-hero--plain::after {
   background: linear-gradient(135deg, rgb(10 14 28 / 0.55), rgb(10 14 28 / 0.2));
+}
+
+/* One icon language: every Lucide icon draws at 1.75 stroke (the brand mark keeps 2). */
+.lucide {
+  stroke-width: 1.75;
 }
