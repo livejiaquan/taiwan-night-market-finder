@@ -110,13 +110,13 @@
 :root {
   color-scheme: light;
   /* Public product tokens (space-separated RGB for Tailwind alpha support). */
-  --canvas: 251 246 238;
+  --canvas: 255 255 255;
   --surface: 255 255 255;
-  --raised: 246 239 228;
-  --fg: 28 22 18;
-  --muted: 92 80 70;
-  --subtle: 112 100 90;
-  --edge: 229 218 202;
+  --raised: 247 247 247;
+  --fg: 34 34 34;
+  --muted: 106 106 106;
+  --subtle: 106 106 106;
+  --edge: 221 221 221;
   --lantern: 196 48 43;
   --lantern-fg: 255 255 255;
   --gold: 180 110 18;

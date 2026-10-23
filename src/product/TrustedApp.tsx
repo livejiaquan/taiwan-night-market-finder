@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import type { ReactNode } from "react";
 import {
   ArrowLeft,
   ArrowUpRight,
@@ -11,8 +12,6 @@ import {
   ExternalLink,
   Info,
   Languages,
-  List,
-  Map as MapIcon,
   MapPin,
   Moon,
   Navigation,
@@ -444,13 +443,28 @@ function decisionTone(decision: MarketDecision) {
 }
 
 // One content container for every section: 1200px of content plus fixed gutters.
-const pageContainer = "mx-auto w-[calc(100%-2rem)] max-w-[1200px] sm:w-[calc(100%-3rem)]";
+const pageContainer = "mx-auto w-full max-w-[1440px] px-4 sm:px-6 lg:px-12";
 const focusRing =
   "focus-visible:outline-solid focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lantern";
 const weekdayInitials: Record<Locale, string[]> = {
   zh: ["一", "二", "三", "四", "五", "六", "日"],
   en: ["M", "T", "W", "T", "F", "S", "S"],
 };
+
+function useMediaQuery(query: string) {
+  const get = () => (typeof window.matchMedia === "function" ? window.matchMedia(query).matches : true);
+  const [matches, setMatches] = useState(get);
+  useEffect(() => {
+    if (typeof window.matchMedia !== "function") {
+      return;
+    }
+    const list = window.matchMedia(query);
+    const update = () => setMatches(list.matches);
+    list.addEventListener("change", update);
+    return () => list.removeEventListener("change", update);
+  }, [query]);
+  return matches;
+}
 
 function useTheme() {
   const [dark, setDark] = useState(() => document.documentElement.classList.contains("dark"));
@@ -518,13 +532,21 @@ function ThemeToggle({ locale }: { locale: Locale }) {
   );
 }
 
-function AppHeader({ locale, setLocale }: { locale: Locale; setLocale: (locale: Locale) => void }) {
+function AppHeader({
+  locale,
+  setLocale,
+  center,
+}: {
+  locale: Locale;
+  setLocale: (locale: Locale) => void;
+  center?: ReactNode;
+}) {
   const c = copy[locale];
   return (
-    <header className="sticky top-0 z-30 border-b border-edge bg-canvas/90 backdrop-blur-sm">
-      <div className={clsx(pageContainer, "flex min-h-16 items-center justify-between gap-3 py-2")}>
+    <header className="sticky top-0 z-30 border-b border-edge bg-canvas">
+      <div className={clsx(pageContainer, "flex flex-wrap items-center justify-between gap-x-4 gap-y-3 py-3 lg:min-h-20 lg:flex-nowrap lg:py-4")}>
         <a
-          className={clsx("flex min-h-11 min-w-0 items-center gap-3 rounded-lg transition-opacity hover:opacity-80", focusRing)}
+          className={clsx("flex min-h-11 min-w-0 flex-1 items-center gap-3 rounded-lg transition-opacity hover:opacity-80 lg:w-72 lg:flex-none", focusRing)}
           href={appUrl("/", new URLSearchParams({ date: getTaipeiToday() }))}
           onClick={(event) => {
             event.preventDefault();
@@ -535,19 +557,88 @@ function AppHeader({ locale, setLocale }: { locale: Locale; setLocale: (locale: 
             市
           </span>
           <span className="min-w-0">
-            <span className="block truncate text-base font-extrabold tracking-tight text-fg sm:text-lg">{c.brand}</span>
-            <span className="block truncate text-sm font-semibold text-subtle">
-              <span className="hidden sm:inline">{c.family} · </span>
-              {c.pilot}
-            </span>
+            <span className="block truncate text-base font-extrabold tracking-tight text-lantern sm:text-lg">{c.brand}</span>
+            <span className="hidden truncate text-sm text-muted sm:block">{c.pilot}</span>
           </span>
         </a>
-        <div className="flex shrink-0 items-center gap-2">
+        {center ? <div className="order-last w-full lg:order-none lg:w-auto lg:max-w-xl lg:flex-1">{center}</div> : null}
+        <div className="flex shrink-0 items-center justify-end gap-2 lg:w-72">
           <ThemeToggle locale={locale} />
           <LanguageToggle locale={locale} setLocale={setLocale} />
         </div>
       </div>
     </header>
+  );
+}
+
+// Airbnb-style search capsule: two labelled segments separated by a hairline.
+function SearchPill({ locale, location }: { locale: Locale; location: LocationState }) {
+  const c = copy[locale];
+  const { date, query, districtCode } = location;
+  return (
+    <div className="flex min-h-14 items-center rounded-full border border-edge bg-surface shadow-[0_3px_12px_rgb(0_0_0/0.08)]">
+      <div className="relative min-w-0 flex-1">
+        <label className="sr-only" htmlFor="market-search">
+          {c.searchLabel}
+        </label>
+        <Search aria-hidden="true" className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-fg" size={18} />
+        <input
+          autoComplete="off"
+          className="min-h-12 w-full rounded-full bg-transparent py-2 pl-12 pr-12 text-base text-fg outline-hidden placeholder:text-muted focus-visible:ring-2 focus-visible:ring-lantern/40"
+          id="market-search"
+          name="market-search"
+          onChange={(event) =>
+            writeLocation(
+              { pathname: "/", date, query: event.target.value, districtCode },
+              { replace: true, scroll: false },
+            )
+          }
+          placeholder={c.searchPlaceholder}
+          type="search"
+          value={query}
+        />
+        {query ? (
+          <button
+            aria-label={c.clearSearch}
+            className={clsx(
+              "absolute right-1 top-1/2 inline-flex min-h-11 min-w-11 -translate-y-1/2 items-center justify-center rounded-full text-muted hover:bg-raised",
+              focusRing,
+            )}
+            onClick={() =>
+              writeLocation({ pathname: "/", date, query: "", districtCode }, { replace: true, scroll: false })
+            }
+            type="button"
+          >
+            <X aria-hidden="true" size={18} />
+          </button>
+        ) : null}
+      </div>
+      <span aria-hidden="true" className="h-8 w-px shrink-0 bg-edge" />
+      <div className="min-w-0 shrink-0 basis-[42%] sm:basis-56">
+        <label className="sr-only" htmlFor="district-filter">
+          {c.chooseDistrict}
+        </label>
+        <select
+          className="min-h-12 w-full cursor-pointer truncate rounded-full bg-transparent py-2 pl-4 pr-4 text-base font-semibold text-fg outline-hidden focus-visible:ring-2 focus-visible:ring-lantern/40"
+          id="district-filter"
+          name="district-filter"
+          onChange={(event) =>
+            writeLocation(
+              { pathname: "/", date, query, districtCode: event.target.value },
+              { replace: true, scroll: false },
+            )
+          }
+          value={districtCode}
+        >
+          <option value="">{c.allPilotDistricts}</option>
+          {pilotDistricts.map((district) => (
+            <option key={district.code} value={district.code}>
+              {district.shortName}
+            </option>
+          ))}
+        </select>
+      </div>
+    </div>
   );
 }
 
@@ -588,7 +679,8 @@ function WeekDots({
   );
 }
 
-function DatePicker({
+
+function DateChips({
   locale,
   dates,
   counts,
@@ -605,38 +697,23 @@ function DatePicker({
 }) {
   const today = getTaipeiToday();
   const c = copy[locale];
-  const dateScrollerRef = useRef<HTMLDivElement>(null);
-  const selectedDateRef = useRef<HTMLButtonElement>(null);
+  const scrollerRef = useRef<HTMLDivElement>(null);
+  const selectedRef = useRef<HTMLButtonElement>(null);
   const windowStart = dates[0];
 
   useEffect(() => {
-    const scroller = dateScrollerRef.current;
-    const selectedButton = selectedDateRef.current;
-    if (!scroller || !selectedButton) {
+    const scroller = scrollerRef.current;
+    const selected = selectedRef.current;
+    if (!scroller || !selected) {
       return;
     }
-
-    // On wide layouts all seven dates fit in view. Resetting the horizontal
-    // offset keeps the first and last dates visible after a user previously
-    // selected a date on mobile, rather than leaving a misleading clipped row.
-    if (typeof window.matchMedia === "function" && window.matchMedia("(min-width: 1024px)").matches) {
-      scroller.scrollLeft = 0;
-      return;
-    }
-
-    scroller.scrollLeft = Math.max(
-      0,
-      selectedButton.offsetLeft - (scroller.clientWidth - selectedButton.clientWidth) / 2,
-    );
+    scroller.scrollLeft = Math.max(0, selected.offsetLeft - (scroller.clientWidth - selected.clientWidth) / 2);
   }, [selectedDate, windowStart]);
 
   return (
     <fieldset className="min-w-0">
-      <legend className="sr-only items-center gap-2 text-sm font-bold text-fg sm:not-sr-only sm:mb-2 sm:flex">
-        <CalendarDays aria-hidden="true" className="text-lantern" size={17} />
-        {c.chooseDate}
-      </legend>
-      <div className="no-scrollbar -mx-1 flex gap-2 overflow-x-auto px-1 pb-1 lg:grid lg:grid-cols-7" ref={dateScrollerRef}>
+      <legend className="sr-only">{c.chooseDate}</legend>
+      <div className="no-scrollbar -mx-1 flex gap-3 overflow-x-auto px-1 py-1" ref={scrollerRef}>
         {dates.map((date) => {
           const selected = date === selectedDate;
           const weekday = dayLabels[locale][getScheduleDay(date) as OpeningDay];
@@ -646,30 +723,25 @@ function DatePicker({
               aria-label={`${date === today ? `${c.today}，` : ""}${formatDecisionDate(date, locale)}，${c.dateCountLabel(count)}`}
               aria-pressed={selected}
               className={clsx(
-                "flex min-h-[72px] min-w-[78px] shrink-0 flex-col items-start rounded-xl border px-3 py-2 text-left tabular-nums transition-colors lg:min-w-0",
+                "inline-flex min-h-11 shrink-0 items-center gap-2 rounded-full border px-4 text-sm tabular-nums transition-colors",
                 focusRing,
                 selected
-                  ? "border-fg bg-fg text-canvas shadow-md"
-                  : "border-edge bg-surface text-muted hover:border-lantern/60",
+                  ? "border-fg bg-fg text-canvas"
+                  : "border-edge bg-surface text-fg hover:border-fg",
               )}
               key={date}
               onClick={() => writeLocation({ pathname: "/", date, query, districtCode })}
-              ref={selected ? selectedDateRef : undefined}
+              ref={selected ? selectedRef : undefined}
               type="button"
             >
-              <span className={clsx("text-sm font-bold", date === today && !selected && "text-lantern")}>
-                {date === today ? c.today : weekday}
-              </span>
-              <span className="whitespace-nowrap text-sm font-extrabold">{formatCompactDate(date, locale)}</span>
+              <span className="font-semibold">{date === today ? c.today : weekday}</span>
+              <span className={clsx(selected ? "text-canvas/80" : "text-muted")}>{formatCompactDate(date, locale)}</span>
               <span
                 className={clsx(
-                  "mt-1 inline-flex items-center gap-1 rounded-full px-2 text-xs font-bold",
-                  selected ? "bg-canvas/15" : count ? "bg-lantern/10 text-lantern" : "text-subtle",
+                  "rounded-full px-2 text-xs font-bold",
+                  selected ? "bg-canvas/20" : count ? "bg-lantern/10 text-lantern" : "text-muted",
                 )}
               >
-                <span
-                  className={clsx("h-1.5 w-1.5 rounded-full", count ? "bg-lantern" : "bg-subtle/50")}
-                />
                 {c.dateCount(count)}
               </span>
             </button>
@@ -695,6 +767,54 @@ function DecisionBadge({ decision, locale }: { decision: MarketDecision; locale:
       <Icon aria-hidden="true" size={14} />
       {decisionLabel(decision, locale)}
     </span>
+  );
+}
+
+
+// The 4:3 media tile stands in for a listing photo: the market's weekly schedule, drawn large.
+function ScheduleTile({ market, decision, district, locale }: { market: TrustedMarket; decision: MarketDecision; district: TrustedDistrict; locale: Locale }) {
+  const conflictDays = market.conflicts.flatMap((conflict) => conflict.days);
+  const tone = decisionTone(decision);
+  return (
+    <div
+      className={clsx(
+        "relative flex aspect-[4/3] flex-col justify-end overflow-hidden rounded-[20px] p-4",
+        tone === "confirmed" && "bg-gradient-to-br from-lantern/35 via-lantern/20 to-gold/30",
+        tone === "conflict" && "bg-gradient-to-br from-warn/35 to-warn-soft",
+        tone === "degraded" && "bg-gradient-to-br from-idle/30 to-idle-soft",
+      )}
+    >
+      <div className="absolute left-3 top-3">
+        <span className="rounded-full bg-surface shadow-sm [&>span]:bg-transparent">
+          <DecisionBadge decision={decision} locale={locale} />
+        </span>
+      </div>
+      <span className="absolute right-3 top-3 rounded-full bg-surface px-3 py-1 text-sm font-semibold text-fg shadow-sm">
+        {district.shortName}
+      </span>
+      <span aria-hidden="true" className="grid grid-cols-7 gap-1">
+        {OPENING_DAYS.map((day, index) => {
+          const scheduled = market.scheduleDays.includes(day);
+          const disputed = conflictDays.includes(day);
+          return (
+            <span
+              className={clsx(
+                "grid aspect-square place-items-center rounded-lg text-sm font-bold",
+                disputed
+                  ? "border border-dashed border-warn bg-surface text-warn"
+                  : scheduled
+                    ? "bg-lantern text-lantern-fg"
+                    : "bg-surface/70 text-muted",
+                day === decision.day && "ring-2 ring-fg ring-offset-2 ring-offset-transparent",
+              )}
+              key={day}
+            >
+              {weekdayInitials[locale][index]}
+            </span>
+          );
+        })}
+      </span>
+    </div>
   );
 }
 
@@ -727,157 +847,31 @@ function MarketCard({
   );
 
   return (
-    <article className="group flex min-h-full flex-col rounded-2xl border border-edge bg-surface p-4 shadow-xs lg:p-6 transition hover:border-lantern/50 hover:shadow-lg">
-      <div className="flex items-start justify-between gap-3">
-        <DecisionBadge decision={decision} locale={locale} />
-        <span className="shrink-0 rounded-full border border-edge px-3 py-1 text-sm font-bold text-muted">
-          {district.shortName}
-        </span>
+    <article className="group flex flex-col">
+      <ScheduleTile decision={decision} district={district} locale={locale} market={market} />
+      <div className="mt-3 flex items-start justify-between gap-3">
+        <h3 className="text-base font-semibold text-fg">{market.name}</h3>
+        <span className="shrink-0 text-base text-fg">{scheduleText(market.scheduleDays, locale)}</span>
       </div>
-      <h3 className="mt-3 text-2xl font-black tracking-tight text-fg">{market.name}</h3>
-      <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-2">
-        <WeekDots
-          conflictDays={market.conflicts.flatMap((conflict) => conflict.days)}
-          days={market.scheduleDays}
-          highlight={decision.day}
-          locale={locale}
-        />
-      </div>
-      <p className="mt-2 text-base text-muted">
-        <strong className="text-fg">{c.schedule}：</strong>
-        {scheduleText(market.scheduleDays, locale)}
+      <p className="line-clamp-1 text-base text-muted">{market.permittedArea}</p>
+      <p className="text-sm text-muted">
+        {scheduleEvidence.publisher} · {c.checkedAt} {formatEvidenceDate(scheduleEvidence.verifiedAt, locale)}
       </p>
-      <div className="mt-2 flex items-start gap-2 text-base text-muted">
-        <MapPin aria-hidden="true" className="mt-1 shrink-0 text-lantern" size={15} />
-        <p className="line-clamp-2">{market.permittedArea}</p>
-      </div>
-      <div className="mt-auto pt-4">
-        <p className="flex items-start gap-2 border-t border-edge pt-3 text-sm leading-6 text-subtle">
-          <Database aria-hidden="true" className="mt-1 shrink-0" size={13} />
-          <span>
-            {c.cardSource}：{scheduleEvidence.publisher} ·{" "}
-            <span className="whitespace-nowrap">
-              {c.checkedAt} {formatEvidenceDate(scheduleEvidence.verifiedAt, locale)}
-            </span>
-          </span>
-        </p>
-        <a
-          className={clsx(
-            "mt-3 inline-flex min-h-11 w-full items-center justify-between rounded-xl bg-fg px-4 font-bold text-canvas transition-colors hover:bg-lantern hover:text-lantern-fg",
-            focusRing,
-          )}
-          href={url}
-          onClick={(event) => {
-            event.preventDefault();
-            writeLocation({ pathname: `/market/${market.id}`, date, query, districtCode });
-          }}
-        >
-          {c.details}
-          <ChevronRight aria-hidden="true" className="transition group-hover:translate-x-0.5" size={18} />
-        </a>
-      </div>
-    </article>
-  );
-}
-
-const fieldClass =
-  "min-h-12 w-full rounded-xl border border-edge bg-canvas text-base text-fg outline-hidden transition-colors placeholder:text-subtle focus:border-lantern focus:ring-2 focus:ring-lantern/25";
-
-function SearchControl({
-  locale,
-  date,
-  query,
-  districtCode,
-}: {
-  locale: Locale;
-  date: string;
-  query: string;
-  districtCode: string;
-}) {
-  const c = copy[locale];
-  return (
-    <div>
-      <label className="sr-only text-sm font-bold text-fg sm:not-sr-only sm:mb-2 sm:block" htmlFor="market-search">
-        {c.searchLabel}
-      </label>
-      <div className="relative">
-        <Search aria-hidden="true" className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-subtle" size={19} />
-        <input
-          className={clsx(fieldClass, "py-2 pl-12 pr-12")}
-          id="market-search"
-          name="market-search"
-          autoComplete="off"
-          onChange={(event) =>
-            writeLocation(
-              { pathname: "/", date, query: event.target.value, districtCode },
-              { replace: true, scroll: false },
-            )
-          }
-          placeholder={c.searchPlaceholder}
-          type="search"
-          value={query}
-        />
-        {query ? (
-          <button
-            aria-label={c.clearSearch}
-            className={clsx(
-              "absolute right-0.5 top-1/2 inline-flex min-h-11 min-w-11 -translate-y-1/2 items-center justify-center rounded-lg text-muted hover:bg-raised",
-              focusRing,
-            )}
-            onClick={() =>
-              writeLocation(
-                { pathname: "/", date, query: "", districtCode },
-                { replace: true, scroll: false },
-              )
-            }
-            type="button"
-          >
-            <X aria-hidden="true" size={18} />
-          </button>
-        ) : null}
-      </div>
-    </div>
-  );
-}
-
-function DistrictControl({
-  locale,
-  date,
-  query,
-  districtCode,
-}: {
-  locale: Locale;
-  date: string;
-  query: string;
-  districtCode: string;
-}) {
-  const c = copy[locale];
-  return (
-    <div>
-      <label className="sr-only text-sm font-bold text-fg sm:not-sr-only sm:mb-2 sm:block" htmlFor="district-filter">
-        {c.chooseDistrict}
-      </label>
-      <select
-        className={clsx(fieldClass, "px-3 py-2 font-semibold")}
-        id="district-filter"
-        name="district-filter"
-        onChange={(event) =>
-          writeLocation(
-            { pathname: "/", date, query, districtCode: event.target.value },
-            { replace: true, scroll: false },
-          )
-        }
-        value={districtCode}
+      <a
+        className={clsx(
+          "mt-1 inline-flex min-h-11 items-center gap-1 self-start rounded-sm text-base font-semibold text-fg underline underline-offset-4 transition-colors hover:text-lantern",
+          focusRing,
+        )}
+        href={url}
+        onClick={(event) => {
+          event.preventDefault();
+          writeLocation({ pathname: `/market/${market.id}`, date, query, districtCode });
+        }}
       >
-        <option value="">{c.allPilotDistricts}</option>
-        {pilotDistricts.map((district) => (
-          <option key={district.code} value={district.code}>
-            {district.shortName}
-          </option>
-        ))}
-      </select>
-      <p className="mt-2 hidden text-sm leading-6 text-subtle sm:block">{c.districtHelp}</p>
-    </div>
+        {c.details}
+        <ChevronRight aria-hidden="true" size={16} />
+      </a>
+    </article>
   );
 }
 
@@ -926,42 +920,6 @@ function StatusChips({
   );
 }
 
-function ViewToggle({
-  locale,
-  view,
-  setView,
-}: {
-  locale: Locale;
-  view: "list" | "map";
-  setView: (view: "list" | "map") => void;
-}) {
-  const c = copy[locale];
-  return (
-    <div aria-label={c.viewLabel} className="grid grid-cols-2 rounded-xl border border-edge bg-surface p-1 sm:inline-flex lg:hidden" role="group">
-      {(
-        [
-          ["list", c.viewList, List],
-          ["map", c.viewMap, MapIcon],
-        ] as const
-      ).map(([option, label, Icon]) => (
-        <button
-          aria-pressed={view === option}
-          className={clsx(
-            "inline-flex min-h-11 items-center justify-center gap-2 rounded-lg px-3 text-sm font-bold",
-            focusRing,
-            view === option ? "bg-fg text-canvas" : "text-muted hover:bg-raised",
-          )}
-          key={option}
-          onClick={() => setView(option)}
-          type="button"
-        >
-          <Icon aria-hidden="true" size={15} />
-          {label}
-        </button>
-      ))}
-    </div>
-  );
-}
 
 function DistrictMap({
   locale,
@@ -977,16 +935,21 @@ function DistrictMap({
   onSelect: (code: string) => void;
 }) {
   const c = copy[locale];
+  // Phones get a compact, read-only overview (tiles would be under 44px); the
+  // district select in the search capsule does the filtering there.
+  const interactive = useMediaQuery("(min-width: 1024px)");
   return (
-    <section aria-labelledby="district-map-title" className="sm:rounded-2xl sm:border sm:border-edge sm:bg-surface sm:p-6 sm:shadow-xs">
+    <section
+      aria-labelledby="district-map-title"
+      className="flex h-full flex-col bg-raised px-4 py-6 lg:rounded-[20px] lg:p-6"
+    >
       <div className="flex items-start justify-between gap-3">
-        <h2 className="flex items-center gap-2 font-extrabold text-fg" id="district-map-title">
-          <MapIcon aria-hidden="true" className="text-lantern" size={18} />
+        <h2 className="text-base font-semibold text-fg" id="district-map-title">
           {c.mapTitle}
         </h2>
         {selectedCode ? (
           <button
-            className={clsx("-my-2 min-h-11 shrink-0 rounded-lg px-2 text-sm font-bold text-lantern underline underline-offset-4", focusRing)}
+            className={clsx("-my-3 min-h-11 shrink-0 rounded-full px-3 text-sm font-semibold text-fg underline underline-offset-4", focusRing)}
             onClick={() => onSelect("")}
             type="button"
           >
@@ -994,70 +957,77 @@ function DistrictMap({
           </button>
         ) : null}
       </div>
-      <p className="mt-1 text-sm leading-6 text-subtle">{c.mapNote}</p>
-      <div
-        className="mt-4 grid gap-1"
-        style={{
-          gridTemplateColumns: `repeat(${DISTRICT_TILE_COLUMNS}, minmax(0, 1fr))`,
-          gridTemplateRows: `repeat(${DISTRICT_TILE_ROWS}, minmax(0, 1fr))`,
-        }}
-      >
-        {districtDataset.districts.map((district) => {
-          const tile = districtTiles[district.shortName];
-          if (!tile) {
-            return null;
-          }
-          const count = candidateCounts.get(district.code) ?? 0;
-          const registered = registeredCounts.get(district.code) ?? 0;
-          const label = district.shortName.length > 2 ? district.shortName.replace(/區$/u, "") : district.shortName;
-          const style = { gridColumn: tile.col + 1, gridRow: tile.row + 1 };
-          if (!registered) {
+      <p className="mt-1 hidden text-sm text-muted lg:block">{c.mapNote}</p>
+      <div className="flex flex-1 items-center justify-center py-3 lg:py-4">
+        <div
+          className="grid w-full max-w-[240px] gap-1 lg:max-w-[460px]"
+          style={{
+            gridTemplateColumns: `repeat(${DISTRICT_TILE_COLUMNS}, minmax(0, 1fr))`,
+            gridTemplateRows: `repeat(${DISTRICT_TILE_ROWS}, minmax(0, 1fr))`,
+          }}
+        >
+          {districtDataset.districts.map((district) => {
+            const tile = districtTiles[district.shortName];
+            if (!tile) {
+              return null;
+            }
+            const count = candidateCounts.get(district.code) ?? 0;
+            const registered = registeredCounts.get(district.code) ?? 0;
+            const label = district.shortName.length > 2 ? district.shortName.replace(/區$/u, "") : district.shortName;
+            const style = { gridColumn: tile.col + 1, gridRow: tile.row + 1 };
+            if (!registered || !interactive) {
+              return (
+                <div
+                  aria-hidden="true"
+                  className={clsx(
+                    "grid aspect-square place-items-center rounded-md text-xs",
+                    !registered && "text-muted",
+                    registered && count && "bg-lantern font-bold text-lantern-fg",
+                    registered && !count && "border border-edge bg-surface text-fg",
+                  )}
+                  key={district.code}
+                  style={style}
+                >
+                  {label}
+                </div>
+              );
+            }
+            const selected = selectedCode === district.code;
             return (
-              <div
-                aria-hidden="true"
-                className="grid aspect-square place-items-center rounded-md border border-dashed border-edge text-xs font-semibold text-subtle"
+              <button
+                aria-label={c.mapTile(district.shortName, count, registered)}
+                aria-pressed={selected}
+                className={clsx(
+                  "relative flex aspect-square flex-col items-center justify-center rounded-lg text-sm font-bold leading-tight transition",
+                  focusRing,
+                  count
+                    ? "bg-lantern text-lantern-fg shadow-sm hover:brightness-110"
+                    : "border border-edge bg-surface text-fg hover:border-fg",
+                  selected && "ring-2 ring-fg ring-offset-2 ring-offset-raised",
+                )}
                 key={district.code}
+                onClick={() => onSelect(selected ? "" : district.code)}
                 style={style}
+                type="button"
               >
-                {label}
-              </div>
+                <span>{label}</span>
+                {count ? <span className="text-xs font-bold tabular-nums">{count}</span> : null}
+              </button>
             );
-          }
-          const selected = selectedCode === district.code;
-          return (
-            <button
-              aria-label={c.mapTile(district.shortName, count, registered)}
-              aria-pressed={selected}
-              className={clsx(
-                "relative flex aspect-square flex-col items-center justify-center rounded-md text-sm font-extrabold leading-tight transition",
-                focusRing,
-                count
-                  ? "bg-lantern text-lantern-fg shadow-xs hover:brightness-110"
-                  : "border border-edge bg-raised text-muted hover:border-lantern",
-                selected && "ring-2 ring-fg ring-offset-2 ring-offset-surface",
-              )}
-              key={district.code}
-              onClick={() => onSelect(selected ? "" : district.code)}
-              style={style}
-              type="button"
-            >
-              <span>{label}</span>
-              {count ? <span className="text-xs font-bold tabular-nums opacity-90">{count}</span> : null}
-            </button>
-          );
-        })}
+          })}
+        </div>
       </div>
-      <ul className="mt-4 flex flex-wrap gap-x-4 gap-y-2 text-sm text-muted">
+      <ul className="flex flex-wrap gap-x-4 gap-y-2 text-sm text-muted">
         <li className="flex items-center gap-2">
           <span aria-hidden="true" className="h-3 w-3 rounded-xs bg-lantern" />
           {c.mapLegendOpen}
         </li>
         <li className="flex items-center gap-2">
-          <span aria-hidden="true" className="h-3 w-3 rounded-xs border border-edge bg-raised" />
+          <span aria-hidden="true" className="h-3 w-3 rounded-xs border border-edge bg-surface" />
           {c.mapLegendRegistered}
         </li>
         <li className="flex items-center gap-2">
-          <span aria-hidden="true" className="h-3 w-3 rounded-xs border border-dashed border-edge" />
+          <span aria-hidden="true" className="h-3 w-3 rounded-xs border border-dashed border-muted" />
           {c.mapLegendNone}
         </li>
       </ul>
@@ -1119,10 +1089,10 @@ function isCandidate(decision: MarketDecision) {
   );
 }
 
+
 function HomeView({ locale, location }: { locale: Locale; location: LocationState }) {
   const c = copy[locale];
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
-  const [view, setView] = useState<"list" | "map">("list");
   const selectedDay = getScheduleDay(location.date) as OpeningDay;
   const collator = locale === "zh" ? "zh-TW" : "en-US";
   const normalizedQuery = location.query.toLocaleLowerCase(collator);
@@ -1236,50 +1206,13 @@ function HomeView({ locale, location }: { locale: Locale; location: LocationStat
       { pathname: "/", date: location.date, query: location.query, districtCode: code },
       { replace: true, scroll: false },
     );
-    if (code) {
-      setView("list");
-    }
   };
 
   return (
     <>
-      <section className="lantern-hero">
-        <div className={clsx(pageContainer, "pb-12 pt-8 sm:pb-16 sm:pt-12")}>
-          <h1>
-            <span className="block text-lg font-bold text-[#ffc56b] sm:text-xl">
-              {location.date === today ? `${c.tonight} · ` : ""}
-              {formatDecisionDate(location.date, locale)} · {c.city}
-            </span>
-            <span className="mt-2 flex flex-wrap items-baseline gap-x-4 gap-y-2">
-              <span className="text-5xl font-black tracking-tight tabular-nums text-[#ffb35c] sm:text-6xl">
-                {headline.confirmed}
-              </span>
-              <span className="text-xl font-extrabold sm:text-2xl">{c.heroUnit}</span>
-            </span>
-          </h1>
-          {headline.needsCheck ? (
-            <p className="mt-3 flex items-center gap-2 text-base font-bold text-[#ffd98a]">
-              <TriangleAlert aria-hidden="true" size={16} />
-              {c.heroNeedsCheck(headline.needsCheck)}
-            </p>
-          ) : null}
-          <p className="mt-4 text-base text-white/85">{c.introShort}</p>
-          {headline.freshness ? (
-            <p className="mt-4 inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-sm font-semibold ring-1 ring-white/20">
-              <ShieldCheck aria-hidden="true" size={16} />
-              {c.heroFreshness(
-                formatEvidenceDate(headline.freshness.verifiedAt, locale),
-                headline.freshness.ageDays,
-              )}
-            </p>
-          ) : null}
-        </div>
-        <span className="absolute bottom-2 right-3 text-xs font-semibold text-white/60">{c.illustration}</span>
-      </section>
-
-      <section aria-label={c.chooseDate} className="border-b border-edge bg-surface">
-        <div className={clsx(pageContainer, "py-4 sm:py-6")}>
-          <DatePicker
+      <div className="border-b border-edge bg-canvas">
+        <div className={clsx(pageContainer, "py-3")}>
+          <DateChips
             counts={dateCounts}
             dates={dates}
             districtCode={location.districtCode}
@@ -1287,115 +1220,127 @@ function HomeView({ locale, location }: { locale: Locale; location: LocationStat
             query={location.query}
             selectedDate={location.date}
           />
-          <div className="mt-3 grid gap-3 sm:mt-4 sm:gap-4 md:grid-cols-2">
-            <SearchControl
-              date={location.date}
-              districtCode={location.districtCode}
+        </div>
+      </div>
+
+      <div className={clsx(pageContainer, "lg:grid lg:grid-cols-[minmax(0,638fr)_minmax(0,658fr)] lg:gap-12 lg:pt-8")}>
+        <div className="-mx-4 sm:-mx-6 lg:order-2 lg:mx-0">
+          <div className="lg:sticky lg:top-[120px] lg:h-[calc(100vh-152px)]">
+            <DistrictMap
+              candidateCounts={candidateCounts}
               locale={locale}
-              query={location.query}
-            />
-            <DistrictControl
-              date={location.date}
-              districtCode={location.districtCode}
-              locale={locale}
-              query={location.query}
+              onSelect={selectDistrict}
+              registeredCounts={registeredCounts}
+              selectedCode={location.districtCode}
             />
           </div>
         </div>
-      </section>
 
-      <section className={clsx(pageContainer, "pb-12 pt-6 sm:pt-8")} aria-labelledby="results-title">
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between sm:gap-4">
-          <div>
-            <h2 className="text-xl font-black text-fg sm:text-2xl" id="results-title">
-              {c.resultsTitle}
-            </h2>
-            <p aria-live="polite" className="mt-1 text-base font-semibold tabular-nums text-muted">
-              {c.resultsSummary(confirmed.length, needsCheck.length)}
+        <section
+          aria-labelledby="results-title"
+          className="relative -mx-4 -mt-6 rounded-t-3xl bg-canvas px-4 pb-12 pt-4 shadow-[0_-6px_16px_rgb(0_0_0/0.08)] sm:-mx-6 sm:px-6 lg:order-1 lg:mx-0 lg:mt-0 lg:rounded-none lg:px-0 lg:pt-0 lg:shadow-none"
+        >
+          <span aria-hidden="true" className="mx-auto mb-4 block h-1 w-10 rounded-full bg-edge lg:hidden" />
+          <p className="text-base font-semibold text-muted">
+            {location.date === today ? `${c.tonight} · ` : ""}
+            {formatDecisionDate(location.date, locale)} · {c.city}
+          </p>
+          <h1 className="mt-1 flex flex-wrap items-baseline gap-x-3">
+            <span className="text-4xl font-black tracking-tight tabular-nums text-lantern sm:text-5xl">
+              {headline.confirmed}
+            </span>
+            <span className="text-lg font-semibold text-fg sm:text-xl">{c.heroUnit}</span>
+          </h1>
+          {headline.needsCheck ? (
+            <p className="mt-1 flex items-center gap-2 text-base font-semibold text-warn">
+              <TriangleAlert aria-hidden="true" size={16} />
+              {c.heroNeedsCheck(headline.needsCheck)}
             </p>
-          </div>
-          <ViewToggle locale={locale} setView={setView} view={view} />
-        </div>
-        <div className="mt-3 sm:mt-4">
-          <StatusChips
-            counts={{
-              all: confirmed.length + needsCheck.length,
-              confirmed: confirmed.length,
-              check: needsCheck.length,
-            }}
-            locale={locale}
-            onChange={setStatusFilter}
-            value={statusFilter}
-          />
-        </div>
+          ) : null}
+          <p className="mt-2 flex flex-wrap items-center gap-x-2 text-sm text-muted">
+            <ShieldCheck aria-hidden="true" className="text-ok" size={16} />
+            {headline.freshness
+              ? c.heroFreshness(formatEvidenceDate(headline.freshness.verifiedAt, locale), headline.freshness.ageDays)
+              : null}
+            <span aria-hidden="true">·</span>
+            {c.introShort}
+          </p>
 
-        {hasHardStaleData ? (
-          <div className="mt-6 flex gap-3 rounded-xl border border-warn/40 bg-warn-soft p-4 text-warn" role="status">
-            <TriangleAlert aria-hidden="true" className="mt-1 shrink-0" size={20} />
-            <p className="text-sm font-semibold leading-6">{c.staleDatasetNotice}</p>
-          </div>
-        ) : null}
-
-        {location.invalidDistrictCode ? (
-          <div className="mt-6 flex gap-3 rounded-xl border border-edge bg-idle-soft p-4 text-idle" role="status">
-            <Info aria-hidden="true" className="mt-1 shrink-0" size={20} />
-            <p className="text-sm font-semibold leading-6">{c.invalidDistrict}</p>
-          </div>
-        ) : null}
-
-        <div className="mt-6 grid gap-6 lg:grid-cols-12 lg:items-start">
-          <div className={clsx("lg:col-span-8", view === "map" && "hidden lg:block")}>
-            {visible.length ? (
-              <div className="grid gap-4 sm:grid-cols-2">
-                {visible.map(({ market, district, decision }) => (
-                  <MarketCard
-                    date={location.date}
-                    decision={decision}
-                    district={district}
-                    districtCode={location.districtCode}
-                    key={market.id}
-                    locale={locale}
-                    market={market}
-                    query={location.query}
-                  />
-                ))}
-              </div>
-            ) : (
-              <div className="rounded-2xl border border-dashed border-edge bg-surface p-4 text-center sm:p-8">
-                <CircleAlert aria-hidden="true" className="mx-auto text-subtle" size={30} />
-                <h3 className="mt-3 text-xl font-extrabold text-fg">{c.noResults}</h3>
-                <p className="mx-auto mt-2 max-w-xl text-base text-muted">{c.noResultsHint}</p>
-                {location.query || location.districtCode ? (
-                  <button
-                    className={clsx(
-                      "mt-6 min-h-11 rounded-xl bg-fg px-4 font-bold text-canvas transition-colors hover:bg-lantern hover:text-lantern-fg",
-                      focusRing,
-                    )}
-                    onClick={() =>
-                      writeLocation({ pathname: "/", date: location.date, query: "", districtCode: "" })
-                    }
-                    type="button"
-                  >
-                    {c.clearFilters}
-                  </button>
-                ) : null}
-              </div>
-            )}
-          </div>
-          <div className="space-y-4 lg:sticky lg:top-24 lg:col-span-4">
-            <div className={clsx(view === "list" && "hidden lg:block")}>
-              <DistrictMap
-                candidateCounts={candidateCounts}
-                locale={locale}
-                onSelect={selectDistrict}
-                registeredCounts={registeredCounts}
-                selectedCode={location.districtCode}
-              />
+          <div className="mt-4 flex flex-col gap-3 border-t border-edge pt-4">
+            <div className="flex flex-wrap items-baseline gap-x-3">
+              <h2 className="text-lg font-semibold text-fg" id="results-title">
+                {c.resultsTitle}
+              </h2>
+              <p aria-live="polite" className="text-sm tabular-nums text-muted">
+                {c.resultsSummary(confirmed.length, needsCheck.length)}
+              </p>
             </div>
+            <StatusChips
+              counts={{
+                all: confirmed.length + needsCheck.length,
+                confirmed: confirmed.length,
+                check: needsCheck.length,
+              }}
+              locale={locale}
+              onChange={setStatusFilter}
+              value={statusFilter}
+            />
+          </div>
+
+          {hasHardStaleData ? (
+            <div className="mt-6 flex gap-3 rounded-2xl border border-warn/40 bg-warn-soft p-4 text-warn" role="status">
+              <TriangleAlert aria-hidden="true" className="mt-1 shrink-0" size={20} />
+              <p className="text-base font-semibold">{c.staleDatasetNotice}</p>
+            </div>
+          ) : null}
+
+          {location.invalidDistrictCode ? (
+            <div className="mt-6 flex gap-3 rounded-2xl border border-edge bg-idle-soft p-4 text-idle" role="status">
+              <Info aria-hidden="true" className="mt-1 shrink-0" size={20} />
+              <p className="text-base font-semibold">{c.invalidDistrict}</p>
+            </div>
+          ) : null}
+
+          {visible.length ? (
+            <div className="mt-6 grid gap-x-6 gap-y-10 sm:grid-cols-2">
+              {visible.map(({ market, district, decision }) => (
+                <MarketCard
+                  date={location.date}
+                  decision={decision}
+                  district={district}
+                  districtCode={location.districtCode}
+                  key={market.id}
+                  locale={locale}
+                  market={market}
+                  query={location.query}
+                />
+              ))}
+            </div>
+          ) : (
+            <div className="mt-6 rounded-[20px] bg-raised p-8 text-center">
+              <CircleAlert aria-hidden="true" className="mx-auto text-muted" size={32} />
+              <h3 className="mt-3 text-xl font-semibold text-fg">{c.noResults}</h3>
+              <p className="mx-auto mt-2 max-w-xl text-base text-muted">{c.noResultsHint}</p>
+              {location.query || location.districtCode ? (
+                <button
+                  className={clsx(
+                    "mt-6 min-h-11 rounded-full bg-fg px-6 font-semibold text-canvas transition-colors hover:bg-lantern hover:text-lantern-fg",
+                    focusRing,
+                  )}
+                  onClick={() => writeLocation({ pathname: "/", date: location.date, query: "", districtCode: "" })}
+                  type="button"
+                >
+                  {c.clearFilters}
+                </button>
+              ) : null}
+            </div>
+          )}
+
+          <div className="mt-12">
             <SourceSummary headingId="source-scope-title" locale={locale} />
           </div>
-        </div>
-      </section>
+        </section>
+      </div>
     </>
   );
 }
@@ -1852,7 +1797,11 @@ export default function TrustedApp() {
       <a className="skip-link" href="#main-content">
         {copy[locale].skip}
       </a>
-      <AppHeader locale={locale} setLocale={setLocale} />
+      <AppHeader
+        center={!showNotFound && !selectedMarket ? <SearchPill locale={locale} location={location} /> : undefined}
+        locale={locale}
+        setLocale={setLocale}
+      />
       {showNotFound ? (
         <NotFoundView locale={locale} location={location} />
       ) : selectedMarket ? (
