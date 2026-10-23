@@ -5,6 +5,7 @@ import {
   ArrowUpRight,
   CalendarDays,
   CheckCircle2,
+  ChevronDown,
   ChevronRight,
   CircleAlert,
   Clock3,
@@ -129,8 +130,13 @@ const copy = {
     districtSourcePage: "查看臺南市行政區代碼來源",
     attribution: "資料來源：臺南市政府經濟發展局，政府資料開放授權條款第 1 版。",
     lab: "視覺原型保留於 lab，不是公共首頁。",
-    correction: "回報資料或產品問題（需要 GitHub 登入）",
     privacy: "隱私、可近用性與已知限制",
+    operability: [
+      ["資料更正", "官方資料若有錯誤，請直接聯絡原始提供機關：臺南市已取得設置許可夜市名冊與臺南市各區代碼兩份資料集的頁面都列有聯絡方式。本試行版不承諾回覆時限。"],
+      ["隱私", "這是靜態網站：沒有帳號、分析追蹤、廣告、定位收集、資料庫或執行期憑證，也不抓取 Google 地點資料。只有在你點擊導航連結時才會開啟 Google Maps。"],
+      ["可近用性", "提供語意化地標、跳至主要內容連結、鍵盤可操作的原生控制項、可見焦點、有標籤的日期／篩選／搜尋、狀態朗讀與減少動態支援。"],
+      ["已知限制", "只涵蓋已審查的臺南許可夜市名冊；呈現正常週期，不是即時營業、臨時停業、天候、節慶、個別攤商、精確鐘點、距離或座標。來源更新時間可能未提供，地圖搜尋結果不是官方座標。"],
+    ] as [string, string][],
     notFoundTitle: "找不到這個夜市資料",
     notFoundBody: "連結可能已過期或輸入有誤；我們不會靜默改成另一個夜市。",
     home: "回到候選清單",
@@ -246,8 +252,13 @@ const copy = {
     districtSourcePage: "Open the Tainan district-code source",
     attribution: "Source: Economic Development Bureau, Tainan City Government. Open Government Data License 1.0.",
     lab: "The visual prototype remains in the lab and is not the public homepage.",
-    correction: "Report a data or product issue (GitHub sign-in required)",
     privacy: "Privacy, accessibility, and known limitations",
+    operability: [
+      ["Corrections", "For errors in the official data, contact the original publishers listed on the Tainan licensed-market and district-code dataset pages. This pilot promises no response time."],
+      ["Privacy", "This is a static site: no accounts, analytics, advertising, location collection, database, or runtime credentials, and no Google Places scraping. Google Maps opens only when you activate a directions link."],
+      ["Accessibility", "Semantic landmarks, a skip link, keyboard-operable native controls, visible focus, labelled date/filter/search controls, status announcements, and reduced-motion support."],
+      ["Known limitations", "Covers the reviewed Tainan licensed-market register only. It shows regular weekly schedules—not live opening, temporary closures, weather, festivals, individual stalls, exact hours, distance, or coordinates. Source update times may be unavailable, and Maps results are not official coordinates."],
+    ] as [string, string][],
     notFoundTitle: "This market record was not found",
     notFoundBody: "The link may be old or mistyped. We will not silently substitute another market.",
     home: "Back to candidates",
@@ -527,7 +538,7 @@ function ThemeToggle({ locale }: { locale: Locale }) {
       title={dark ? c.themeToLight : c.themeToDark}
       type="button"
     >
-      {dark ? <Sun aria-hidden="true" size={18} /> : <Moon aria-hidden="true" size={18} />}
+      {dark ? <Sun aria-hidden="true" size={20} /> : <Moon aria-hidden="true" size={20} />}
     </button>
   );
 }
@@ -546,19 +557,23 @@ function AppHeader({
     <header className="sticky top-0 z-30 border-b border-edge bg-canvas">
       <div className={clsx(pageContainer, "flex flex-wrap items-center justify-between gap-x-4 gap-y-3 py-3 lg:min-h-20 lg:flex-nowrap lg:py-4")}>
         <a
-          className={clsx("flex min-h-11 min-w-0 flex-1 items-center gap-3 rounded-lg transition-opacity hover:opacity-80 lg:w-72 lg:flex-none", focusRing)}
+          className={clsx("flex min-h-11 min-w-0 flex-1 items-center gap-[10px] rounded-lg transition-opacity hover:opacity-80 lg:w-72 lg:flex-none", focusRing)}
           href={appUrl("/", new URLSearchParams({ date: getTaipeiToday() }))}
           onClick={(event) => {
             event.preventDefault();
             writeLocation({ pathname: "/", date: getTaipeiToday(), query: "", districtCode: "" });
           }}
         >
-          <span aria-hidden="true" className="lantern-mark shrink-0 text-lg font-black">
-            市
-          </span>
+          <img
+            alt=""
+            className="h-8 w-8 shrink-0"
+            height={32}
+            src={`${import.meta.env.BASE_URL}brand/mark.svg`}
+            width={32}
+          />
           <span className="min-w-0">
-            <span className="block truncate text-base font-extrabold tracking-tight text-lantern sm:text-lg">{c.brand}</span>
-            <span className="hidden truncate text-sm text-muted sm:block">{c.pilot}</span>
+            <span className="block truncate text-base font-semibold tracking-[-0.01em] text-fg">{c.brand}</span>
+            <span className="hidden truncate text-xs font-medium text-muted sm:block">{c.pilot}</span>
           </span>
         </a>
         {center ? <div className="order-last w-full lg:order-none lg:w-auto lg:max-w-xl lg:flex-1">{center}</div> : null}
@@ -581,7 +596,7 @@ function SearchPill({ locale, location }: { locale: Locale; location: LocationSt
         <label className="sr-only" htmlFor="market-search">
           {c.searchLabel}
         </label>
-        <Search aria-hidden="true" className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-fg" size={18} />
+        <Search aria-hidden="true" className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-fg" size={20} />
         <input
           autoComplete="off"
           className="min-h-12 w-full rounded-full bg-transparent py-2 pl-12 pr-12 text-base text-fg outline-hidden placeholder:text-muted focus-visible:ring-2 focus-visible:ring-lantern/40"
@@ -609,7 +624,7 @@ function SearchPill({ locale, location }: { locale: Locale; location: LocationSt
             }
             type="button"
           >
-            <X aria-hidden="true" size={18} />
+            <X aria-hidden="true" size={20} />
           </button>
         ) : null}
       </div>
@@ -764,7 +779,7 @@ function DecisionBadge({ decision, locale }: { decision: MarketDecision; locale:
         tone === "degraded" && "bg-idle-soft text-idle",
       )}
     >
-      <Icon aria-hidden="true" size={14} />
+      <Icon aria-hidden="true" size={16} />
       {decisionLabel(decision, locale)}
     </span>
   );
@@ -910,8 +925,8 @@ function StatusChips({
           onClick={() => onChange(option)}
           type="button"
         >
-          {option === "confirmed" ? <CheckCircle2 aria-hidden="true" className="hidden sm:block" size={15} /> : null}
-          {option === "check" ? <TriangleAlert aria-hidden="true" className="hidden sm:block" size={15} /> : null}
+          {option === "confirmed" ? <CheckCircle2 aria-hidden="true" className="hidden sm:block" size={16} /> : null}
+          {option === "check" ? <TriangleAlert aria-hidden="true" className="hidden sm:block" size={16} /> : null}
           {label}
           <span className="tabular-nums opacity-70">{counts[option]}</span>
         </button>
@@ -1068,11 +1083,11 @@ function SourceSummary({ headingId, locale }: { headingId: string; locale: Local
           <div className="mt-2 flex flex-col items-start">
             <a className={textLinkClass} href={marketDataset.source.datasetUrl} rel="noreferrer" target="_blank">
               {c.sourcePage}
-              <ExternalLink aria-hidden="true" size={14} />
+              <ExternalLink aria-hidden="true" size={16} />
             </a>
             <a className={textLinkClass} href={districtDataset.source.datasetUrl} rel="noreferrer" target="_blank">
               {c.districtSourcePage}
-              <ExternalLink aria-hidden="true" size={14} />
+              <ExternalLink aria-hidden="true" size={16} />
             </a>
           </div>
         </div>
@@ -1318,7 +1333,7 @@ function HomeView({ locale, location }: { locale: Locale; location: LocationStat
             </div>
           ) : (
             <div className="mt-6 rounded-[20px] bg-raised p-8 text-center">
-              <CircleAlert aria-hidden="true" className="mx-auto text-muted" size={32} />
+              <CircleAlert aria-hidden="true" className="mx-auto text-muted" size={24} />
               <h3 className="mt-3 text-xl font-semibold text-fg">{c.noResults}</h3>
               <p className="mx-auto mt-2 max-w-xl text-base text-muted">{c.noResultsHint}</p>
               {location.query || location.districtCode ? (
@@ -1443,7 +1458,7 @@ function EvidenceItem<T>({
       ) : null}
       <a className={clsx(textLinkClass, "mt-3")} href={evidence.sourceUrl} rel="noreferrer" target="_blank">
         {c.openSource}
-        <ExternalLink aria-hidden="true" size={14} />
+        <ExternalLink aria-hidden="true" size={16} />
       </a>
     </article>
   );
@@ -1490,7 +1505,7 @@ function ShareAction({ market, date, locale }: { market: TrustedMarket; date: st
         onClick={share}
         type="button"
       >
-        <Share2 aria-hidden="true" size={18} />
+        <Share2 aria-hidden="true" size={20} />
         {status === "pending" ? c.sharing : c.share}
       </button>
       <p aria-live="polite" className={clsx("mt-2 text-sm font-semibold", status === "error" ? "text-bad" : "text-ok")}>
@@ -1541,7 +1556,7 @@ function DetailView({
             });
           }}
         >
-          <ArrowLeft aria-hidden="true" size={18} />
+          <ArrowLeft aria-hidden="true" size={20} />
           {c.back}
         </a>
 
@@ -1557,7 +1572,7 @@ function DetailView({
             <div className="p-4 sm:p-8">
               {decision.status === "conflict" ? (
                 <div className="mb-6 flex gap-3 rounded-xl border border-warn/40 bg-warn-soft p-4 text-warn">
-                  <TriangleAlert aria-hidden="true" className="mt-1 shrink-0" size={21} />
+                  <TriangleAlert aria-hidden="true" className="mt-1 shrink-0" size={20} />
                   <p className="text-sm font-semibold leading-6">{c.conflictExplanation}</p>
                 </div>
               ) : null}
@@ -1572,14 +1587,14 @@ function DetailView({
               <dl className="grid gap-6 sm:grid-cols-2">
                 <div>
                   <dt className="flex items-center gap-2 text-sm font-extrabold text-subtle">
-                    <MapPin aria-hidden="true" size={17} />
+                    <MapPin aria-hidden="true" size={16} />
                     {c.district}
                   </dt>
                   <dd className="mt-1 text-xl font-extrabold text-fg">{district.shortName}</dd>
                 </div>
                 <div>
                   <dt className="flex items-center gap-2 text-sm font-extrabold text-subtle">
-                    <CalendarDays aria-hidden="true" size={17} />
+                    <CalendarDays aria-hidden="true" size={16} />
                     {c.schedule}
                   </dt>
                   <dd className="mt-1">
@@ -1596,7 +1611,7 @@ function DetailView({
                 </div>
                 <div className="sm:col-span-2">
                   <dt className="flex items-center gap-2 text-sm font-extrabold text-subtle">
-                    <MapPin aria-hidden="true" size={17} />
+                    <MapPin aria-hidden="true" size={16} />
                     {c.permitArea}
                   </dt>
                   <dd className="mt-1 whitespace-pre-wrap text-base leading-7 text-fg">{market.permittedArea}</dd>
@@ -1619,7 +1634,7 @@ function DetailView({
                     rel="noreferrer"
                     target="_blank"
                   >
-                    <Navigation aria-hidden="true" size={18} />
+                    <Navigation aria-hidden="true" size={20} />
                     {c.map}
                     <ArrowUpRight aria-hidden="true" size={16} />
                   </a>
@@ -1631,7 +1646,7 @@ function DetailView({
           </article>
 
           <aside className="rounded-3xl border border-edge bg-raised/50 p-4 sm:p-6" aria-labelledby="evidence-title">
-            <ShieldCheck aria-hidden="true" className="text-ok" size={26} />
+            <ShieldCheck aria-hidden="true" className="text-ok" size={24} />
             <h2 className="mt-3 text-2xl font-black text-fg" id="evidence-title">
               {c.evidenceTitle}
             </h2>
@@ -1711,7 +1726,7 @@ function NotFoundView({ locale, location }: { locale: Locale; location: Location
   return (
     <main id="main-content" ref={mainRef} tabIndex={-1}>
       <section className="mx-auto max-w-xl px-4 py-16 text-center sm:px-6">
-        <CircleAlert aria-hidden="true" className="mx-auto text-lantern" size={38} />
+        <CircleAlert aria-hidden="true" className="mx-auto text-lantern" size={24} />
         <h1 className="mt-4 text-3xl font-black text-fg">{c.notFoundTitle}</h1>
         <p className="mt-3 leading-7 text-muted">{c.notFoundBody}</p>
         <a
@@ -1731,7 +1746,7 @@ function NotFoundView({ locale, location }: { locale: Locale; location: Location
           }}
         >
           {c.home}
-          <ChevronRight aria-hidden="true" size={18} />
+          <ChevronRight aria-hidden="true" size={20} />
         </a>
       </section>
     </main>
@@ -1748,28 +1763,30 @@ function AppFooter({ locale }: { locale: Locale }) {
         <div className="flex flex-wrap gap-x-6 gap-y-2 font-bold">
           <a className={footerLink} href="https://data.gov.tw/license" rel="noreferrer" target="_blank">
             Open Government Data License 1.0
-            <ExternalLink aria-hidden="true" size={13} />
-          </a>
-          <a
-            className={footerLink}
-            href="https://github.com/livejiaquan/taiwan-night-market-finder/issues/new?template=data-correction.yml"
-            rel="noreferrer"
-            target="_blank"
-          >
-            {c.correction}
-            <ExternalLink aria-hidden="true" size={13} />
-          </a>
-          <a
-            className={footerLink}
-            href="https://github.com/livejiaquan/taiwan-night-market-finder/blob/main/docs/PUBLIC_OPERABILITY.md"
-            rel="noreferrer"
-            target="_blank"
-          >
-            {c.privacy}
-            <ExternalLink aria-hidden="true" size={13} />
+            <ExternalLink aria-hidden="true" size={16} />
           </a>
         </div>
+        <details className="group rounded-2xl border border-edge bg-canvas">
+          <summary
+            className={clsx(
+              "flex min-h-11 cursor-pointer list-none items-center justify-between gap-2 rounded-2xl px-4 font-semibold text-fg",
+              focusRing,
+            )}
+          >
+            {c.privacy}
+            <ChevronDown aria-hidden="true" className="transition group-open:rotate-180" size={20} />
+          </summary>
+          <dl className="space-y-4 px-4 pb-4 text-sm text-muted">
+            {c.operability.map(([term, body]) => (
+              <div key={term}>
+                <dt className="font-semibold text-fg">{term}</dt>
+                <dd className="mt-1">{body}</dd>
+              </div>
+            ))}
+          </dl>
+        </details>
         <p className="text-xs text-subtle">{c.lab}</p>
+        <p className="text-xs text-subtle">© 2026 Lim Jia Quan</p>
       </div>
     </footer>
   );
