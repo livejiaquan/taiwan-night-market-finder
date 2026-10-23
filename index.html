@@ -3,12 +3,11 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#fbf6ee" media="(prefers-color-scheme: light)" />
-    <meta name="theme-color" content="#0e1424" media="(prefers-color-scheme: dark)" />
+    <meta name="theme-color" content="#ffffff" />
     <script>
       try {
         var theme = localStorage.getItem("night-market-theme");
-        if (theme === "dark" || (!theme && matchMedia("(prefers-color-scheme: dark)").matches)) {
+        if (theme === "dark") {
           document.documentElement.classList.add("dark");
         }
       } catch (error) {}
@@ -35,8 +34,6 @@
       content="查臺南夜市正常營業日、官方來源、核對時間與衝突；不是即時開門保證。"
     />
     <link rel="canonical" href="https://night-market.invalid/" />
-    <link rel="preload" as="image" href="%BASE_URL%assets/night-market-hero-800.webp" media="(max-width: 767px)" fetchpriority="high" />
-    <link rel="preload" as="image" href="%BASE_URL%assets/night-market-hero.webp" media="(min-width: 768px)" fetchpriority="high" />
     <link rel="icon" type="image/svg+xml" href="%BASE_URL%favicon.svg" />
     <title>今晚哪裡有市｜臺南夜市正常營業日</title>
     <script type="application/ld+json">
