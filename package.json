@@ -2,6 +2,13 @@
   "name": "taiwan-night-market-finder",
   "private": true,
   "version": "0.1.0",
+  "description": "Traceable Tainan night-market schedule finder built on official open data.",
+  "author": "Lim Jia Quan",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/livejiaquan/taiwan-night-market-finder.git"
+  },
   "type": "module",
   "engines": {
     "node": ">=20.19 <25"

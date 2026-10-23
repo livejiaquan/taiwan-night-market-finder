@@ -4,7 +4,7 @@ Status: **implementation gate**. This is a public, static Tainan pilot; it is no
 
 ## Baseline and decision
 
-- Starting commit: `562816523d0cd4fcd7ee01e129646b74ffafb3ff` on `codex/unified-visual-refresh`.
+- Starting point: the unified visual refresh of the prototype.
 - Starting worktree: clean before this specification.
 - Current automated baseline: all 75 unit/data tests pass on Node 22.22.3. The release gate also runs the repository-owned Chromium smoke suite against the production build and project-site base path.
 - This document refines, and does not override, [PRODUCT_MISSION.md](./PRODUCT_MISSION.md), [DATA_TRUST_CONTRACT.md](./DATA_TRUST_CONTRACT.md), [ROADMAP.md](./ROADMAP.md), and [README.md](../README.md).
